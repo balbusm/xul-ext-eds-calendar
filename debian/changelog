@@ -1,0 +1,23 @@
+xul-ext-evolution-mirror (0.3.2) precise; urgency=low
+
+  * Allowed for the possibility of different libecal versions
+
+ -- Mark Tully <markjtully@gmail.com>  Fri, 13 Jul 2012 23:00:10 +0100
+ 
+xul-ext-evolution-mirror (0.3.1) precise; urgency=low
+
+  * Fixed a bug where first run would fail to add existing events to
+  Evolution.
+  * Changed dependency on libecal-1.2-dev to libecal-1.2
+  * Added dependency on evolution-data-server
+  * Removed old changelog from extension in favour of this one
+
+ -- Mark Tully <markjtully@gmail.com>  Fri, 06 Jul 2012 09:10:10 +0100
+ 
+xul-ext-evolution-mirror (0.3) precise; urgency=low
+
+  * Packaged extension
+  * Converted extension to use js-ctypes rather than python scripts
+
+ -- Mark Tully <markjtully@gmail.com>  Sat, 23 Jun 2012 23:25:10 +0100
+ 
