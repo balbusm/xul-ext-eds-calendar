@@ -1,32 +1,17 @@
 var edsCalendar = {
 	
 	setupCalendar : function edsCalendar_setupCalendar() {
-	  Components.utils.import("resource://calendar/modules/calUtils.jsm");
 	  //First run stuff
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                        .getService(Components.interfaces.nsIPrefService).getBranch("extensions.edscalendar.");
-		var firstrun = prefs.getBoolPref("firstrun");
-		let debugMode = false;
-		debugger;
-		if (firstrun || debugMode) {
-			prefs.setBoolPref("firstrun", false);
+//		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+//                        .getService(Components.interfaces.nsIPrefService).getBranch("extensions.edscalendar.");
+//		var firstrun = prefs.getBoolPref("firstrun");
+		
+//		prefs.setBoolPref("firstrun", false);
+	    // TODO: Add cache?
 			//get all the items from all calendars and add them to EDS
 			for (let aCalendar of cal.getCalendarManager().getCalendars({})) {
-				var getListener = {
-		
-					onOperationComplete: function (aCalendar, aStatus, aOperationType, aId, aDetail) {
-					  debugger;
-					},
-			
-					onGetResult: function (aCalendar, aStatus, aItemType, aDetail, aCount, aItems) {
-					  debugger;
-					  edsCalendar.addEvents(aCalendar, aItems);
-					}
-				};
-		
-				aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, getListener);
+				aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, this.calendarGetListener);
 			}
-		}
 	
 		// setting up listeners etc
 		if (this.calendar == null) {
@@ -41,14 +26,17 @@ var edsCalendar = {
 		}
     },
 	
-	calendarOpListener : {
-		onOperationComplete : function listener_onOperationComplete(calendarObserver, status, optype, id, detail) {	},
-		onGetResult : function listener_onGetResult(calendarObserver, status, itemtype, detail, count, items) {
+	calendarGetListener : {
+	  onOperationComplete : function listener_onOperationComplete(calendar, status, optype, id, detail) { 
+	    // TODO add calendar when no result returned
+	    ;
+	  },
+		onGetResult : function listener_onGetResult(calendar, status, itemtype, detail, count, items) {
 			if (!Components.isSuccessCode(status)) {
 				return;
 			}
-			items.forEach(edsCalendar.addItem, edsCalendar);
-		}
+			  edsCalendar.addEvents(calendar, items);
+			}
 	},
 	
 	calendarObserver : {
@@ -62,7 +50,8 @@ var edsCalendar = {
 		},
 		
 		onAddItem : function edsCalendar_onAddItem(item) {
-			edsCalendar.addEvent(item);
+			debugger;
+		  edsCalendar.addEvents(item.calendar, [item]);
 			
 		},
 		
@@ -79,21 +68,10 @@ var edsCalendar = {
 		},
 		
 		onCalendarAdded : function edsCalendar_calAdd(aCalendar) {
-			//This is called when a new calendar is added.
+		  debugger;
+		  //This is called when a new calendar is added.
 			//We can get all the items from the calendar and add them one by one to Evolution Data Server
-	
-			var getListener = {
-		
-				onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) { },
-		
-				onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItems) {
-					for each (item in aItems) {
-						edsCalendar.addEvent(item);
-					}
-				}
-			};
-	
-			aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, getListener);
+			aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendar.calendarGetListener);
 		},
 		
 		onCalendarRemoved : function edsCalendar_calRemove(aCalendar) {
