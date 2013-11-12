@@ -26,17 +26,25 @@ var glib = {
         this.gpointer = ctypes.void_t.ptr;
         this.gconstpointer = ctypes.void_t.ptr;
         
+        this.declareMemAlloc(this);
         this.declareGMainContext(this);
         this.declareGError(this);
         this.declareGList(this);
         
 	},
 	
-	declareGObject : function(parent) {
+	declareMemAlloc : function(parent) {
 
-		parent.g_object_unref = parent.lib.declare("g_object_unref",
-				ctypes.default_abi, glib.gpointer);
+//		parent.g_object_unref = parent.lib.declare("g_object_unref",
+//				ctypes.default_abi,
+//				ctypes.void_t, // return
+//				glib.gpointer); // mem
 		
+    parent.g_free = parent.lib.declare("g_free",
+        ctypes.default_abi,
+        ctypes.void_t, // return
+        glib.gpointer); // mem
+
 	},
 	
 	declareGMainContext : function (parent) {

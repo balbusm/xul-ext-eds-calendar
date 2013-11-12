@@ -20,6 +20,7 @@ var libecal = {
 
         this.declareESource(this);
         this.declareECalClientSourceType(this);
+        this.declareECalObjModType(this);
         this.declareECalClient(this);
 
     },
@@ -56,7 +57,29 @@ var libecal = {
     	parent.e_source_get_uid = parent.lib.declare("e_source_get_parent",
     			ctypes.default_abi, glib.gchar.ptr, parent.ESource.ptr);
     	
+
+      parent.e_source_remove_sync = parent.lib.declare("e_source_remove_sync",
+          ctypes.default_abi,
+          glib.gboolean, //return
+          parent.ESource.ptr, // source
+          gio.GCancellable.ptr, // cancellable
+          glib.GError.ptr.ptr); // error
+    	
     },
+    
+    declareECalObjModType : function (parent) {
+      // Enum
+      parent.ECalObjModType = {
+          E_CAL_OBJ_MOD_THIS : 1 << 0,
+          E_CAL_OBJ_MOD_THIS_AND_PRIOR : 1 << 1,
+          E_CAL_OBJ_MOD_THIS_AND_FUTURE : 1 << 2,
+          E_CAL_OBJ_MOD_ALL : 0x07,
+          E_CAL_OBJ_MOD_ONLY_THIS : 1 << 3
+      };
+      parent.ECalObjModType.type = ctypes.int;
+      
+    },
+    
     
     declareECalClientSourceType : function(parent) {
     	// Enum
@@ -97,7 +120,16 @@ var libecal = {
     			libical.icalcomponent.ptr.ptr,
     			gio.GCancellable.ptr, glib.GError.ptr.ptr);
     	
-    	
+      parent.e_cal_client_remove_object_sync = parent.lib.declare(
+          "e_cal_client_remove_object_sync", ctypes.default_abi,
+          glib.gboolean, //return
+          parent.ECalClient.ptr, // client
+          glib.gchar.ptr, // uid
+          glib.gchar.ptr, // rid
+          libecal.ECalObjModType.type, // mod
+          gio.GCancellable.ptr, // cancellable
+          glib.GError.ptr.ptr); // error
+
 //    	parent.e_cal_client_get_objects_for_uid_sync = parent.lib.declare(
 //    			"e_cal_client_get_objects_for_uid_sync", ctypes.default_abi,
 //    			glib.gboolean, parent.ECalClient.ptr, glib.gchar.ptr, glib.GSList.ptr.ptr,

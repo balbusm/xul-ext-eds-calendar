@@ -1,26 +1,20 @@
 var edsCalendar = {
 	
 	setupCalendar : function edsCalendar_setupCalendar() {
-	  //First run stuff
-//		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-//                        .getService(Components.interfaces.nsIPrefService).getBranch("extensions.edscalendar.");
-//		var firstrun = prefs.getBoolPref("firstrun");
-		
-//		prefs.setBoolPref("firstrun", false);
 	    // TODO: Add cache?
-			//get all the items from all calendars and add them to EDS
+			// get all the items from all calendars and add them to EDS
 			for (let aCalendar of cal.getCalendarManager().getCalendars({})) {
 				aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, this.calendarGetListener);
 			}
 	
 		// setting up listeners etc
 		if (this.calendar == null) {
-			this.calendar = cal.getCompositeCalendar();
+			this.calendar = getCompositeCalendar();
 		}
 		if (this.calendar) {
 			this.calendar.removeObserver(this.calendarObserver);
+			this.calendar.addObserver(this.calendarObserver);
 		}
-		this.calendar.addObserver(this.calendarObserver);
 		if (this.mListener) {
 			this.mListener.updatePeriod();
 		}
@@ -28,8 +22,13 @@ var edsCalendar = {
 	
 	calendarGetListener : {
 	  onOperationComplete : function listener_onOperationComplete(calendar, status, optype, id, detail) { 
-	    // TODO add calendar when no result returned
-	    ;
+	    if (!Components.isSuccessCode(status)) {
+        return;
+      }
+	    // make sure that calendar has been created
+	    // when there are no items on a list
+	    let registry = edsCalendar.createERegistry();
+	    edsCalendar.getESource(registry, calendar);
 	  },
 		onGetResult : function listener_onGetResult(calendar, status, itemtype, detail, count, items) {
 			if (!Components.isSuccessCode(status)) {
@@ -56,38 +55,30 @@ var edsCalendar = {
 		},
 		
 		onDeleteItem : function edsCalendar_onDeleteItem(item, rebuildFlag) {
-			edsCalendar.deleteEvent(item);
+		  debugger;
+		  edsCalendar.deleteEvent(item.calendar, item);
 			
 		},
 		
 		onModifyItem : function edsCalendar_onModifyItem(newItem, oldItem) {
-			edsCalendar.deleteEvent(oldItem);
+			// TODO: Modify event instead of removing it
+		  edsCalendar.deleteEvent(oldItem.calendar, oldItem);
 			
-			edsCalendar.addEvent(newItem);
+			edsCalendar.addEvents(newItem.calendar, [newItem]);
 			
 		},
 		
 		onCalendarAdded : function edsCalendar_calAdd(aCalendar) {
 		  debugger;
-		  //This is called when a new calendar is added.
-			//We can get all the items from the calendar and add them one by one to Evolution Data Server
+		  // This is called when a new calendar is added.
+			// We can get all the items from the calendar and add them one by one to
+      // Evolution Data Server
 			aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendar.calendarGetListener);
 		},
 		
 		onCalendarRemoved : function edsCalendar_calRemove(aCalendar) {
-	
-			var getListener = {
-		
-				onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) { },
-		
-				onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItems) {
-					for each (item in aItems) {
-						edsCalendar.deleteEvent(item);
-					}
-				}
-			};
-	
-			aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, getListener);
+		  debugger;
+		  edsCalendar.deleteCalendar(aCalendar);
 		},
 		
 		onStartBatch : function edsCalendar_onStartBatch() {
@@ -106,6 +97,36 @@ var edsCalendar = {
 		onPropertyDeleting : function() { },
 		onDefaultCalendarChanged : function() { },
 		onLoad : function() { }
+	},
+	
+	createERegistry : function createERegistry() {
+	  let error = glib.GError.ptr();
+
+	  let registry = libedataserver.e_source_registry_new_sync(null, error.address());
+	    if (!error.isNull())
+	    {
+	      edsCalendar.debug("Couldn't get source registry " + error.contents.code + " - " +
+	          error.contents.message.readString());
+	      return null;
+	    }
+	    return registry;
+	},
+	
+	findESource : function findESource(registry, calendar) {
+    // look for exising calendar
+    let source = libedataserver.e_source_registry_ref_source(registry, calendar.id);
+    return source;
+	},
+	
+	getESource : function getESource(registry, calendar) {
+	    // look for exising calendar
+	    let source = edsCalendar.findESource(registry, calendar);
+	    // do not create new one if calendar exists
+	    if (source.isNull()) {
+	      source = edsCalendar.createESource(calendar, registry);
+	      edsCalendar.debug("Created new source");
+	    }
+	    return source;
 	},
 	
 	createESource : function createESource(calendar, registry) {
@@ -133,24 +154,11 @@ var edsCalendar = {
 
 	},
 	
-	createEdsClient: function createEdsClient(calendar) {
+	getECalClient: function getECalClient(calendar, eSourceProvider) {
 		let error = glib.GError.ptr();
-		registry = libedataserver.e_source_registry_new_sync(null, error.address());
-		if (!error.isNull())
-		{
-			edsCalendar.debug("Couldn't get source registry " + error.contents.code + " - " +
-					error.contents.message.readString());
-			return null;
-		}
-		// look for exising calendar
-		let source = libedataserver.e_source_registry_ref_source(registry, calendar.id);
-		// do not create new one if calendar exists
-		if (source.isNull()) {
-			source = edsCalendar.createESource(calendar, registry);
-			edsCalendar.debug("Created new source");
-		}
-		
-		client = libecal.e_cal_client_connect_sync(source, 
+		let registry = edsCalendar.createERegistry();
+		let source = eSourceProvider(registry, calendar);
+		let client = libecal.e_cal_client_connect_sync(source, 
 				libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
 				null,
 				error.address());
@@ -164,76 +172,91 @@ var edsCalendar = {
 		return client;
 	},
 	
+	findItem : function findItem(client, item) {
+	  let error = glib.GError.ptr();
+	  let icalcomponent = libical.icalcomponent.ptr();
+
+	  let found = libecal.e_cal_client_get_object_sync(client, item.id, null, icalcomponent.address(), null, error.address());
+	  // FIXME remove icalcomponent reference
+	  return icalcomponent;
+	},
+	
 	addEvents: function addEvents(calendar, items) {
 	  edsCalendar.debug("Adding events for calendar " + calendar.name + " - " + calendar.id);
-    let client = edsCalendar.createEdsClient(calendar);
+    let client = edsCalendar.getECalClient(calendar, edsCalendar.getESource);
 		if (client != null) {
 			for (let item of items) {
 	      edsCalendar.debug("Processing item " + item.title + " - " + item.id);
-			  edsCalendar.addEvent2(client, item);
+			  edsCalendar.addEvent(client, item);
 			}
 			
 		}
 	},
 	
-	addEvent2 : function addEvent2(client, item) {
+	addEvent : function addEvent(client, item) {
 		let error = glib.GError.ptr();
-		let error2 = glib.GError.ptr();
-    
-		let icalcomponent = libical.icalcomponent.ptr();
-		let found = libecal.e_cal_client_get_object_sync(client, item.id, null, icalcomponent.address(), null, error.address());
+		let icalcomponent = edsCalendar.findItem(client, item);
 		// item exists in calendar, do not add it
-		if (found) {
+		if (!icalcomponent.isNull()) {
 		  edsCalendar.debug("Skipping item: " + item.title + " - " + item.id);		  
 		  return;
 		}
+		// get_object raises error when item is not found
+		// clean pointer
+// glib.g_free(error);
+		error.value = null;
+		
 		let comp = libical.icalcomponent_new_from_string(item.icalString);
 		let uid = glib.gchar.ptr();
 		
 		let itemcomp = this.vcalendar_add_timezones_get_item(client, comp);
 		
-		let created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error2.address());
-		if (!created || !error2.isNull()) {
-      edsCalendar.debug("Couldn't create calendar object " + error2.contents.code + " - " +
-          error2.contents.message.readString());
+		let created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error.address());
+		if (!created || !error.isNull()) {
+      edsCalendar.debug("Couldn't create calendar object " + error.contents.code + " - " +
+          error.contents.message.readString());
 		}
 		  
 		edsCalendar.debug("Created new EDS item " + item.title + " - " + item.id);
 		
 	},
 	
-	addEvent: function (item) {
-	  edsCalendar.debug("Using deprecated addEvent for item: " + item.title + " - " + item.id);
-	  let comp = libical.icalcomponent_new_from_string(item.icalString);
-		let uid = glib.gchar.ptr();
-		let error = glib.GError.ptr();
-		let error2 = glib.GError.ptr();
-		
-		// TODO If evolution has never been run, opening the system calendar fails.
-        if (libecal.e_cal_open(ecalClient, true, error.address())) { } else {
-			edsCalendar.debug("Error opening EDS Calendar: " + 
-					error.contents.code + " - " +
-					error.contents.message.readString());;
-		}
-
-		let itemcomp = this.vcalendar_add_timezones_get_item(comp);
-		rc = libecal.e_cal_client_create_object_sync(ecalClient, itemcomp, uid.address(), error2.address());
-			
-	},
+	deleteCalendar: function edsCalendar_deleteCalendar(calendar) {
+    let error = glib.GError.ptr();
+    let registry = edsCalendar.createERegistry();
+    // look for exising calendar
+    let source = edsCalendar.findESource(registry, calendar);
+    if (source.isNull()) {
+      edsCalendar.debug("Calendar " + calendar.name + " " + calendar.id + " doesn't exist. Unable to remove calendar.");
+      return;
+    }
+    
+    let removed = libecal.e_source_remove_sync(source, null, error.address());
+    
+    if (!error.isNull())
+    {
+      edsCalendar.debug("Couldn't remove calendar " + error.contents.code + " - " +
+          error.contents.message.readString());
+      return;
+    }
+    edsCalendar.debug("Removed calendar " +  calendar.name + " " + calendar.id);
+  },
 	
-	deleteEvent: function deleteEvent(item) {
+	
+	deleteEvent: function deleteEvent(calendar, item) {
 		let error = glib.GError.ptr();
-		let error2 = glib.GError.ptr();
-		this.ecal = libecal.e_cal_new_system_calendar();
-		
-		// TODO If evolution has never been run, opening the system calendar fails.
-        if (libecal.e_cal_open(this.ecal, true, error.address())) { } else {
-			edsCalendar.debug("Error opening EDS Calendar: " + 
-					error.contents.code + " - " +
-					error.contents.message.readString());;
-		}
 
-		rc = libecal.e_cal_remove_object(this.ecal, item.id, error2.address());
+		let client = edsCalendar.getECalClient(calendar, edsCalendar.findESource);
+    
+    let removed = libecal.e_cal_client_remove_object_sync(client, item.id, item.recurrenceId, libecal.ECalObjModType.E_CAL_OBJ_MOD_ALL, null, error.address());
+		
+    if (!removed)
+    {
+      edsCalendar.debug("Couldn't remove item " + error.contents.code + " - " +
+          error.contents.message.readString());
+      return;
+    }
+    edsCalendar.debug("Removed item " +  item.title + " " + item.id);
 		
 	},
 	
@@ -289,5 +312,5 @@ var edsCalendar = {
 	}
 };
 
-window.addEventListener("load", function() {edsCalendar.init()}, false);
-window.addEventListener("unload", function() {edsCalendar.uninit()}, false);
+window.addEventListener("load", function() {edsCalendar.init();}, false);
+window.addEventListener("unload", function() {edsCalendar.uninit();}, false);
