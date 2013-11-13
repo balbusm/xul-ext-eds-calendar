@@ -2,21 +2,21 @@
 <!DOCTYPE overlay SYSTEM "chrome://edscalendar/locale/overlay.dtd">
 
 <overlay id="edscalendar-overlay" 
-	 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script type="application/javascript" src="chrome://calendar/content/calendar-management.js"/>
-	<script type="application/javascript" src="chrome://calendar/content/calendar-item-editing.js"/>
-	<script type="application/javascript" src="chrome://calendar/content/calendar-dnd-listener.js"/>
-	<script type="application/javascript" src="chrome://edscalendar/content/bindings/glib.js"></script>
+    <script type="application/javascript" src="chrome://calendar/content/calendar-management.js"/>
+    <script type="application/javascript" src="chrome://calendar/content/calendar-item-editing.js"/>
+    <script type="application/javascript" src="chrome://calendar/content/calendar-dnd-listener.js"/>
+    <script type="application/javascript" src="chrome://edscalendar/content/bindings/glib.js"></script>
     <script type="application/javascript" src="chrome://edscalendar/content/bindings/gio.js"></script>
-	<script type="application/javascript" src="chrome://edscalendar/content/bindings/libical.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/content/bindings/libical.js"></script>
     <script type="application/javascript" src="chrome://edscalendar/content/bindings/libecal.js"></script>
     <script type="application/javascript" src="chrome://edscalendar/content/bindings/libedataserver.js"></script>
-	<script type="application/javascript" src="chrome://edscalendar/content/overlay.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/content/overlay.js"></script>
 
-	<stringbundleset id="stringbundleset">
-		<stringbundle 	id="edscalendar-strings" 
-						src="chrome://edscalendar/locale/overlay.properties"/>
-	</stringbundleset>
+    <stringbundleset id="stringbundleset">
+    <stringbundle id="edscalendar-strings" 
+        src="chrome://edscalendar/locale/overlay.properties"/>
+    </stringbundleset>
 
 </overlay>
