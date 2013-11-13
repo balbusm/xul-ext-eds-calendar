@@ -7,12 +7,12 @@
     <script type="application/javascript" src="chrome://calendar/content/calendar-management.js"/>
     <script type="application/javascript" src="chrome://calendar/content/calendar-item-editing.js"/>
     <script type="application/javascript" src="chrome://calendar/content/calendar-dnd-listener.js"/>
-    <script type="application/javascript" src="chrome://edscalendar/content/bindings/glib.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/content/bindings/gio.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/content/bindings/libical.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/content/bindings/libecal.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/content/bindings/libedataserver.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/content/overlay.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/modules/glib.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/modules/gio.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/modules/libical.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/modules/libecal.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/modules/libedataserver.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/components/edsCalendar.js"></script>
 
     <stringbundleset id="stringbundleset">
     <stringbundle id="edscalendar-strings" 

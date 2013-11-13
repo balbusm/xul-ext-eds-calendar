@@ -1,7 +1,7 @@
-content	edscalendar	chrome/content/
+content edscalendar chrome/content/
 
-overlay chrome://messenger/content/messenger.xul chrome://edscalendar/content/edsCalendarOverlay.xul
+overlay chrome://messenger/content/messenger.xul    chrome://edscalendar/content/edsCalendarOverlay.xul
 
-locale	edscalendar	en-US	chrome/locale/en-US/
+locale  edscalendar en-US   chrome/locale/en-US/
 
-skin	edscalendar	classic/1.0	chrome/skin/
+skin    edscalendar    classic/1.0  chrome/skin/
