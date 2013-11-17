@@ -4,15 +4,7 @@
 <overlay id="edscalendar-overlay" 
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <script type="application/javascript" src="chrome://calendar/content/calendar-management.js"/>
-    <script type="application/javascript" src="chrome://calendar/content/calendar-item-editing.js"/>
-    <script type="application/javascript" src="chrome://calendar/content/calendar-dnd-listener.js"/>
-    <script type="application/javascript" src="chrome://edscalendar/modules/glib.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/modules/gio.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/modules/libical.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/modules/libecal.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/modules/libedataserver.js"></script>
-    <script type="application/javascript" src="chrome://edscalendar/components/edsCalendar.js"></script>
+    <script type="application/javascript" src="chrome://edscalendar/content/edsCalendarClient.js"></script>
 
     <stringbundleset id="stringbundleset">
     <stringbundle id="edscalendar-strings" 

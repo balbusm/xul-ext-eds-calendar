@@ -7,7 +7,7 @@
 
     <em:id>{e6696d02-466a-11e3-a162-04e36188709b}</em:id>
     <em:name>EDS Calendar Integration</em:name>
-    <em:version>0.2</em:version>
+    <em:version>0.3</em:version>
     <em:description>Synchronizes calendars with Evolution Database Server</em:description>
     <em:creator>Mati</em:creator>
     <em:type>2</em:type>

@@ -1,3 +1,6 @@
+
+var EXPORTED_SYMBOLS = ["libedataserver"];
+
 var libedataserver =
     {
 

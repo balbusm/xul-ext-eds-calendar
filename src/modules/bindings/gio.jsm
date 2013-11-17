@@ -1,3 +1,6 @@
+
+var EXPORTED_SYMBOLS = ["gio"];
+
 var gio =
     {
 

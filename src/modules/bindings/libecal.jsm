@@ -1,3 +1,6 @@
+
+var EXPORTED_SYMBOLS = ["libecal"];
+
 var libecal =
     {
 
@@ -176,6 +179,15 @@ var libecal =
                 libecal.ECalObjModType.type, // mod
                 gio.GCancellable.ptr, // cancellable
                 glib.GError.ptr.ptr); // error
+        
+        parent.e_cal_client_modify_object_sync = 
+          parent.lib.declare("e_cal_client_modify_object_sync",
+              ctypes.default_abi, glib.gboolean, // return
+              parent.ECalClient.ptr, // client
+              libical.icalcomponent.ptr, // icalcomp
+              libecal.ECalObjModType.type, // mod
+              gio.GCancellable.ptr, // cancellable
+              glib.GError.ptr.ptr); // error
 
 //    	parent.e_cal_client_get_objects_for_uid_sync = parent.lib.declare(
 //    			"e_cal_client_get_objects_for_uid_sync", ctypes.default_abi,

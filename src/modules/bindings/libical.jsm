@@ -1,3 +1,6 @@
+
+var EXPORTED_SYMBOLS = ["libical"];
+
 var libical = {
 
 	icallibPath : "libical.so",

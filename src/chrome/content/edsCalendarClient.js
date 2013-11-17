@@ -1,13 +1,59 @@
+Components.utils.import("resource://calendar/modules/calUtils.jsm");
 
 var edsCalendarClient = {
     
     init : function int() {
-      edsCalendarService.init();
-      edsCalendarService.setupCalendar();
+      debugger;
+      this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
+      // TODO: Add cache?
+      // get all the items from all calendars and add them to EDS
+      for (let aCalendar of cal.getCalendarManager().getCalendars({})) {
+        aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, this.calendarGetListener);
+      }
     },
     
     uninit : function uninit() {
-      edsCalendarService.unint();
+      // FIXME: close calendar service
+      //      this.edsCalendarService.unint();
+    },
+    
+    calendarGetListener : {
+      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
+        if (!Components.isSuccessCode(aStatus)) {
+        return;
+      }
+        // make sure that calendar has been created
+        // when there are no items on a list
+        edsCalendarClient.edsCalendarService.addCalendar(aCalendar);
+//        let registry = this.edsCalendarService.createERegistry();
+//        this.edsCalendarService.getESource(registry, calendar);
+      },
+      onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+        if (!Components.isSuccessCode(aStatus)) {
+          return;
+        }
+        LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
+        edsCalendarClient.edsCalendarService.startBatch();
+        for (let item of aItemscalendar) {
+          LOG("Processing item " + item.title + " - " + item.id);
+          edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
+        }
+        edsCalendarClient.edsCalendarService.endBatch();
+      }
+    },
+    
+    calendarChangeListener : {
+      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
+        if (!Components.isSuccessCode(aStatus)) {
+          ERROR("Couldn't change item " + item.title + " - " + item.id);
+          return;
+      }
+        LOG("Changed item " + item.title + " - " + item.id);
+        
+      },
+      onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+        throw "Unexpected operation";
+      }
     },
     
     calendarObserver : {
@@ -20,47 +66,50 @@ var edsCalendarClient = {
         return this;
       },
       
-      onAddItem : function onAddItem(item) {
+      // calIObserver
+      onAddItem : function onAddItem(aItem) {
         debugger;
-        edsCalendarService.addEvents(item.calendar, [item]);
+        this.edsCalendarService.addItem(aItem, this.calendarChangeListener);
         
       },
 
-      onDeleteItem : function onDeleteItem(item, rebuildFlag) {
+      // calIObserver
+      onDeleteItem : function onDeleteItem(aItem) {
         debugger;
-        edsCalendarService.deleteEvent(item.calendar, item);
-
+        this.edsCalendarService.deleteItem(item, this.calendarChangeListener);
       },
 
-      onModifyItem : function onModifyItem(newItem, oldItem) {
-        // TODO: Modify event instead of removing it
-        edsCalendarService.deleteEvent(oldItem.calendar, oldItem);
-
-        edsCalendarService.addEvents(newItem.calendar, [newItem]);
-
+      // calIObserver
+      onModifyItem : function onModifyItem(aNewItem, aOldItem) {
+        debugger;
+        this.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
       },
 
+      // calICompositeObserver
       onCalendarAdded : function onCalendarAdded(aCalendar) {
         debugger;
         // This is called when a new calendar is added.
         // We can get all the items from the calendar and add them one by one to
-      // Evolution Data Server
-        aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarService.calendarGetListener);
+        // Evolution Data Server
+        aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
       },
 
+      // calICompositeObserver
       onCalendarRemoved : function onCalendarRemoved(aCalendar) {
         debugger;
-        edsCalendarService.deleteCalendar(aCalendar);
+        this.edsCalendarService.removeCalendar(aCalendar);
       },
 
+      // calIObserver
       onStartBatch : function onStartBatch() {
         this.mBatchCount++;
       },
 
+      // calIObserver
       onEndBatch : function onEndBatch() {
         this.mBatchCount--;
         if (this.mBatchCount === 0) {
-          edsCalendarService.refreshCalendarQuery();
+          this.edsCalendarService.refreshCalendarQuery();
         }
       },
 
