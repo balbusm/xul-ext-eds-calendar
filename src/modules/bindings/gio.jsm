@@ -1,4 +1,6 @@
 
+Components.utils.import("resource://gre/modules/ctypes.jsm");
+
 var EXPORTED_SYMBOLS = ["gio"];
 
 var gio =
@@ -9,8 +11,6 @@ var gio =
       lib : null,
 
       init : function() {
-
-        Components.utils.import("resource://gre/modules/ctypes.jsm");
 
         this.lib = ctypes.open(this.gioPath);
         this.declareGCancellable(this);
@@ -25,13 +25,6 @@ var gio =
         parent.createGCancellable = function() {
           return parent.g_cancellable_new();
         };
-      },
-
-      debug : function(aMessage) {
-        var consoleService =
-            Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-        consoleService.logStringMessage("GIO (" + new Date() + " ):\n\t" + aMessage);
-        window.dump("GIO: (" + new Date() + " ):\n\t" + aMessage + "\n");
       },
 
       shutdown : function() {

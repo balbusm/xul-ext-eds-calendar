@@ -1,4 +1,10 @@
 
+Components.utils.import("resource://gre/modules/ctypes.jsm");
+
+Components.utils.import("resource://edscalendar/bindings/glib.jsm");
+Components.utils.import("resource://edscalendar/bindings/gio.jsm");
+Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+
 var EXPORTED_SYMBOLS = ["libedataserver"];
 
 var libedataserver =
@@ -90,13 +96,6 @@ var libedataserver =
           E_SOURCE_EXTENSION_CALENDAR : "Calendar"
         };
 
-      },
-
-      debug : function(aMessage) {
-        var consoleService =
-            Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-        consoleService.logStringMessage("Libedataserver (" + new Date() + " ):\n\t" + aMessage);
-        window.dump("Libedataserver: (" + new Date() + " ):\n\t" + aMessage + "\n");
       },
 
       shutdown : function() {

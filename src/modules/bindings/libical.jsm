@@ -1,4 +1,6 @@
 
+Components.utils.import("resource://gre/modules/ctypes.jsm");
+
 var EXPORTED_SYMBOLS = ["libical"];
 
 var libical = {
@@ -9,7 +11,6 @@ var libical = {
 
 	init : function() {
 
-		Components.utils.import("resource://gre/modules/ctypes.jsm");
 
 		this.lib = ctypes.open(this.icallibPath);
 
@@ -105,15 +106,6 @@ var libical = {
 						this.icalcomponent_kind.type, this.icalcomponent.ptr);
 	},
 	
-
-	debug : function(aMessage) {
-		var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-				.getService(Components.interfaces.nsIConsoleService);
-		consoleService.logStringMessage("Icallib (" + new Date() + " ):\n\t" +
-				aMessage);
-		window.dump("Icallib: (" + new Date() + " ):\n\t" + aMessage + "\n");
-	},
-
 	shutdown : function() {
 		this.lib.close();
 	}

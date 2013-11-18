@@ -1,4 +1,12 @@
 
+Components.utils.import("resource://gre/modules/ctypes.jsm");
+
+Components.utils.import("resource://edscalendar/bindings/glib.jsm");
+Components.utils.import("resource://edscalendar/bindings/gio.jsm");
+Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.import("resource://edscalendar/utils.jsm");
+
+
 var EXPORTED_SYMBOLS = ["libecal"];
 
 var libecal =
@@ -9,16 +17,15 @@ var libecal =
       lib : null,
 
       init : function() {
-
-        Components.utils.import("resource://gre/modules/ctypes.jsm");
-
+        
+        addLogger(this, "libecal");
         for ( var path in this.ecallibPath) {
           try {
             this.lib = ctypes.open(this.ecallibPath[path]);
-            this.debug("Opened " + this.ecallibPath[path]);
+            this.LOG("Opened " + this.ecallibPath[path]);
             break;
           } catch (err) {
-            this.debug("Failed to open " + this.ecallibPath[path] + ": " + err);
+            this.WARN("Failed to open " + this.ecallibPath[path] + ": " + err);
           }
         }
 
@@ -196,13 +203,6 @@ var libecal =
 
 
           },
-
-      debug : function(aMessage) {
-        var consoleService =
-            Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-        consoleService.logStringMessage("Ecalclientlib (" + new Date() + " ):\n\t" + aMessage);
-        window.dump("Ecalclientlib: (" + new Date() + " ):\n\t" + aMessage + "\n");
-      },
 
       shutdown : function() {
         this.lib.close();

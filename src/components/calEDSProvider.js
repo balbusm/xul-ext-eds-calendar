@@ -35,20 +35,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource:///modules/Services.jsm");
-Components.utils.import("resource:///modules/ctypes.jsm");
-Components.utils.import("resource:///modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/ctypes.jsm");
 Components.utils.import("resource://calendar/modules/calUtils.jsm");
 Components.utils.import("resource://calendar/modules/calProviderUtils.jsm");
 
 Components.utils.import("resource://edscalendar/bindings/gio.jsm");
 Components.utils.import("resource://edscalendar/bindings/glib.jsm");
+Components.utils.import("resource://edscalendar/bindings/libical.jsm");
 Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
 Components.utils.import("resource://edscalendar/bindings/libedataserver.jsm");
-Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.import("resource://edscalendar/utils.jsm");
 
 function calEDSProvider() {
     this.initProviderBase();
+    addLogger(this, "calEDSProvider");
 }
 
 calEDSProvider.prototype = {
@@ -78,10 +81,12 @@ calEDSProvider.prototype = {
 
     implementationLanguage: Components.interfaces.nsIProgrammingLanguage.JAVASCRIPT,
     flags: 0,
-
-    QueryInterface: function QueryInterface(aIID) {
-        return cal.doQueryInterface(this, calEDSProvider.prototype, aIID, null, this);
-    },
+    QueryInterface: XPCOMUtils.generateQI([
+                                           Components.interfaces.nsISupports,
+                                           Components.interfaces.calICalendar,
+                                           Components.interfaces.nsIClassInfo, 
+                                           Components.interfaces.calICompositeCalendar
+                                           ]),
 
     get type() {
         return "eds";
@@ -122,9 +127,9 @@ calEDSProvider.prototype = {
 //
 //        // TODO If evolution has never been run, opening the system calendar fails.
 //        if (libecal.e_cal_open(this.ecal, true, error.address())) {
-//            cal.LOG("System ECal opened");
+//            this.LOG("System ECal opened");
 //        } else {
-//            cal.ERROR("Error opening EDS Calendar: " + 
+//            this.ERROR("Error opening EDS Calendar: " + 
 //                      error.contents.code + " - " +
 //                      error.contents.message.readString());;
 //        }
@@ -176,7 +181,7 @@ calEDSProvider.prototype = {
       // do not create new one if calendar exists
       if (source.isNull()) {
         source = this.createESource(calendar, registry);
-        LOG("Created new source");
+        this.LOG("Created new source");
       }
       return source;
     },
@@ -187,7 +192,7 @@ calEDSProvider.prototype = {
       let source = libecal.e_source_new_with_uid(calendar.id, null, error.address());
       if (!error.isNull())
       {
-        ERROR("Couldn't create new source " + error.contents.code + " - " +
+        this.ERROR("Couldn't create new source " + error.contents.code + " - " +
             error.contents.message.readString());
         return null;
       }
@@ -198,7 +203,7 @@ calEDSProvider.prototype = {
       let sourceCreated  = libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
       if (!sourceCreated || !error.isNull())
       {
-        ERROR("Couldn't commit source " + error.contents.code + " - " +
+        this.ERROR("Couldn't commit source " + error.contents.code + " - " +
             error.contents.message.readString());
         return null;
       }
@@ -212,6 +217,8 @@ calEDSProvider.prototype = {
          return this.mBatchClient; 
       }
       
+      this.LOG("glib " + glib.GError);
+      
       let error = glib.GError.ptr();
       let registry = this.createERegistry();
       let source = eSourceProvider(registry, calendar);
@@ -221,7 +228,7 @@ calEDSProvider.prototype = {
           error.address());
       if (!error.isNull())
       {
-        ERROR("Couldn't open source " + error.contents.code + " - " +
+        this.ERROR("Couldn't open source " + error.contents.code + " - " +
             error.contents.message.readString());
         return null;
       }
@@ -290,7 +297,7 @@ calEDSProvider.prototype = {
       let icalcomponent = this.findItem(client, aItem);
       // item exists in calendar, do not add it
       if (!icalcomponent.isNull()) {
-        LOG("Skipping item: " + aItem.title + " - " + aItem.id);
+        this.LOG("Skipping item: " + aItem.title + " - " + aItem.id);
         return;
       }
       // get_object raises error when item is not found
@@ -310,13 +317,13 @@ calEDSProvider.prototype = {
         this.mObservers.notify("onAddItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
-        LOG("Created new EDS item " + aItem.title + " - " + aItem.id);
+        this.LOG("Created new EDS item " + aItem.title + " - " + aItem.id);
       } else {
         detail = "EDS: Error adding item: " + 
           error.contents.code + " - " +
           error.contents.message.readString();
         nserror = Components.results.NS_ERROR_FAILURE;
-        ERROR(detail);
+        this.ERROR(detail);
       }
       this.notifyOperationComplete(aListener,
           nserror,
@@ -344,7 +351,7 @@ calEDSProvider.prototype = {
       let detail;
       let nserror;
       if (modified) {
-        LOG("Modified item " +  item.title + " " + item.id);
+        this.LOG("Modified item " +  item.title + " " + item.id);
         this.mObservers.notify("onModifyItem", [aNewItem, aOldItem]);
         nserror = Components.results.NS_OK;
         detail = aNewItem;
@@ -353,7 +360,7 @@ calEDSProvider.prototype = {
           error.contents.code + " - " +
           error.contents.message.readString();
         nserror = Components.results.NS_ERROR_FAILURE;
-        ERROR(detail);
+        this.ERROR(detail);
       }
 
       this.notifyOperationComplete(aListener,
@@ -377,9 +384,9 @@ calEDSProvider.prototype = {
           error.contents.code + " - " +
           error.contents.message.readString();
         nserror = Components.results.NS_ERROR_FAILURE;
-        ERROR(detail);
+        this.ERROR(detail);
       } else {
-        LOG("Removed item " +  item.title + " " + item.id);
+        this.LOG("Removed item " +  item.title + " " + item.id);
         this.mObservers.notify("onDeleteItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
@@ -433,7 +440,7 @@ calEDSProvider.prototype = {
             query = query.replace("{to}", aRangeEnd.icalString);
         }
 
-        cal.LOG("EDS: Query is " + query);
+        this.LOG("EDS: Query is " + query);
 
         if (libecal.e_cal_get_object_list(this.ecal, query, objects.address(), error.address())) {
             let items = this.glist_to_item_array(objects, this.superCalendar);
@@ -445,7 +452,7 @@ calEDSProvider.prototype = {
                                    items);
             nserror = Components.results.NS_OK;
         } else {
-            cal.ERROR("EDS: Error retrieving items: " + 
+            this.ERROR("EDS: Error retrieving items: " + 
                       error.contents.code + " - " +
                       error.contents.message.readString());
             nserror = Components.results.NS_ERROR_FAILURE;
@@ -458,6 +465,14 @@ calEDSProvider.prototype = {
                                      null, null);
     },
     
+    // calICalendar
+    endBatch : function endBatch() {
+      this.__proto__.__proto__.endBatch.apply(this, arguments);
+      // FIXME: unref client and calendar
+      this.mBatchClient = null;
+      this.mBatchCalendar = null;
+    },
+
     // calICompositeCalendar
     addCalendar : function addCalendar(/*calICalendar*/ aCalendar) {
       let registry = this.createERegistry();
@@ -466,47 +481,48 @@ calEDSProvider.prototype = {
     },
     
     // calICompositeCalendar
-    removeCalendar : function removeCalendar(/*nsIURI*/ aServer) {
+    removeCalendar : function removeCalendar(/*calICalendar*/ aCalendar) {
       let error = glib.GError.ptr();
       let registry = this.createERegistry();
       // look for exising calendar
-      let source = this.findESource(registry, calendar);
+      let source = this.findESource(registry, aCalendar);
       if (source.isNull()) {
-        WARN("Calendar " + calendar.name + " " + calendar.id + " doesn't exist. Unable to remove calendar.");
+        this.WARN("Calendar " + aCalendar.name + " " + aCalendar.id + " doesn't exist. Unable to remove calendar.");
         return;
       }
 
       let removed = libecal.e_source_remove_sync(source, null, error.address());
 
       if (!error.isNull()) {
-        ERROR("Couldn't remove calendar " + error.contents.code + " - " +
+        this.ERROR("Couldn't remove calendar " + error.contents.code + " - " +
             error.contents.message.readString());
         return;
       }
-      LOG("Removed calendar " +  calendar.name + " " + calendar.id);
+      this.LOG("Removed calendar " +  aCalendar.name + " " + aCalendar.id);
     },
     
     // calICompositeCalendar
-    getCalendar : function getCalendar(/*nsIURI*/ aServer) {
-      return null; /*calICalendar*/
-    },
-    
-    // calICompositeCalendar
-    getCalendars : function(count, /*calICalendar*/ aCalendars) {
+    getCalendarById : function getCalendarById(aId) {
       
     },
+
+    // calICompositeCalendar
+    getCalendars : function getCalendars(count, aCalendars){
+      
+    },
+
+    // calICompositeCalendar
+    defaultCalendar : null,
+    // calICompositeCalendar
+    prefPrefix : null,
+
+    statusDisplayed : false,
     
     // calICompositeCalendar
     setStatusObserver : function (/*calIStatusObserver*/ aStatusObserver, /*nsIDOMChromeWindow*/ aWindow) {
-      
-    }, 
-    
-    endBatch : function endBatch() {
-      this.__proto__.__proto__.endBatch.apply(this, arguments);
-      // FIXME: unref client and calendar
-      this.mBatchClient = null;
-      this.mBatchCalendar = null;
+      throw "Unsupported operation setStatusObserver";
     }
+    
 };
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([calEDSProvider]);

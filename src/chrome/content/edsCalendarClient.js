@@ -1,15 +1,34 @@
+
 Components.utils.import("resource://calendar/modules/calUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
+
+Components.utils.import("resource://edscalendar/utils.jsm");
 
 var edsCalendarClient = {
     
+    calendar : null,
+    
     init : function int() {
       debugger;
+      addLogger(this, "edsCalendarClient");
       this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
       // TODO: Add cache?
       // get all the items from all calendars and add them to EDS
       for (let aCalendar of cal.getCalendarManager().getCalendars({})) {
         aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, this.calendarGetListener);
       }
+      
+      // setting up listeners etc
+      if (this.calendar === null) {
+        this.calendar = getCompositeCalendar();
+      }
+      if (this.calendar) {
+        this.calendar.removeObserver(this.calendarObserver);
+        this.calendar.addObserver(this.calendarObserver);
+      }
+
     },
     
     uninit : function uninit() {
@@ -32,10 +51,10 @@ var edsCalendarClient = {
         if (!Components.isSuccessCode(aStatus)) {
           return;
         }
-        LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
+        edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
         edsCalendarClient.edsCalendarService.startBatch();
         for (let item of aItemscalendar) {
-          LOG("Processing item " + item.title + " - " + item.id);
+          edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
           edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
         }
         edsCalendarClient.edsCalendarService.endBatch();
@@ -45,10 +64,10 @@ var edsCalendarClient = {
     calendarChangeListener : {
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
         if (!Components.isSuccessCode(aStatus)) {
-          ERROR("Couldn't change item " + item.title + " - " + item.id);
+          edsCalendarClient.ERROR("Couldn't change item " + item.title + " - " + item.id);
           return;
       }
-        LOG("Changed item " + item.title + " - " + item.id);
+        this.LOG("Changed item " + item.title + " - " + item.id);
         
       },
       onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {

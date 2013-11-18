@@ -1,4 +1,6 @@
 
+Components.utils.import("resource://gre/modules/ctypes.jsm");
+
 var EXPORTED_SYMBOLS = ["glib"];
 
 var glib =
@@ -9,8 +11,6 @@ var glib =
       lib : null,
 
       init : function() {
-
-        Components.utils.import("resource://gre/modules/ctypes.jsm");
 
         this.lib = ctypes.open(this.glibPath);
 
@@ -98,14 +98,6 @@ var glib =
         };
 
 
-      },
-
-
-      debug: function (aMessage) {
-        var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-        .getService(Components.interfaces.nsIConsoleService);
-        consoleService.logStringMessage("GLib (" + new Date() + " ):\n\t" + aMessage);
-        window.dump("GLib: (" + new Date() + " ):\n\t" + aMessage + "\n");
       },
 
       shutdown: function() {
