@@ -4,6 +4,7 @@ Components.utils.import("resource://gre/modules/ctypes.jsm");
 Components.utils.import("resource://edscalendar/bindings/glib.jsm");
 Components.utils.import("resource://edscalendar/bindings/gio.jsm");
 Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
 
 var EXPORTED_SYMBOLS = ["libedataserver"];
 

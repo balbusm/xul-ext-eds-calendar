@@ -88,20 +88,20 @@ var edsCalendarClient = {
       // calIObserver
       onAddItem : function onAddItem(aItem) {
         debugger;
-        this.edsCalendarService.addItem(aItem, this.calendarChangeListener);
+        edsCalendarClient.edsCalendarService.addItem(aItem, this.calendarChangeListener);
         
       },
 
       // calIObserver
       onDeleteItem : function onDeleteItem(aItem) {
         debugger;
-        this.edsCalendarService.deleteItem(item, this.calendarChangeListener);
+        edsCalendarClient.edsCalendarService.deleteItem(aItem, this.calendarChangeListener);
       },
 
       // calIObserver
       onModifyItem : function onModifyItem(aNewItem, aOldItem) {
         debugger;
-        this.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
+        edsCalendarClient.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
       },
 
       // calICompositeObserver
@@ -116,7 +116,7 @@ var edsCalendarClient = {
       // calICompositeObserver
       onCalendarRemoved : function onCalendarRemoved(aCalendar) {
         debugger;
-        this.edsCalendarService.removeCalendar(aCalendar);
+        edsCalendarClient.edsCalendarService.removeCalendar(aCalendar);
       },
 
       // calIObserver

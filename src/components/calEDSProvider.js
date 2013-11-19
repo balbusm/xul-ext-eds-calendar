@@ -52,6 +52,12 @@ Components.utils.import("resource://edscalendar/utils.jsm");
 function calEDSProvider() {
     this.initProviderBase();
     addLogger(this, "calEDSProvider");
+    debugger;
+    glib.init();
+    gio.init();
+    libical.init();
+    libecal.init();
+    libedataserver.init();
 }
 
 calEDSProvider.prototype = {
@@ -162,7 +168,7 @@ calEDSProvider.prototype = {
       let registry = libedataserver.e_source_registry_new_sync(null, error.address());
       if (!error.isNull())
       {
-        ERROR("Couldn't get source registry " + error.contents.code + " - " +
+        this.ERROR("Couldn't get source registry " + error.contents.code + " - " +
             error.contents.message.readString());
         return null;
       }
@@ -181,7 +187,7 @@ calEDSProvider.prototype = {
       // do not create new one if calendar exists
       if (source.isNull()) {
         source = this.createESource(calendar, registry);
-        this.LOG("Created new source");
+        this.LOG("Created new source for calendar " + calendar.name + " - " + calendar.id);
       }
       return source;
     },
@@ -216,8 +222,6 @@ calEDSProvider.prototype = {
       if (this.mBatchCount > 0 && this.mBatchClient !== null && this.mBatchCalendar === calendar) {
          return this.mBatchClient; 
       }
-      
-      this.LOG("glib " + glib.GError);
       
       let error = glib.GError.ptr();
       let registry = this.createERegistry();
@@ -291,7 +295,8 @@ calEDSProvider.prototype = {
     // calICalendar
     adoptItem : function adoptItem(aItem, aListener) {
       let calendar = aItem.calendar;
-      let client = this.getECalClient(calendar, this.getESource);
+      let eSourceProvider = this.getESource.bind(this);
+      let client = this.getECalClient(calendar, eSourceProvider);
       
       let error = glib.GError.ptr();
       let icalcomponent = this.findItem(client, aItem);
@@ -328,7 +333,7 @@ calEDSProvider.prototype = {
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.ADD,
-          (rc ? aItem.id : null),
+          (created ? aItem.id : null),
           detail);
 
     },
@@ -340,8 +345,10 @@ calEDSProvider.prototype = {
 
     // calICalendar
     modifyItem: function modifyItem(aNewItem, aOldItem, aListener) {
+      let calendar = aNewItem.calendar;
       let error = glib.GError.ptr();
-      let client = this.getECalClient(calendar, this.findESource);
+      let eSourceProvider = this.getESource.bind(this);
+      let client = this.getECalClient(calendar, eSourceProvider);
       let objModType = this.getObjModType(aNewItem);
       let comp = libical.icalcomponent_new_from_string(aNewItem.icalString);
       let subcomp = this.vcalendar_add_timezones_get_item(comp);
@@ -366,14 +373,16 @@ calEDSProvider.prototype = {
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.MODIFY,
-          (rc ? aNewItem.id : null),
+          (modified ? aNewItem.id : null),
           detail);
     },
 
     // calICalendar
     deleteItem: function deleteItem(aItem, aListener) {
+      let calendar = aItem.calendar;
       let error = glib.GError.ptr();
-      let client = this.getECalClient(calendar, this.findESource);
+      let eSourceProvider = this.getESource.bind(this);
+      let client = this.getECalClient(calendar, eSourceProvider);
       let objModType = this.getObjModType(aItem);
       
       let removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, aItem.recurrenceId, objModType, null, error.address());
@@ -386,7 +395,7 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
       } else {
-        this.LOG("Removed item " +  item.title + " " + item.id);
+        this.LOG("Removed item " +  aItem.title + " " + aItem.id);
         this.mObservers.notify("onDeleteItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
@@ -394,7 +403,7 @@ calEDSProvider.prototype = {
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.DELETE,
-          (rc ? aItem.id : null),
+          (removed ? aItem.id : null),
           detail);
     },
 
@@ -476,7 +485,7 @@ calEDSProvider.prototype = {
     // calICompositeCalendar
     addCalendar : function addCalendar(/*calICalendar*/ aCalendar) {
       let registry = this.createERegistry();
-      this.getESource(registry, calendar);
+      this.getESource(registry, aCalendar);
       // FIXME: add calendar items
     },
     
@@ -521,8 +530,15 @@ calEDSProvider.prototype = {
     // calICompositeCalendar
     setStatusObserver : function (/*calIStatusObserver*/ aStatusObserver, /*nsIDOMChromeWindow*/ aWindow) {
       throw "Unsupported operation setStatusObserver";
-    }
+    },
     
+    close : function close() {
+      libedataserver.shutdown();
+      libecal.shutdown();
+      libical.shutdown();
+      gio.shutdown();
+      glib.shutdown();
+    }
 };
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([calEDSProvider]);
