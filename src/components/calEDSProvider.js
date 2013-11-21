@@ -182,7 +182,7 @@ calEDSProvider.prototype = {
     },
     
     getESource : function getESource(registry, calendar) {
-      // look for exising calendar
+      // look for existing calendar
       let source = this.findESource(registry, calendar);
       // do not create new one if calendar exists
       if (source.isNull()) {
@@ -251,6 +251,12 @@ calEDSProvider.prototype = {
       let icalcomponent = libical.icalcomponent.ptr();
 
       let found = libecal.e_cal_client_get_object_sync(client, item.id, null, icalcomponent.address(), null, error.address());
+      // Ignore error code 1, it is raised when item doesn't exist
+      if (!found && !error.isNull() && error.contents.code != 1) {
+        this.ERROR("EDS: Couldn't find item: " + 
+            error.contents.code + " - " +
+            error.contents.message.readString());
+      }
       // FIXME remove icalcomponent reference
       return icalcomponent;
     },
@@ -351,14 +357,14 @@ calEDSProvider.prototype = {
       let client = this.getECalClient(calendar, eSourceProvider);
       let objModType = this.getObjModType(aNewItem);
       let comp = libical.icalcomponent_new_from_string(aNewItem.icalString);
-      let subcomp = this.vcalendar_add_timezones_get_item(comp);
+      let subcomp = this.vcalendar_add_timezones_get_item(client, comp);
 
-      let modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, error.address());
+      let modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
 
       let detail;
       let nserror;
       if (modified) {
-        this.LOG("Modified item " +  item.title + " " + item.id);
+        this.LOG("Modified item " +  aNewItem.title + " " + aNewItem.id);
         this.mObservers.notify("onModifyItem", [aNewItem, aOldItem]);
         nserror = Components.results.NS_OK;
         detail = aNewItem;
@@ -500,6 +506,7 @@ calEDSProvider.prototype = {
         return;
       }
 
+      // TODO: Shoud items be removed first?
       let removed = libecal.e_source_remove_sync(source, null, error.address());
 
       if (!error.isNull()) {

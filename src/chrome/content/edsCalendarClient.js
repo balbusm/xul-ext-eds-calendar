@@ -64,10 +64,10 @@ var edsCalendarClient = {
     calendarChangeListener : {
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
         if (!Components.isSuccessCode(aStatus)) {
-          edsCalendarClient.ERROR("Couldn't change item " + item.title + " - " + item.id);
+          edsCalendarClient.ERROR("Couldn't change item " + aCalendar.name + " - " + aCalendar.id);
           return;
       }
-        this.LOG("Changed item " + item.title + " - " + item.id);
+        edsCalendarClient.LOG("Changed item " + item.title + " - " + item.id);
         
       },
       onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
