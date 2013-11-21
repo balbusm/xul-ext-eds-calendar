@@ -31,6 +31,28 @@ var edsCalendarClient = {
 
     },
     
+    operationTypeToString : function operationTypeToString(operationType) {
+      let result;
+      switch(operationType) {
+      case Components.interfaces.calIOperationListener.ADD:
+        result = "add";
+        break;
+      case Components.interfaces.calIOperationListener.MODIFY:
+        result = "modify";
+        break;
+      case Components.interfaces.calIOperationListener.DELETE:
+        result = "delete";
+        break;
+      case Components.interfaces.calIOperationListener.GET:
+        result = "get";
+        break;
+      default:
+        result = "unknown";
+        break;
+      }
+      return result;
+    },
+    
     uninit : function uninit() {
       // FIXME: close calendar service
       //      this.edsCalendarService.unint();
@@ -39,16 +61,28 @@ var edsCalendarClient = {
     calendarGetListener : {
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
         if (!Components.isSuccessCode(aStatus)) {
-        return;
-      }
+          edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
+              " on element " + aId + " failed. " + aStatus + " - " + aDetai);
+          return;
+        }
         // make sure that calendar has been created
         // when there are no items on a list
-        edsCalendarClient.edsCalendarService.addCalendar(aCalendar);
-//        let registry = this.edsCalendarService.createERegistry();
-//        this.edsCalendarService.getESource(registry, calendar);
+        let element;
+        if (aOperationType == Components.interfaces.calIOperationListener.GET) {
+          edsCalendarClient.edsCalendarService.addCalendar(aCalendar);
+          element = aCalendar.id;
+        } else {
+          element = aId;
+        }
+        edsCalendarClient.LOG("Operation " + edsCalendarClient.operationTypeToString(aOperationType) + 
+            " on element " + element + " completed");
+        
+ 
       },
       onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
         if (!Components.isSuccessCode(aStatus)) {
+          edsCalendarClient.ERROR("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
+              ". " + aStatus + " - " + aDetai );
           return;
         }
         edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
@@ -64,10 +98,19 @@ var edsCalendarClient = {
     calendarChangeListener : {
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
         if (!Components.isSuccessCode(aStatus)) {
-          edsCalendarClient.ERROR("Couldn't change item " + aCalendar.name + " - " + aCalendar.id);
+          edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
+              " on element " + aId + " failed. " + aStatus + " - " + aDetai);
           return;
-      }
-        edsCalendarClient.LOG("Changed item " + item.title + " - " + item.id);
+        }
+        
+        let element;
+        if (aOperationType == Components.interfaces.calIOperationListener.GET) {
+          element = aCalendar.id;
+        } else {
+          element = aId;
+        }
+        edsCalendarClient.LOG("Operation " + edsCalendarClient.operationTypeToString(aOperationType) + 
+            " on element " + element + " completed.");
         
       },
       onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
