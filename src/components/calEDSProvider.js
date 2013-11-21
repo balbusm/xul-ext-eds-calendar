@@ -483,9 +483,11 @@ calEDSProvider.prototype = {
     // calICalendar
     endBatch : function endBatch() {
       this.__proto__.__proto__.endBatch.apply(this, arguments);
-      // FIXME: unref client and calendar
-      this.mBatchClient = null;
-      this.mBatchCalendar = null;
+      if (this.mBatchCount === 0)  {
+        // FIXME: unref client and calendar
+        this.mBatchClient = null;
+        this.mBatchCalendar = null;
+      }
     },
 
     // calICompositeCalendar
