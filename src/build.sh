@@ -57,13 +57,15 @@ if [ -z $APP_NAME ]; then
 fi
 
 ROOT_DIR=`pwd`
-TMP_DIR=build
+OUTPUT_DIR=$ROOT_DIR/output
+TMP_DIR=$OUTPUT_DIR/build
+FILES_DIR=$OUTPUT_DIR/files
 
 #uncomment to debug
 #set -x
 
 # remove any left-over files from previous build
-rm -f $APP_NAME.jar $APP_NAME.xpi files
+rm -f $OUTPUT_DIR/$APP_NAME.jar $OUTPUT_DIR/$APP_NAME.xpi $OUTPUT_DIR/files
 rm -rf $TMP_DIR
 
 $BEFORE_BUILD
@@ -71,18 +73,18 @@ $BEFORE_BUILD
 mkdir --parents --verbose $TMP_DIR/chrome
 
 for CHROME_SUBDIR in $CHROME_PROVIDERS; do
-  find $CHROME_SUBDIR -path '*CVS*' -prune -o -type f -print | grep -v \~ >> files
+  find $CHROME_SUBDIR -path '*CVS*' -prune -o -type f -print | grep -v \~ >> $FILES_DIR
 done
 
 if [ $USE_JAR != 0 ]; then
     # generate the JAR file, excluding CVS and temporary files
     JAR_FILE=$TMP_DIR/chrome/$APP_NAME.jar
     echo "Generating $JAR_FILE..."
-    zip -0 -r $JAR_FILE `cat files`
+    zip -0 -r $JAR_FILE `cat $FILES_DIR`
 else
     # The following statement should be used instead if you don't wish to use the JAR file
     echo "Copying Chrome files to $TMP_DIR folder..."
-    cp --verbose --parents `cat files` $TMP_DIR
+    cp --verbose --parents `cat $FILES_DIR` $TMP_DIR
 fi
 
 # prepare components and defaults
@@ -98,7 +100,7 @@ done
 for ROOT_FILE in $ROOT_FILES install.rdf chrome.manifest; do
   cp --verbose $ROOT_FILE $TMP_DIR
   if [ -f $ROOT_FILE ]; then
-    echo $ROOT_FILE >> files
+    echo $ROOT_FILE >> $FILES_DIR
   fi
 done
 
@@ -120,16 +122,18 @@ fi
 
 # generate the XPI file
 echo "Generating $APP_NAME.xpi..."
-zip -r ../$APP_NAME.xpi *
+zip -r $OUTPUT_DIR/$APP_NAME.xpi *
 
 cd "$ROOT_DIR"
 
 echo "Cleanup..."
 if [ $CLEAN_UP = 0 ]; then
   # save the jar file
-  mv $TMP_DIR/chrome/$APP_NAME.jar .
+  if [ -f $TMP_DIR/chrome/$APP_NAME.jar ]; then
+    mv $TMP_DIR/chrome/$APP_NAME.jar $OUTPUT_DIR
+  fi
 else
-  rm ./files
+  rm $FILES_DIR
 fi
 
 # remove the working files
