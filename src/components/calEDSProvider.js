@@ -176,8 +176,12 @@ calEDSProvider.prototype = {
     },
 
     findESource : function findESource(registry, calendar) {
+      return this.findESourceByCalendarId(registry, calendar.id);
+    },
+
+    findESourceByCalendarId : function findESourceByCalendarId(registry, id) {
       // look for exising calendar
-      let source = libedataserver.e_source_registry_ref_source(registry, calendar.id);
+      let source = libedataserver.e_source_registry_ref_source(registry, id);
       return source;
     },
     
@@ -353,6 +357,7 @@ calEDSProvider.prototype = {
     modifyItem: function modifyItem(aNewItem, aOldItem, aListener) {
       let calendar = aNewItem.calendar;
       let error = glib.GError.ptr();
+      // FIXME: Check if source exists
       let eSourceProvider = this.getESource.bind(this);
       let client = this.getECalClient(calendar, eSourceProvider);
       let objModType = this.getObjModType(aNewItem);
@@ -387,6 +392,7 @@ calEDSProvider.prototype = {
     deleteItem: function deleteItem(aItem, aListener) {
       let calendar = aItem.calendar;
       let error = glib.GError.ptr();
+      // FIXME: Check if source exists
       let eSourceProvider = this.getESource.bind(this);
       let client = this.getECalClient(calendar, eSourceProvider);
       let objModType = this.getObjModType(aItem);
@@ -521,7 +527,20 @@ calEDSProvider.prototype = {
     
     // calICompositeCalendar
     getCalendarById : function getCalendarById(aId) {
-      
+      let registry = this.createERegistry();
+      // look for exising calendar
+      let source = this.findESourceByCalendarId(registry, aId);
+      if (source.isNull()) {
+        this.LOG("Couldn't find calendar " + aId);
+        return null;
+      }
+      let localCalendarUri = Components.classes["@mozilla.org/network/io-service;1"]
+        .getService(Components.interfaces.nsIIOService)
+        .newURI("moz-storage-calendar://", null, null);
+      var calendar = cal.getCalendarManager().createCalendar("storage", localCalendarUri);
+      calendar.id = aId;
+      this.LOG("Calendar " + calendar);
+      return calendar;
     },
 
     // calICompositeCalendar

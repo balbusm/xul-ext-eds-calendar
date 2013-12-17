@@ -39,22 +39,14 @@
 Components.utils.import("resource://calendar/modules/calUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://mozmill/modules/assertions.js");
+Components.utils.import('resource://mozmill/driver/mozmill.js');
 
 Components.utils.import("resource://edscalendar/utils.jsm");
 
-var MODULE_NAME = "test-calEdsProvider";
-
-var RELATIVE_ROOT = "../shared-modules";
-var MODULE_REQUIRES = ["folder-display-helpers"];
-
 function setupModule(module)
 {
-  addLogger(this, "test-calEDSProvider");
-  this.WARN("collector " + collector);
-//  let fdh = collector.getModule("folder-display-helpers");
-//  this.WARN("fdh " + fdh);
-  
-//  fdh.installInto(module);
+  addLogger(this, "edsCalendarTest");
 }
 
 function teardownModule(module) {
@@ -62,16 +54,29 @@ function teardownModule(module) {
 
 function setupTest(test)
 {
+  addLogger(this, "edsCalendarTest");
+//  driver.sleep(10000);
   let edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
   test.edsCalendarService = edsCalendarService;
+  test.assert = new Assert();
 }
 
 function teardownTest(test)
 {
 }
 
-function testSomething() {
-  addLogger(this, "test-calEDSProvider");
-  this.WARN("edsCalendarService " + this.edsCalendarService);
-//  assert_true(true);
+function testRetreivingEdsCalendarService() {
+  this.assert.notEqual(this.edsCalendarService, undefined, "Couldn't retrieve EDS Calendar");
+  this.assert.notEqual(this.edsCalendarService, null, "Couldn't retrieve EDS Calendar");
 }
+
+function testAddNewCalendar() {
+  debugger;
+  let calendar = {id: "f8192dac-61dc-11e3-a20e-010b6288709b", name: "testAddNewCalendar"};
+  this.edsCalendarService.addCalendar(calendar);
+  let resultCalendar = this.edsCalendarService.getCalendarById(calendar.id);
+  this.LOG("Result calendar " + resultCalendar.id);
+  this.assert.notEqual(resultCalendar, null, "Couldn't retrieve calendar");
+  this.assert.equal(resultCalendar.id, calendar.id, "Couldn't retrieve calendar with valid id");
+}
+

@@ -40,6 +40,7 @@ BEFORE_BUILD=      # run this before building       (bash command)
 AFTER_BUILD=       # ...and this after the build    (bash command)
 
 config=./config_build.sh
+OPTIND=1
 while getopts "c:" opt; do
     case "$opt" in
     c)  config=$OPTARG

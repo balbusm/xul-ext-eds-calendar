@@ -10,4 +10,4 @@ ROOT_FILES=
 ROOT_DIRS="modules components defaults locale"
 BEFORE_BUILD=
 BEFORE_PACK=
-AFTER_BUILD=". test.sh"
+AFTER_BUILD=

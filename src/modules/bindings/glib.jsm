@@ -85,17 +85,17 @@ var glib =
         parent.g_list_length = parent.lib.declare("g_list_length",
             ctypes.default_abi, glib.guint, parent.GList.ptr);
 
-        parent.createGList = function () {
-          return parent.g_list_alloc();
-        };
-
-        parent.GList.freeFull = function() {
-          parent.g_list_free_full(this, glib.g_object_unref);
-        };
-
-        parent.GList.lenght = function() {
-          return parent.g_list_length(this);
-        };
+//        parent.createGList = function () {
+//          return parent.g_list_alloc();
+//        };
+//
+//        parent.GList.freeFull = function() {
+//          parent.g_list_free_full(this, glib.g_object_unref);
+//        };
+//
+//        parent.GList.lenght = function() {
+//          return parent.g_list_length(this);
+//        };
 
 
       },
