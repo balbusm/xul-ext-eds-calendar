@@ -59,10 +59,10 @@ var edsCalendarClient = {
     },
     
     calendarGetListener : {
-      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
+      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) { 
         if (!Components.isSuccessCode(aStatus)) {
           edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
-              " on element " + aId + " failed. " + aStatus + " - " + aDetai);
+              " on element " + aId + " failed. " + aStatus + " - " + aDetail);
           return;
         }
         // make sure that calendar has been created
@@ -82,7 +82,7 @@ var edsCalendarClient = {
       onGetResult : function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
         if (!Components.isSuccessCode(aStatus)) {
           edsCalendarClient.ERROR("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
-              ". " + aStatus + " - " + aDetai );
+              ". " + aStatus + " - " + aDetail);
           return;
         }
         edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
@@ -96,10 +96,10 @@ var edsCalendarClient = {
     },
     
     calendarChangeListener : {
-      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
+      onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) { 
         if (!Components.isSuccessCode(aStatus)) {
           edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
-              " on element " + aId + " failed. " + aStatus + " - " + aDetai);
+              " on element " + aId + " failed. " + aStatus + " - " + aDetail);
           return;
         }
         

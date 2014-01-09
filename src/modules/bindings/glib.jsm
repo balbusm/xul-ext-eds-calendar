@@ -34,6 +34,7 @@ var glib =
         this.declareGMainContext(this);
         this.declareGError(this);
         this.declareGList(this);
+        this.declareGSList(this);
 
       },
 
@@ -84,6 +85,49 @@ var glib =
 
         parent.g_list_length = parent.lib.declare("g_list_length",
             ctypes.default_abi, glib.guint, parent.GList.ptr);
+
+        parent.g_list_next = function (list) {
+          return list.isNull() ? parent.GList.ptr : list.contents.next; 
+        };
+
+//        parent.createGList = function () {
+//          return parent.g_list_alloc();
+//        };
+//
+//        parent.GList.freeFull = function() {
+//          parent.g_list_free_full(this, glib.g_object_unref);
+//        };
+//
+//        parent.GList.lenght = function() {
+//          return parent.g_list_length(this);
+//        };
+
+
+      },
+      
+      declareGSList : function(parent) {
+
+        parent._GSList = new ctypes.StructType("_GSlist");
+        parent._GSList.define([ 
+                              { data : glib.gpointer }, 
+                              { next : parent._GSList.ptr }
+                              ]);
+
+        parent.GSList = parent._GSList;
+
+        // Methods
+        parent.g_slist_alloc = parent.lib.declare("g_slist_alloc",
+            ctypes.default_abi, parent.GSList.ptr);
+
+        parent.g_slist_free_full = parent.lib.declare("g_slist_free_full",
+            ctypes.default_abi, ctypes.void_t, parent.GSList.ptr, glib.gpointer);
+
+        parent.g_slist_length = parent.lib.declare("g_slist_length",
+            ctypes.default_abi, glib.guint, parent.GSList.ptr);
+
+        parent.g_slist_next = function (list) {
+          return list.isNull() ? NULL : list.next; 
+        };
 
 //        parent.createGList = function () {
 //          return parent.g_list_alloc();

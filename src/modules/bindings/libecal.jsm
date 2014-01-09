@@ -40,6 +40,7 @@ var libecal =
 
         // Structures
         parent._ESource = new ctypes.StructType("_ESource");
+
         parent.ESource = parent._ESource;
 
         // Methods
@@ -60,7 +61,7 @@ var libecal =
                 parent.ESource.ptr,
                 glib.gchar.ptr);
 
-    	parent.e_source_set_display_name =
+        parent.e_source_set_display_name =
             parent.lib.declare(
                 "e_source_set_display_name",
                 ctypes.default_abi,
@@ -80,6 +81,12 @@ var libecal =
                 glib.gchar.ptr,
                 parent.ESource.ptr);
 
+        parent.e_source_dup_uid =
+          parent.lib.declare("e_source_dup_uid",
+              ctypes.default_abi,
+              glib.gchar.ptr,
+              parent.ESource.ptr);
+        
         parent.e_source_set_parent =
             parent.lib.declare(
                 "e_source_set_parent",

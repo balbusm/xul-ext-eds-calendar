@@ -321,6 +321,7 @@ calEDSProvider.prototype = {
       error.value = null;
 
       let comp = libical.icalcomponent_new_from_string(aItem.icalString);
+      this.LOG("Given icalString " + aItem.icalString);
       let uid = glib.gchar.ptr();
 
       let itemcomp = this.vcalendar_add_timezones_get_item(client, comp);
@@ -421,8 +422,91 @@ calEDSProvider.prototype = {
 
     // calICalendar
     getItem: function getItem(aId, aListener) {
+      let registry = this.createERegistry();
+      // FIXME: free g_list
+      //      g_list_free_full (list, g_object_unref);
+      let sourcesList = libedataserver.e_source_registry_list_sources(registry, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+      var calendarItem = null;
+      let error = glib.GError.ptr();
+      for (let iter = sourcesList; !iter.isNull(); iter = glib.g_list_next(iter)) {
+        // create client for each source
+        let source = ctypes.cast(iter.contents.data, libecal.ESource.ptr);
+        let client = libecal.e_cal_client_connect_sync(source, 
+            libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
+            null,
+            error.address());
+        // look for item in every client/calendar
+        let item = { id: aId };
+        let icalcomponent = this.findItem(client, item);
+        if (!icalcomponent.isNull()) {
+          let calendar = this.createCalendarFromESource(source);
+          calendarItem = icalcomponent_to_calendar_item(icalcomponent, calendar);
+          break;
+        }
+      }
+      
+      let nserror;
+      if (calendarItem !== null) {
+          aListener.onGetResult (calendarItem.calendar,
+                                 Components.results.NS_OK,
+                                 Components.interfaces.calIEvent,
+                                 null,
+                                 1,
+                                 [calendarItem]);
+          nserror = Components.results.NS_OK;
+      } else if (!error.isNull()){
+          this.ERROR("EDS: Error coulndn't retrieve item aId " + 
+                    error.contents.code + " - " +
+                    error.contents.message.readString());
+          nserror = Components.results.NS_ERROR_FAILURE;
+      } else {
+        aListener.onGetResult (null,
+            Components.results.NS_OK,
+            Components.interfaces.calIEvent,
+            null,
+            0,
+            [ ]);
+        nserror = Components.results.NS_OK;
+        
+      }
+
+      this.notifyOperationComplete(aListener, nserror, 
+                                   Components.interfaces.calIOperationListener.GET,
+                                   null, null);
+    },
+    
+    icalcomponent_to_calendar_item: function icalcomponent_to_calendar_item(icalcomponent, calendar) {
+
+      // TODO This is not super since we parse the string again. When
+      // lightning moves to using js-ctypes for libical, we can just pass
+      // the icalcomponent to the item and have it take what it needs
+      let icalstring = libical.icalcomponent_as_ical_string(icalcomponent);
+      let item = cal.createEvent(icalstring.readString());
+
+      // Set up the calendar for this item
+      item.calendar = calendar;
+      return item;
+    },
+  
+    createCalendarFromESource : function createCalendarFromESource(source) {
+      let localCalendarUri = Components.classes["@mozilla.org/network/io-service;1"]
+        .getService(Components.interfaces.nsIIOService)
+        .newURI("moz-storage-calendar://", null, null);
+      // FIXME register calendar, set name
+      var calendar = cal.getCalendarManager().createCalendar("storage", localCalendarUri);
+      // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
+      let id = libecal.e_source_dup_uid(source).readString();
+      calendar.id = id;
+      let name = libecal.e_source_get_display_name(source).readString();
+      calendar.name = name;
+      this.LOG("Created calendar " + calendar.name + " - " + calendar.id);
+      return calendar;
     },
 
+    
+    /**
+     * Obsolete. Do not use!
+     */
     glist_to_item_array: function glist_to_item_array(glistptr, calendar) {
         let items = [];
         let current = glistptr;
@@ -445,6 +529,9 @@ calEDSProvider.prototype = {
     },
 
     // calICalendar
+    /**
+     * Obsolete. Do not use!
+     */
     getItems: function getItems(aItemFilter,
                                     aCount,
                                     aRangeStart,
@@ -534,15 +621,10 @@ calEDSProvider.prototype = {
         this.LOG("Couldn't find calendar " + aId);
         return null;
       }
-      let localCalendarUri = Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService)
-        .newURI("moz-storage-calendar://", null, null);
-      var calendar = cal.getCalendarManager().createCalendar("storage", localCalendarUri);
-      calendar.id = aId;
-      this.LOG("Calendar " + calendar);
+      var calendar = this.createCalendarFromESource(source);
       return calendar;
     },
-
+    
     // calICompositeCalendar
     getCalendars : function getCalendars(count, aCalendars){
       
