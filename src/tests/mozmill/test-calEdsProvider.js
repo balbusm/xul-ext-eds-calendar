@@ -40,12 +40,17 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://mozmill/modules/assertions.js");
+Components.utils.import("resource://mozmill/modules/assertions.js");
 
 Components.utils.import("resource://edscalendar/utils.jsm");
 
 function setupModule(module)
 {
   addLogger(module, "edsCalendarTest");
+  
+  module.uuidGenerator = Components.classes["@mozilla.org/uuid-generator;1"]
+  .getService(Components.interfaces.nsIUUIDGenerator);
+  
   module.assert = new Assert();
   module.AssertContainer = function() {
     Assert.constructor.call(this);
@@ -77,6 +82,9 @@ function setupModule(module)
       this.assert.fail("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
           ". " + aStatus + " - " + aDetail );
     }
+    this._assertExpectedItemsMatch(aItemscalendar);
+  }
+  module.ResultListener.prototype._assertExpectedItemsMatch = function listener_assertExpectedItemsMatch(aItemscalendar) {
     let found = false;
     for (let expectedItem of this.expectedItems) {
       for (let item of aItemscalendar) {
@@ -91,6 +99,7 @@ function setupModule(module)
       }
       found = false;
     }
+
   }
   
 }
@@ -151,7 +160,11 @@ function testRemoveCalendar() {
 function testAddItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae03", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  var item = {id: "f8192dac-61dc-11e3-a20e-010b628cee01", name: "testItem1",
+  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // as a workaround generate different item each time
+  let uuid = this.uuidGenerator.generateUUID();
+  let uuidString = uuid.toString();
+  var item = {id: uuidString, name: "testItem1",
       calendar: calendar, icalString:
         "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
@@ -178,7 +191,58 @@ function testAddItem() {
         "CREATED:20131220T225208Z\n" +
         "LAST-MODIFIED:20131220T225233Z\n" +
         "DTSTAMP:20131220T225233Z\n" +
-        "UID:ce51645f-2771-4028-94e8-746802aef468\n" +
+        "UID:" + uuidString + "\n" +
+        "SUMMARY:New Event\n" +
+        "CATEGORIES:Birthday\n" +
+        "DTSTART;TZID=Europe/Warsaw:20131212T234500\n" +
+        "DTEND;TZID=Europe/Warsaw:20131213T004500\n" +
+        "LOCATION:loc\n" +
+        "END:VEVENT\n" +
+        "END:VCALENDAR",
+        clone : function() { return this;}
+        };
+  this.calendarsItems.push(item);
+  let assertContainer = new this.AssertContainer();
+  let resultListener = new this.ResultListener([item], assertContainer);
+  this.edsCalendarService.addItem(item, resultListener);
+  assertContainer.assertErrors();
+}
+
+function testGetItem() {
+  var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae04", name: "testGetItemCal" };
+  this.calendars.push(calendar);
+  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // as a workaround generate different item each time
+  let uuid = this.uuidGenerator.generateUUID();
+  let uuidString = uuid.toString();
+  var item = {id: uuidString, name: "testItem1",
+      calendar: calendar, icalString:
+        "BEGIN:VCALENDAR\n" +
+        "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
+        "VERSION:2.0\n" +
+        "BEGIN:VTIMEZONE\n" +
+        "TZID:Europe/Warsaw\n" +
+        "X-LIC-LOCATION:Europe/Warsaw\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19700329T020000\n" +
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19701025T030000\n" +
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" +
+        "END:STANDARD\n" +
+        "END:VTIMEZONE\n" +
+        "BEGIN:VEVENT\n" +
+        "CREATED:20131220T225208Z\n" +
+        "LAST-MODIFIED:20131220T225233Z\n" +
+        "DTSTAMP:20131220T225233Z\n" +
+        "UID:" + uuidString + "\n" +
         "SUMMARY:New Event\n" +
         "CATEGORIES:Birthday\n" +
         "DTSTART;TZID=Europe/Warsaw:20131212T234500\n" +
@@ -193,14 +257,68 @@ function testAddItem() {
   let resultListener = new this.ResultListener([item], assertContainer);
   debugger;
   this.edsCalendarService.addItem(item, resultListener);
-  assertContainer.assertErrors();
   this.edsCalendarService.getItem(item.id, resultListener);
   assertContainer.assertErrors();
-  
 }
 
 function testDeleteItem() {
+  var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae05", name: "testDeleteItemCal" };
+  this.calendars.push(calendar);
+  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // as a workaround generate different item each time
+  let uuid = this.uuidGenerator.generateUUID();
+  let uuidString = uuid.toString();
+  var item = {id: uuidString, name: "testItem1",
+      calendar: calendar, icalString:
+        "BEGIN:VCALENDAR\n" +
+        "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
+        "VERSION:2.0\n" +
+        "BEGIN:VTIMEZONE\n" +
+        "TZID:Europe/Warsaw\n" +
+        "X-LIC-LOCATION:Europe/Warsaw\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19700329T020000\n" +
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19701025T030000\n" +
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" +
+        "END:STANDARD\n" +
+        "END:VTIMEZONE\n" +
+        "BEGIN:VEVENT\n" +
+        "CREATED:20131220T225208Z\n" +
+        "LAST-MODIFIED:20131220T225233Z\n" +
+        "DTSTAMP:20131220T225233Z\n" +
+        "UID:" + uuidString + "\n" +
+        "SUMMARY:New Event\n" +
+        "CATEGORIES:Birthday\n" +
+        "DTSTART;TZID=Europe/Warsaw:20131212T234500\n" +
+        "DTEND;TZID=Europe/Warsaw:20131213T004500\n" +
+        "LOCATION:loc\n" +
+        "END:VEVENT\n" +
+        "END:VCALENDAR",
+        clone : function() { return this;}
+        };
+  let assertContainer = new this.AssertContainer();
+  let resultListener = new this.ResultListener([], assertContainer);
+  resultListener._assertExpectedItemsMatch = function (aItemscalendar) {
+    if (aItemscalendar.length > 0) {
+      this.assert.fail("Unexpected items has been returned");
+    }
+  };
+  this.edsCalendarService.addItem(item, resultListener);
+  this.edsCalendarService.deleteItem(item, resultListener);
+  assertContainer.assertErrors();
+  this.edsCalendarService.getItem(item.id, resultListener);
+  assertContainer.assertErrors();
 }
+
 
 function testModifyItem() {
 }

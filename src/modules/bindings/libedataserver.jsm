@@ -24,6 +24,7 @@ var libedataserver =
         this.declareESourceBackend(this);
         this.declareESourceRegistry(this);
         this.declareESourceCalendar(this);
+        this.declareEUid(this);
       },
 
       declareESourceBackend : function(parent) {
@@ -98,6 +99,16 @@ var libedataserver =
         };
 
       },
+      
+      declareEUid : function(parent) {
+        parent.e_uid_new =
+          parent.lib.declare(
+              "e_uid_new",
+              ctypes.default_abi,
+              glib.gchar.ptr);
+
+      },
+      
 
       shutdown : function() {
         this.lib.close();

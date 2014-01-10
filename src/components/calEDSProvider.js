@@ -52,7 +52,6 @@ Components.utils.import("resource://edscalendar/utils.jsm");
 function calEDSProvider() {
     this.initProviderBase();
     addLogger(this, "calEDSProvider");
-    debugger;
     glib.init();
     gio.init();
     libical.init();
@@ -440,36 +439,28 @@ calEDSProvider.prototype = {
         let icalcomponent = this.findItem(client, item);
         if (!icalcomponent.isNull()) {
           let calendar = this.createCalendarFromESource(source);
-          calendarItem = icalcomponent_to_calendar_item(icalcomponent, calendar);
+          calendarItem = this.icalcomponent_to_calendar_item(icalcomponent, calendar);
           break;
         }
       }
       
       let nserror;
-      if (calendarItem !== null) {
+      if (!error.isNull()){
+        this.ERROR("EDS: Error coulndn't retrieve item aId " + 
+                  error.contents.code + " - " +
+                  error.contents.message.readString());
+        nserror = Components.results.NS_ERROR_FAILURE;
+      } else {
+        if (calendarItem !== null) { 
           aListener.onGetResult (calendarItem.calendar,
                                  Components.results.NS_OK,
                                  Components.interfaces.calIEvent,
                                  null,
                                  1,
                                  [calendarItem]);
-          nserror = Components.results.NS_OK;
-      } else if (!error.isNull()){
-          this.ERROR("EDS: Error coulndn't retrieve item aId " + 
-                    error.contents.code + " - " +
-                    error.contents.message.readString());
-          nserror = Components.results.NS_ERROR_FAILURE;
-      } else {
-        aListener.onGetResult (null,
-            Components.results.NS_OK,
-            Components.interfaces.calIEvent,
-            null,
-            0,
-            [ ]);
+        }
         nserror = Components.results.NS_OK;
-        
-      }
-
+      } 
       this.notifyOperationComplete(aListener, nserror, 
                                    Components.interfaces.calIOperationListener.GET,
                                    null, null);
