@@ -64,10 +64,6 @@ var libical = {
 				"icaltimezone_set_component", ctypes.default_abi, ctypes.int,
 				this.icaltimezone.ptr, this.icalcomponent.ptr);
 		
-//		this.icaltimezone.setComponent = function (icaltimezone, icalcomponent) {
-//			return this.icaltimezone._icaltimezone_set_component(icaltimezone.ptr(), icalcomponent.ptr());
-//		};
-		
 		this.icaltimezone_new = this.lib.declare("icaltimezone_new",
 				ctypes.default_abi, this.icaltimezone.ptr);
 		

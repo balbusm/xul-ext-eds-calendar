@@ -17,13 +17,12 @@ var libedataserver =
 
       init : function() {
 
-        Components.utils.import("resource://gre/modules/ctypes.jsm");
-
         this.lib = ctypes.open(this.glibPath);
 
         this.declareESourceBackend(this);
         this.declareESourceRegistry(this);
         this.declareESourceCalendar(this);
+        this.declareESourceTaskList(this);
         this.declareEUid(this);
       },
 
@@ -98,6 +97,13 @@ var libedataserver =
           E_SOURCE_EXTENSION_CALENDAR : "Calendar"
         };
 
+      },
+      
+      declareESourceTaskList : function(parent) {
+        parent.ESourceTaskList = {
+            E_SOURCE_EXTENSION_TASK_LIST : "Task List"
+          };
+        
       },
       
       declareEUid : function(parent) {

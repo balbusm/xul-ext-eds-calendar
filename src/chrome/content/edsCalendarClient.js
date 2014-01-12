@@ -11,7 +11,6 @@ var edsCalendarClient = {
     calendar : null,
     
     init : function int() {
-      debugger;
       addLogger(this, "edsCalendarClient");
       this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
       // TODO: Add cache?
@@ -54,8 +53,7 @@ var edsCalendarClient = {
     },
     
     uninit : function uninit() {
-      // FIXME: close calendar service
-      //      this.edsCalendarService.unint();
+      this.edsCalendarService.close();
     },
     
     calendarGetListener : {
@@ -175,11 +173,11 @@ var edsCalendarClient = {
         }
       },
 
-      onError : function onError() { },
-      onPropertyChanged : function onPropertyChanged() { },
-      onPropertyDeleting : function onPropertyDeleting() { },
-      onDefaultCalendarChanged : function onDefaultCalendarChanged() { },
-      onLoad : function onLoad() { }
+      onError : function onError() { ; },
+      onPropertyChanged : function onPropertyChanged() { ; },
+      onPropertyDeleting : function onPropertyDeleting() { ; },
+      onDefaultCalendarChanged : function onDefaultCalendarChanged() { ; },
+      onLoad : function onLoad() { ; }
     }
 
 };

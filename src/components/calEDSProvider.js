@@ -205,10 +205,10 @@ calEDSProvider.prototype = {
             error.contents.message.readString());
         return null;
       }
-      let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
       libecal.e_source_set_display_name(source, calendar.name);
       libecal.e_source_set_parent(source, "local-stub");
-      libedataserver.e_source_backend_set_backend_name(ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr), "local");
+      // TODO add task list support
+      this.prepareSourceExtension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
       let sourceCreated  = libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
       if (!sourceCreated || !error.isNull())
       {
@@ -219,8 +219,25 @@ calEDSProvider.prototype = {
       return source;
 
     },
+
+    prepareSourceExtension : function prepareSourceExtension(source, extensionType) {
+      let sourceExtension = libecal.e_source_get_extension(source, extensionType);
+      libedataserver.e_source_backend_set_backend_name(ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr), "local");
+    },
     
-    getECalClient: function getECalClient(calendar, eSourceProvider) {
+    getItemSourceType : function getItemSourceType(item) {
+      var sourceType;
+      if (item instanceof Components.interfaces.calITodo)
+        sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_TASKS;
+      else if (item instanceof Components.interfaces.calIEvent)
+        sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
+      else
+        sourceType = null;
+      return sourceType;
+    },
+    
+    getECalClient: function getECalClient(item, eSourceProvider) {
+      let calendar = item.calendar;
       // check batch client 
       if (this.mBatchCount > 0 && this.mBatchClient !== null && this.mBatchCalendar === calendar) {
          return this.mBatchClient; 
@@ -229,8 +246,9 @@ calEDSProvider.prototype = {
       let error = glib.GError.ptr();
       let registry = this.createERegistry();
       let source = eSourceProvider(registry, calendar);
+      let sourceType = this.getItemSourceType(item);
       let client = libecal.e_cal_client_connect_sync(source, 
-          libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
+          sourceType,
           null,
           error.address());
       if (!error.isNull())
@@ -303,9 +321,9 @@ calEDSProvider.prototype = {
     
     // calICalendar
     adoptItem : function adoptItem(aItem, aListener) {
-      let calendar = aItem.calendar;
+      debugger;
       let eSourceProvider = this.getESource.bind(this);
-      let client = this.getECalClient(calendar, eSourceProvider);
+      let client = this.getECalClient(aItem, eSourceProvider);
       
       let error = glib.GError.ptr();
       let icalcomponent = this.findItem(client, aItem);
@@ -355,11 +373,10 @@ calEDSProvider.prototype = {
 
     // calICalendar
     modifyItem: function modifyItem(aNewItem, aOldItem, aListener) {
-      let calendar = aNewItem.calendar;
       let error = glib.GError.ptr();
       // FIXME: Check if source exists
       let eSourceProvider = this.getESource.bind(this);
-      let client = this.getECalClient(calendar, eSourceProvider);
+      let client = this.getECalClient(aNewItem, eSourceProvider);
       let objModType = this.getObjModType(aNewItem);
       let comp = libical.icalcomponent_new_from_string(aNewItem.icalString);
       let subcomp = this.vcalendar_add_timezones_get_item(client, comp);
@@ -390,11 +407,10 @@ calEDSProvider.prototype = {
 
     // calICalendar
     deleteItem: function deleteItem(aItem, aListener) {
-      let calendar = aItem.calendar;
       let error = glib.GError.ptr();
       // FIXME: Check if source exists
       let eSourceProvider = this.getESource.bind(this);
-      let client = this.getECalClient(calendar, eSourceProvider);
+      let client = this.getECalClient(aItem, eSourceProvider);
       let objModType = this.getObjModType(aItem);
       
       let removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, aItem.recurrenceId, objModType, null, error.address());
@@ -430,6 +446,7 @@ calEDSProvider.prototype = {
       for (let iter = sourcesList; !iter.isNull(); iter = glib.g_list_next(iter)) {
         // create client for each source
         let source = ctypes.cast(iter.contents.data, libecal.ESource.ptr);
+        // FIXME: implement switching the source type
         let client = libecal.e_cal_client_connect_sync(source, 
             libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
             null,
@@ -634,6 +651,7 @@ calEDSProvider.prototype = {
     },
     
     close : function close() {
+      this.LOG("Closing EDS Calendar Service");
       libedataserver.shutdown();
       libecal.shutdown();
       libical.shutdown();
