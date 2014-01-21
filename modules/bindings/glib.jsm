@@ -41,11 +41,6 @@ var glib =
 
       declareMemAlloc : function(parent) {
 
-        // parent.g_object_unref = parent.lib.declare("g_object_unref",
-        // ctypes.default_abi,
-        // ctypes.void_t, // return
-        // glib.gpointer); // mem
-
         parent.g_free = parent.lib.declare("g_free",
             ctypes.default_abi,
             ctypes.void_t, // return
@@ -63,6 +58,9 @@ var glib =
                                                            {code: glib.gint}, 
                                                            {message: glib.gchar.ptr}]);
         parent.GError = parent._GError;
+        
+        parent.g_error_free = parent.lib.declare("g_error_free", ctypes.default_abi,
+            ctypes.void_t, parent.GError.ptr);
       },
 
       declareGList : function(parent) {
@@ -90,19 +88,6 @@ var glib =
           return list.isNull() ? parent.GList.ptr : list.contents.next; 
         };
 
-//        parent.createGList = function () {
-//          return parent.g_list_alloc();
-//        };
-//
-//        parent.GList.freeFull = function() {
-//          parent.g_list_free_full(this, glib.g_object_unref);
-//        };
-//
-//        parent.GList.lenght = function() {
-//          return parent.g_list_length(this);
-//        };
-
-
       },
       
       declareGSList : function(parent) {
@@ -128,19 +113,6 @@ var glib =
         parent.g_slist_next = function (list) {
           return list.isNull() ? NULL : list.next; 
         };
-
-//        parent.createGList = function () {
-//          return parent.g_list_alloc();
-//        };
-//
-//        parent.GList.freeFull = function() {
-//          parent.g_list_free_full(this, glib.g_object_unref);
-//        };
-//
-//        parent.GList.lenght = function() {
-//          return parent.g_list_length(this);
-//        };
-
 
       },
 

@@ -23,6 +23,7 @@ var libedataserver =
         this.declareESourceRegistry(this);
         this.declareESourceCalendar(this);
         this.declareESourceTaskList(this);
+        this.declareEClient(this);
         this.declareEUid(this);
       },
 
@@ -105,6 +106,22 @@ var libedataserver =
           };
         
       },
+      
+      declareEClient : function(parent) {
+        // Structures
+        parent._EClient = new ctypes.StructType("_EClient");
+        parent.EClient = parent._EClient;
+        
+        // Methods
+        parent.e_client_get_source =
+          parent.lib.declare(
+              "e_client_get_source",
+              ctypes.default_abi,
+              libecal.ESource.ptr,
+              parent.EClient.ptr);
+
+      },
+
       
       declareEUid : function(parent) {
         parent.e_uid_new =

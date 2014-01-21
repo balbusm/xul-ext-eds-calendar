@@ -100,6 +100,10 @@ var libical = {
 		this.icalcomponent_isa = this.lib
 				.declare("icalcomponent_isa", ctypes.default_abi,
 						this.icalcomponent_kind.type, this.icalcomponent.ptr);
+
+		this.icalcomponent_free = this.lib
+        .declare("icalcomponent_free", ctypes.default_abi,
+        ctypes.void_t, this.icalcomponent.ptr);
 	},
 	
 	shutdown : function() {
