@@ -168,14 +168,15 @@ calEDSProvider.prototype = {
     },
     
     getERegistry : function getERegistry() {
-      if (this.registry)
-        return this.registry;
+//      if (this.registry)
+//        return this.registry;
       
       let error = glib.GError.ptr();
       let registry = libedataserver.e_source_registry_new_sync(null, error.address());
       this.checkGError("Couldn't get source registry:", error);
 
-      this.registry = registry;
+//      this.registry = registry;
+      // FIXME: We leak here
       return registry;
     },
     
@@ -349,8 +350,8 @@ calEDSProvider.prototype = {
     // calICalendar
     adoptItem : function adoptItem(aItem, aListener) {
       debugger;
-      let nserror;
-      let detail;
+      var nserror;
+      var detail;
       let created;
       
       // to manual remove
@@ -420,8 +421,8 @@ calEDSProvider.prototype = {
 
     // calICalendar
     modifyItem: function modifyItem(aNewItem, aOldItem, aListener) {
-      let detail;
-      let nserror;
+      var detail;
+      var nserror;
       let modified;
       
       // to manual remove
@@ -469,8 +470,8 @@ calEDSProvider.prototype = {
 
     // calICalendar
     deleteItem: function deleteItem(aItem, aListener) {
-      let detail;
-      let nserror;
+      var detail;
+      var nserror;
       let removed;
       
       // to manual remove
@@ -509,8 +510,8 @@ calEDSProvider.prototype = {
 
     // calICalendar
     getItem: function getItem(aId, aListener) {
-      let nserror;
-      let datail = null;
+      var nserror;
+      var detail = null;
       
       let error = glib.GError.ptr();
       let sourcesList;
@@ -562,7 +563,7 @@ calEDSProvider.prototype = {
         this.ERROR(detail);
       } finally {
         if (this.checkCDataNotNull(sourcesList))
-          glib.g_list_free_full (sourcesList, glib.g_object_unref);
+          glib.g_list_free_full (sourcesList, gobject.g_object_unref);
       }
       
       this.notifyOperationComplete(aListener, nserror, 
