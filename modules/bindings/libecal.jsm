@@ -74,6 +74,12 @@ var libecal =
                 ctypes.default_abi,
                 glib.gchar.ptr,
                 parent.ESource.ptr);
+        
+        parent.e_source_dup_display_name =
+          parent.lib.declare("e_source_dup_display_name",
+              ctypes.default_abi,
+              glib.gchar.ptr,
+              parent.ESource.ptr);
 
         parent.e_source_get_uid =
             parent.lib.declare("e_source_get_uid",

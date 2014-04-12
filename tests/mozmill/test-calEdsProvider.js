@@ -39,6 +39,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://mozmill/modules/assertions.js");
 
+Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+
 Components.utils.import("resource://edscalendar/utils.jsm");
 
 function setupModule(module)
@@ -102,6 +104,7 @@ function setupModule(module)
 }
 
 function teardownModule(module) {
+  module.LOG("All tests are finished");
 }
 
 function setupTest(test)
@@ -114,15 +117,16 @@ function setupTest(test)
 
 function teardownTest(test)
 {
+  test.LOG("Tear down test");
   for (let calendarItem of test.calendarsItems) {
+    test.LOG("On the end of the test removed calendar item " + calendarItem.name + " - " + calendarItem.id);
     let resultListener = new this.ResultListener([calendarItem], this.assert);
     test.edsCalendarService.deleteItem(calendarItem, resultListener);
-    test.LOG("Removed calendar item " + calendarItem);
   }
 
   for (let calendar of test.calendars) {
+    test.LOG("On the end of the test removed calendar " + calendar.name + " - " + calendar.id);
     test.edsCalendarService.removeCalendar(calendar);
-    test.LOG("Removed calendar " + calendar);
   }
   
 }
@@ -132,6 +136,75 @@ function testRetreivingEdsCalendarService() {
   this.assert.notEqual(this.edsCalendarService, null, "Couldn't retrieve EDS Calendar");
   this.assert.equal(this.edsCalendarService instanceof Components.interfaces.calICalendar, true, "Couldn't retrieve EDS Calendar with calICalendar interface");
   this.assert.equal(this.edsCalendarService instanceof Components.interfaces.calICompositeCalendar, true, "Couldn't retrieve EDS Calendar with calICompositeCalendar interface");
+}
+
+function testLongAddRemoveCalendars() {
+  for (let i = 0; i < 50; i++) {
+    let calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae-XYY" + i, name: "testLongAddRemoveCalendars" + i};
+    this.edsCalendarService.addCalendar(calendar);
+    let resultCalendar = this.edsCalendarService.getCalendarById(calendar.id);
+    this.edsCalendarService.removeCalendar(calendar);
+    this.assert.equal(resultCalendar.id, calendar.id);
+  }
+}
+
+function testLongAddRemoveItems() {
+  var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae00", name: "testLongAddRemoveItems"};
+  this.calendars.push(calendar);
+  this.edsCalendarService.addCalendar(calendar);
+  for (let i = 0; i < 50; i++) {
+    // FIXME: There is a bug in EDS that doesn't remove esource nor item
+    // as a workaround generate different item each time
+    let uuid = this.uuidGenerator.generateUUID();
+    let uuidString = uuid.toString();
+    var item = {id: uuidString, name: "testItem" + i,
+        QueryInterface: XPCOMUtils.generateQI([
+                                               Components.interfaces.nsISupports,
+                                               Components.interfaces.calIEvent
+                                             ]),
+        calendar: calendar, icalString:
+          "BEGIN:VCALENDAR\n" +
+          "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
+          "VERSION:2.0\n" +
+          "BEGIN:VTIMEZONE\n" +
+          "TZID:Europe/Warsaw\n" +
+          "X-LIC-LOCATION:Europe/Warsaw\n" +
+          "BEGIN:DAYLIGHT\n" +
+          "TZOFFSETFROM:+0100\n" +
+          "TZOFFSETTO:+0200\n" +
+          "TZNAME:CEST\n" +
+          "DTSTART:19700329T020000\n" +
+          "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" +
+          "END:DAYLIGHT\n" +
+          "BEGIN:STANDARD\n" +
+          "TZOFFSETFROM:+0200\n" +
+          "TZOFFSETTO:+0100\n" +
+          "TZNAME:CET\n" +
+          "DTSTART:19701025T030000\n" +
+          "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" +
+          "END:STANDARD\n" +
+          "END:VTIMEZONE\n" +
+          "BEGIN:VEVENT\n" +
+          "CREATED:20131220T225208Z\n" +
+          "LAST-MODIFIED:20131220T225233Z\n" +
+          "DTSTAMP:20131220T225233Z\n" +
+          "UID:" + uuidString + "\n" +
+          "SUMMARY:New Event\n" +
+          "CATEGORIES:Birthday\n" +
+          "DTSTART;TZID=Europe/Warsaw:20131212T234500\n" +
+          "DTEND;TZID=Europe/Warsaw:20131213T004500\n" +
+          "LOCATION:loc\n" +
+          "END:VEVENT\n" +
+          "END:VCALENDAR",
+          clone : function() { return this;}
+          };
+    let assertContainer = new this.AssertContainer();
+    let resultListener = new this.ResultListener([item], assertContainer);
+    this.edsCalendarService.addItem(item, resultListener);
+    this.edsCalendarService.getItem(item.id, resultListener);
+    this.edsCalendarService.deleteItem(item, resultListener);
+    assertContainer.assertErrors();
+  }
 }
 
 function testAddNewCalendar() {
@@ -152,12 +225,18 @@ function testRemoveCalendar() {
   this.edsCalendarService.removeCalendar(calendar);
   let resultCalendar = this.edsCalendarService.getCalendarById(calendar.id);
   this.assert.equal(resultCalendar, null, "Unexpectedly retrieved calendar");
+
+  let indexOfCalendar = this.calendars.indexOf(calendar);
+  if (indexOfCalendar > -1) {
+    this.calendars.splice(indexOfCalendar, 1);
+  }
+
 }
 
 function testAddItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae03", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -212,7 +291,7 @@ function testAddItem() {
 function testGetItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae04", name: "testGetItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -268,7 +347,7 @@ function testGetItem() {
 function testDeleteItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae05", name: "testDeleteItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -326,13 +405,17 @@ function testDeleteItem() {
   assertContainer.assertErrors();
   this.edsCalendarService.getItem(item.id, resultListener);
   assertContainer.assertErrors();
+  let indexOfItem = this.calendarsItems.indexOf(item);
+  if (indexOfItem > -1) {
+    this.calendarsItems.splice(indexOfItem, 1);
+  }
 }
 
 
 function testModifyItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae06", name: "testModifyItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -429,7 +512,7 @@ function testModifyItem() {
 function testAddRecurringItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae07", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -483,10 +566,10 @@ function testAddRecurringItem() {
   assertContainer.assertErrors();
 }
 
-function testAddAlerItem() {
+function testAddAlertItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae08", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -548,7 +631,7 @@ function testAddAlerItem() {
 function disabledtestAddTodoItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae09", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();
@@ -617,7 +700,7 @@ function disabledtestAddTodoItem() {
 function disabledtestAddEvolutionTodoItem() {
   var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae10", name: "testAddItemCal" };
   this.calendars.push(calendar);
-  // FIXME: There is a bud in EDS that doesn't remove esource nor item
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time
   let uuid = this.uuidGenerator.generateUUID();
   let uuidString = uuid.toString();

@@ -72,7 +72,15 @@ var libedataserver =
                 glib.GList.ptr,
                 parent.ESourceRegistry.ptr,
                 glib.gchar.ptr);
-
+        
+        parent.e_source_registry_check_enabled =
+          parent.lib.declare(
+              "e_source_registry_check_enabled",
+              ctypes.default_abi,
+              glib.gboolean,
+              parent.ESourceRegistry.ptr,
+              libecal.ESource.ptr);
+        
         parent.e_source_registry_commit_source_sync =
             parent.lib.declare(
                 "e_source_registry_commit_source_sync",

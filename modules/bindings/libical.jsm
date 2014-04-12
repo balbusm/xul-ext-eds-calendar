@@ -67,6 +67,9 @@ var libical = {
 		this.icaltimezone_new = this.lib.declare("icaltimezone_new",
 				ctypes.default_abi, this.icaltimezone.ptr);
 		
+		this.icaltimezone_free = this.lib.declare("icaltimezone_free",
+        ctypes.default_abi, ctypes.void_t, this.icaltimezone.ptr, ctypes.int);
+		
 	},
 	
 	declareICalComponent : function() {

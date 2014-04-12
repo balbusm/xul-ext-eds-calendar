@@ -168,22 +168,26 @@ calEDSProvider.prototype = {
     },
     
     getERegistry : function getERegistry() {
-//      if (this.registry)
-//        return this.registry;
-      
       let error = glib.GError.ptr();
       let registry = libedataserver.e_source_registry_new_sync(null, error.address());
       this.checkGError("Couldn't get source registry:", error);
+      
+      // delete old pointer
+      // For some reason removing pointer
+      // in try finally block as rest of the pointers
+      // causes crash
+      this.deleteERegistry();
 
-//      this.registry = registry;
-      // FIXME: We leak here
+      this.registry = registry;
       return registry;
     },
     
     deleteERegistry : function deleteERegistry() {
-      if (!this.registry)
+      if (!this.registry || this.registry.isNull())
         return;
+      this.LOG("deleteERegistry: Removing registry " + this.registry.toString());
       gobject.g_object_unref(this.registry);
+      this.registry = null;
     },
 
     findESource : function findESource(registry, calendar) {
@@ -192,7 +196,7 @@ calEDSProvider.prototype = {
 
     findESourceByCalendarId : function findESourceByCalendarId(registry, id) {
       // look for exising calendar
-      let source = libedataserver.e_source_registry_ref_source(registry, id);
+      var source = libedataserver.e_source_registry_ref_source(registry, id);
       return source;
     },
     
@@ -201,7 +205,7 @@ calEDSProvider.prototype = {
      */
     getESource : function getESource(registry, calendar) {
       // look for existing calendar
-      let source = this.findESource(registry, calendar);
+      var source = this.findESource(registry, calendar);
       // do not create new one if calendar exists
       if (source.isNull()) {
         source = this.createESource(calendar, registry);
@@ -213,7 +217,7 @@ calEDSProvider.prototype = {
     createESource : function createESource(calendar, registry) {
       let error = glib.GError.ptr();
 
-      let source = libecal.e_source_new_with_uid(calendar.id, null, error.address());
+      var source = libecal.e_source_new_with_uid(calendar.id, null, error.address());
       this.checkGError("Couldn't create new source:", error);
 
       libecal.e_source_set_display_name(source, calendar.name);
@@ -240,6 +244,8 @@ calEDSProvider.prototype = {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
       else
         sourceType = null;
+      if (item._testItem) 
+        sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
       return sourceType;
     },
     
@@ -258,11 +264,14 @@ calEDSProvider.prototype = {
         }
       }
       let error = glib.GError.ptr();
-      let registry = this.getERegistry();
-      let source = eSourceProvider(registry, calendar);
-      let sourceType = this.getItemSourceType(item);
+      let registry;
+      let source;
       let client;
       try{
+        registry = this.getERegistry();
+        source = eSourceProvider(registry, calendar);
+        let sourceType = this.getItemSourceType(item);
+        
         client = libecal.e_cal_client_connect_sync(source, 
           sourceType,
           null,
@@ -271,7 +280,10 @@ calEDSProvider.prototype = {
       } catch (e if e instanceof CalendarServiceException) {
         // release source in case of error in retreiving client
         // if client is created source is released along with client
-        gobject.g_object_unref(source);
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("getECalClient: Removing source " + source.toString());
+          gobject.g_object_unref(source);
+        }
         throw e;
       }
       // FIXME: Unref old client
@@ -289,14 +301,20 @@ calEDSProvider.prototype = {
       if (this.mBatchCount > 0)
         return;
       this.LOG("Removing client");
-      let source = libedataserver.e_client_get_source(ctypes.cast(client, libedataserver.EClient.ptr));
-      gobject.g_object_unref(client);
-      gobject.g_object_unref(source);
+      if (this.checkCDataNotNull(client)) {
+        let source = libedataserver.e_client_get_source(ctypes.cast(client, libedataserver.EClient.ptr));
+        this.LOG("deleteECalClient: Removing client " + client.toString());
+        gobject.g_object_unref(client);
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("deleteECalClient: Removing source " + source.toString());
+          gobject.g_object_unref(source);
+        }
+      }
     },
 
     findItem : function findItem(client, item) {
       let error = glib.GError.ptr();
-      let icalcomponent = libical.icalcomponent.ptr();
+      var icalcomponent = libical.icalcomponent.ptr();
 
       let found = libecal.e_cal_client_get_object_sync(client, item.id, null, icalcomponent.address(), null, error.address());
       // Ignore error code 1, it is raised when item doesn't exist
@@ -311,7 +329,7 @@ calEDSProvider.prototype = {
     },
     
     getObjModType : function getObjModType(item) {
-      let objModType;
+      var objModType;
       if (item.recurrenceId) {
         objModType = libecal.ECalObjModType.E_CAL_OBJ_MOD_THIS;
       } else {
@@ -320,18 +338,22 @@ calEDSProvider.prototype = {
       return objModType;
     },
 
-    vcalendar_add_timezones_get_item: function vcalendar_add_timezones(client, comp) {
+    vcalendarAddTimezonesGetItem: function vcalendarAddTimezonesGetItem(client, comp) {
       let error = glib.GError.ptr();
       let subcomp = libical.icalcomponent_get_first_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
-      let itemcomp;
+      var itemcomp = null;
       while (!subcomp.isNull()) {
         switch (libical.icalcomponent_isa(subcomp)) {
 
         case libical.icalcomponent_kind.ICAL_VTIMEZONE_COMPONENT: {
           let zone = libical.icaltimezone_new();
-          if (libical.icaltimezone_set_component(zone, subcomp)) {
-            libecal.e_cal_client_add_timezone_sync(client, zone, null, error.address());
-            this.checkGError("Couldn't add timezone:", error);
+          try {
+            if (libical.icaltimezone_set_component(zone, subcomp)) {
+              libecal.e_cal_client_add_timezone_sync(client, zone, null, error.address());
+              this.checkGError("Couldn't add timezone:", error);
+            }
+          } finally {
+            libical.icaltimezone_free(zone, 1);
           }
           break;
         }
@@ -349,7 +371,6 @@ calEDSProvider.prototype = {
     
     // calICalendar
     adoptItem : function adoptItem(aItem, aListener) {
-      debugger;
       var nserror;
       var detail;
       let created;
@@ -378,7 +399,7 @@ calEDSProvider.prototype = {
         this.LOG("Given icalString " + aItem.icalString);
         uid = glib.gchar.ptr();
   
-        itemcomp = this.vcalendar_add_timezones_get_item(client, comp);
+        itemcomp = this.vcalendarAddTimezonesGetItem(client, comp);
   
         created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error.address());
         this.checkGError("Error adding item:", error);
@@ -395,15 +416,15 @@ calEDSProvider.prototype = {
         this.ERROR(detail);
         this.ERROR(e.stack);
       } finally {
-        if (this.checkCDataNotNull(client))
+        if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
-        if (this.checkCDataNotNull(comp))
+        }
+        if (this.checkCDataNotNull(comp)) {
           libical.icalcomponent_free(comp);
-        // FIXME: should itemcomp be freed? 
-//        if (this.checkCDataNotNull(itemcomp))
-//          libical.icalcomponent_free(itemcomp);
-        if (this.checkCDataNotNull(uid))
+        }
+        if (this.checkCDataNotNull(uid)) {
           glib.g_free(uid);
+        }
       }
       
       this.notifyOperationComplete(aListener,
@@ -437,7 +458,7 @@ calEDSProvider.prototype = {
         client = this.getECalClient(aNewItem, eSourceProvider);
         let objModType = this.getObjModType(aNewItem);
         comp = libical.icalcomponent_new_from_string(aNewItem.icalString);
-        subcomp = this.vcalendar_add_timezones_get_item(client, comp);
+        subcomp = this.vcalendarAddTimezonesGetItem(client, comp);
   
         modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
         this.checkGError("Error modifying item:", error);
@@ -452,13 +473,12 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
       } finally {
-        if (this.checkCDataNotNull(client))
+        if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
-        if (this.checkCDataNotNull(comp))
+        }
+        if (this.checkCDataNotNull(comp)) {
           libical.icalcomponent_free(comp);
-        // FIXME: should subcomp be freed? 
-//        if (this.checkCDataNotNull(subcomp))
-//          libical.icalcomponent_free(subcomp);
+        }
       }
 
       this.notifyOperationComplete(aListener,
@@ -474,7 +494,7 @@ calEDSProvider.prototype = {
       var nserror;
       let removed;
       
-      // to manual remove
+      // for manual remove
       let client;
       
       try {
@@ -497,8 +517,9 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
       } finally {
-        if (this.checkCDataNotNull(client))
+        if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
+        }
       }
       
       this.notifyOperationComplete(aListener,
@@ -514,10 +535,12 @@ calEDSProvider.prototype = {
       var detail = null;
       
       let error = glib.GError.ptr();
+      let registry;
       let sourcesList;
       var calendarItem = null;
+      // TODO this method needs refactoring
       try {
-        let registry = this.getERegistry();
+        registry = this.getERegistry();
         sourcesList = libedataserver.e_source_registry_list_sources(registry, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
         for (let iter = sourcesList; !iter.isNull(); iter = glib.g_list_next(iter)) {
           let client;
@@ -525,6 +548,9 @@ calEDSProvider.prototype = {
           try {
             // create client for each source
             let source = ctypes.cast(iter.contents.data, libecal.ESource.ptr);
+            if (!libedataserver.e_source_registry_check_enabled(registry, source)) {
+              continue;
+            }
             // FIXME: implement switching the source type
             client = libecal.e_cal_client_connect_sync(source, 
                 libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
@@ -537,13 +563,16 @@ calEDSProvider.prototype = {
             let icalcomponent = this.findItem(client, item, error);
             if (!icalcomponent.isNull()) {
               let calendar = this.createCalendarFromESource(source);
-              calendarItem = this.icalcomponent_to_calendar_item(icalcomponent, calendar);
+              calendarItem = this.icalcomponentToCalendarItem(icalcomponent, calendar);
             }
           } finally {
-            if (this.checkCDataNotNull(client))
+            if (this.checkCDataNotNull(client)) {
+              // all sources will be removed later
               gobject.g_object_unref(client);
-            if (this.checkCDataNotNull(icalcomponent))
+            }
+            if (this.checkCDataNotNull(icalcomponent)) {
               libical.icalcomponent_free(icalcomponent);
+            }
           }
         }
 
@@ -562,8 +591,10 @@ calEDSProvider.prototype = {
         detail = e.message;
         this.ERROR(detail);
       } finally {
-        if (this.checkCDataNotNull(sourcesList))
+        if (this.checkCDataNotNull(sourcesList)) {
+          this.LOG("getItem: Removing source list " + sourcesList.toString());
           glib.g_list_free_full (sourcesList, gobject.g_object_unref);
+        }
       }
       
       this.notifyOperationComplete(aListener, nserror, 
@@ -571,7 +602,7 @@ calEDSProvider.prototype = {
                                    null, detail);
     },
     
-    icalcomponent_to_calendar_item: function icalcomponent_to_calendar_item(icalcomponent, calendar) {
+    icalcomponentToCalendarItem: function icalcomponentToCalendarItem(icalcomponent, calendar) {
 
       // TODO This is not super since we parse the string again. When
       // lightning moves to using js-ctypes for libical, we can just pass
@@ -596,7 +627,7 @@ calEDSProvider.prototype = {
       let sourceId = libecal.e_source_dup_uid(source);
       let id = sourceId.readString();
       calendar.id = id;
-      let sourceName = libecal.e_source_get_display_name(source);
+      let sourceName = libecal.e_source_dup_display_name(source);
       let name = sourceName.readString();
       calendar.name = name;
 
@@ -693,25 +724,32 @@ calEDSProvider.prototype = {
 
     // calICompositeCalendar
     addCalendar : function addCalendar(/*calICalendar*/ aCalendar) {
+      let registry;
       let source;
-      let registry = this.getERegistry();
       try {
+        registry = this.getERegistry();
         source = this.getESource(registry, aCalendar);
         // FIXME: add calendar items
       } finally {
-        if (this.checkCDataNotNull(source))
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("addCalendar: Removing source " + source.toString());
           gobject.g_object_unref(source);
+        }
       }
     },
     
     // calICompositeCalendar
     removeCalendar : function removeCalendar(/*calICalendar*/ aCalendar) {
-      let source;
       let error = glib.GError.ptr();
+      let registry;
+      let source;
       try {
-        let registry = this.getERegistry();
+        registry = this.getERegistry();
+        this.LOG("Found registry");
+      
         // look for exising calendar
         source = this.findESource(registry, aCalendar);
+        this.LOG("Found source");
         if (source.isNull()) {
           this.WARN("Calendar " + aCalendar.name + " " + aCalendar.id + " doesn't exist. Unable to remove calendar.");
           return;
@@ -728,39 +766,45 @@ calEDSProvider.prototype = {
         detail = e.message;
         this.ERROR(detail);
       } finally {
-        if (this.checkCDataNotNull(source))
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("removeCalendar: Removing source " + source.toString());
           gobject.g_object_unref(source);
+        }
       }
 
     },
     
     // calICompositeCalendar
     getCalendarById : function getCalendarById(aId) {
+      let registry;
       let source;
       var calendar = null;
       try {
-        let registry = this.getERegistry();
+        registry = this.getERegistry();
         // look for exising calendar
         source = this.findESourceByCalendarId(registry, aId);
         if (source.isNull()) {
           this.LOG("Couldn't find calendar " + aId);
           return null;
         }
+        
         calendar = this.createCalendarFromESource(source);
       } catch (e if e instanceof CalendarServiceException) {
 //        nserror = Components.results.NS_ERROR_FAILURE;        
         detail = e.message;
         this.ERROR(detail);
       } finally {
-        if (this.checkCDataNotNull(source))
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("getCalendarById: Removing source " + source.toString());
           gobject.g_object_unref(source);
+        }
       }
       return calendar;
     },
     
     // calICompositeCalendar
     getCalendars : function getCalendars(count, aCalendars){
-      
+      // TODO: implement
     },
 
     // calICompositeCalendar
@@ -775,7 +819,7 @@ calEDSProvider.prototype = {
       throw "Unsupported operation setStatusObserver";
     },
     
-    close : function close() {
+    shutdown : function shutdown() {
       this.LOG("Closing EDS Calendar Service");
       this.deleteERegistry();
       libedataserver.shutdown();
