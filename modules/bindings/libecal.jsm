@@ -12,206 +12,206 @@ var EXPORTED_SYMBOLS = ["libecal"];
 var libecal =
     {
 
-      ecallibPath : [ "libecal-1.2.so.15" ],
+      binaries : [ "libecal-1.2.so.15", "libecal-1.2.so.16", "libecal-1.2.so" ],
 
       lib : null,
 
       init : function() {
         
         addLogger(this, "libecal");
-        for ( var path in this.ecallibPath) {
+        for (let path of this.binaries) {
           try {
-            this.lib = ctypes.open(this.ecallibPath[path]);
-            this.LOG("Opened " + this.ecallibPath[path]);
+            this.lib = ctypes.open(path);
+            this.LOG("Opened " + path);
             break;
           } catch (err) {
-            this.WARN("Failed to open " + this.ecallibPath[path] + ": " + err);
+            this.WARN("Failed to open " + path + ": " + err);
           }
         }
 
-        this.declareESource(this);
-        this.declareECalClientSourceType(this);
-        this.declareECalObjModType(this);
-        this.declareECalClient(this);
+        this.declareESource();
+        this.declareECalClientSourceType();
+        this.declareECalObjModType();
+        this.declareECalClient();
 
       },
 
-      declareESource : function(parent) {
+      declareESource : function() {
 
         // Structures
-        parent._ESource = new ctypes.StructType("_ESource");
+        this._ESource = new ctypes.StructType("_ESource");
 
-        parent.ESource = parent._ESource;
+        this.ESource = this._ESource;
 
         // Methods
-        parent.e_source_new_with_uid =
-            parent.lib.declare(
+        this.e_source_new_with_uid =
+            this.lib.declare(
                 "e_source_new_with_uid",
                 ctypes.default_abi,
-                parent.ESource.ptr,
+                this.ESource.ptr,
                 glib.gchar.ptr,
                 glib.GMainContext.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_source_get_extension =
-            parent.lib.declare(
+        this.e_source_get_extension =
+            this.lib.declare(
                 "e_source_get_extension",
                 ctypes.default_abi,
                 glib.gpointer,
-                parent.ESource.ptr,
+                this.ESource.ptr,
                 glib.gchar.ptr);
 
-        parent.e_source_set_display_name =
-            parent.lib.declare(
+        this.e_source_set_display_name =
+            this.lib.declare(
                 "e_source_set_display_name",
                 ctypes.default_abi,
                 ctypes.void_t,
-                parent.ESource.ptr,
+                this.ESource.ptr,
                 glib.gchar.ptr);
 
-        parent.e_source_get_display_name =
-            parent.lib.declare("e_source_get_display_name",
+        this.e_source_get_display_name =
+            this.lib.declare("e_source_get_display_name",
                 ctypes.default_abi,
                 glib.gchar.ptr,
-                parent.ESource.ptr);
+                this.ESource.ptr);
         
-        parent.e_source_dup_display_name =
-          parent.lib.declare("e_source_dup_display_name",
+        this.e_source_dup_display_name =
+          this.lib.declare("e_source_dup_display_name",
               ctypes.default_abi,
               glib.gchar.ptr,
-              parent.ESource.ptr);
+              this.ESource.ptr);
 
-        parent.e_source_get_uid =
-            parent.lib.declare("e_source_get_uid",
+        this.e_source_get_uid =
+            this.lib.declare("e_source_get_uid",
                 ctypes.default_abi,
                 glib.gchar.ptr,
-                parent.ESource.ptr);
+                this.ESource.ptr);
 
-        parent.e_source_dup_uid =
-          parent.lib.declare("e_source_dup_uid",
+        this.e_source_dup_uid =
+          this.lib.declare("e_source_dup_uid",
               ctypes.default_abi,
               glib.gchar.ptr,
-              parent.ESource.ptr);
+              this.ESource.ptr);
         
-        parent.e_source_set_parent =
-            parent.lib.declare(
+        this.e_source_set_parent =
+            this.lib.declare(
                 "e_source_set_parent",
                 ctypes.default_abi,
                 ctypes.void_t,
-                parent.ESource.ptr,
+                this.ESource.ptr,
                 glib.gchar.ptr);
 
-        parent.e_source_get_uid =
-            parent.lib.declare("e_source_get_parent",
+        this.e_source_get_uid =
+            this.lib.declare("e_source_get_parent",
                 ctypes.default_abi,
                 glib.gchar.ptr,
-                parent.ESource.ptr);
+                this.ESource.ptr);
 
-        parent.e_source_remove_sync =
-          parent.lib.declare("e_source_remove_sync",
+        this.e_source_remove_sync =
+          this.lib.declare("e_source_remove_sync",
               ctypes.default_abi,
               glib.gboolean, // return
-              parent.ESource.ptr, // source
+              this.ESource.ptr, // source
               gio.GCancellable.ptr, // cancellable
               glib.GError.ptr.ptr); // error
 
       },
 
-      declareECalObjModType : function(parent) {
+      declareECalObjModType : function() {
         // Enum
-        parent.ECalObjModType = {
+        this.ECalObjModType = {
           E_CAL_OBJ_MOD_THIS : 1 << 0,
           E_CAL_OBJ_MOD_THIS_AND_PRIOR : 1 << 1,
           E_CAL_OBJ_MOD_THIS_AND_FUTURE : 1 << 2,
           E_CAL_OBJ_MOD_ALL : 0x07,
           E_CAL_OBJ_MOD_ONLY_THIS : 1 << 3
         };
-        parent.ECalObjModType.type = ctypes.int;
+        this.ECalObjModType.type = ctypes.int;
 
       },
 
-      declareECalClientSourceType : function(parent) {
+      declareECalClientSourceType : function() {
         // Enum
-        parent.ECalClientSourceType = {
+        this.ECalClientSourceType = {
           E_CAL_CLIENT_SOURCE_TYPE_EVENTS : 0,
           E_CAL_CLIENT_SOURCE_TYPE_TASKS : 1,
           E_CAL_CLIENT_SOURCE_TYPE_MEMOS : 2,
         };
-        parent.ECalClientSourceType.type = ctypes.int;
+        this.ECalClientSourceType.type = ctypes.int;
       },
 
-      declareECalClient : function(parent) {
+      declareECalClient : function() {
 
         // Structures
-        parent._ECalClient = new ctypes.StructType("_ECalClient");
-        parent.ECalClient = parent._ECalClient;
+        this._ECalClient = new ctypes.StructType("_ECalClient");
+        this.ECalClient = this._ECalClient;
 
         // Methods
-        parent.e_cal_client_connect_sync =
-            parent.lib.declare(
+        this.e_cal_client_connect_sync =
+            this.lib.declare(
                 "e_cal_client_connect_sync",
                 ctypes.default_abi,
-                parent.ECalClient.ptr,
+                this.ECalClient.ptr,
                 libecal.ESource.ptr,
                 libecal.ECalClientSourceType.type,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_cal_client_create_object_sync =
-            parent.lib.declare(
+        this.e_cal_client_create_object_sync =
+            this.lib.declare(
                 "e_cal_client_create_object_sync",
                 ctypes.default_abi,
                 glib.gboolean,
-                parent.ECalClient.ptr,
+                this.ECalClient.ptr,
                 libical.icalcomponent.ptr,
                 glib.gchar.ptr.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_cal_client_add_timezone_sync =
-            parent.lib.declare(
+        this.e_cal_client_add_timezone_sync =
+            this.lib.declare(
                 "e_cal_client_add_timezone_sync",
                 ctypes.default_abi,
                 glib.gboolean,
-                parent.ECalClient.ptr,
+                this.ECalClient.ptr,
                 libical.icaltimezone.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_cal_client_get_object_sync =
-            parent.lib.declare(
+        this.e_cal_client_get_object_sync =
+            this.lib.declare(
                 "e_cal_client_get_object_sync",
                 ctypes.default_abi,
                 glib.gboolean,
-                parent.ECalClient.ptr,
+                this.ECalClient.ptr,
                 glib.gchar.ptr,
                 glib.gchar.ptr,
                 libical.icalcomponent.ptr.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_cal_client_remove_object_sync =
-            parent.lib.declare("e_cal_client_remove_object_sync",
+        this.e_cal_client_remove_object_sync =
+            this.lib.declare("e_cal_client_remove_object_sync",
                 ctypes.default_abi, glib.gboolean, // return
-                parent.ECalClient.ptr, // client
+                this.ECalClient.ptr, // client
                 glib.gchar.ptr, // uid
                 glib.gchar.ptr, // rid
                 libecal.ECalObjModType.type, // mod
                 gio.GCancellable.ptr, // cancellable
                 glib.GError.ptr.ptr); // error
         
-        parent.e_cal_client_modify_object_sync = 
-          parent.lib.declare("e_cal_client_modify_object_sync",
+        this.e_cal_client_modify_object_sync = 
+          this.lib.declare("e_cal_client_modify_object_sync",
               ctypes.default_abi, glib.gboolean, // return
-              parent.ECalClient.ptr, // client
+              this.ECalClient.ptr, // client
               libical.icalcomponent.ptr, // icalcomp
               libecal.ECalObjModType.type, // mod
               gio.GCancellable.ptr, // cancellable
               glib.GError.ptr.ptr); // error
 
-//    	parent.e_cal_client_get_objects_for_uid_sync = parent.lib.declare(
+//    	this.e_cal_client_get_objects_for_uid_sync = this.lib.declare(
 //    			"e_cal_client_get_objects_for_uid_sync", ctypes.default_abi,
-//    			glib.gboolean, parent.ECalClient.ptr, glib.gchar.ptr, glib.GSList.ptr.ptr,
+//    			glib.gboolean, this.ECalClient.ptr, glib.gchar.ptr, glib.GSList.ptr.ptr,
 //    			gio.GCancellable.ptr, glib.GError.ptr.ptr);
 
 

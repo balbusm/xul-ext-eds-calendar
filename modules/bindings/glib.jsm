@@ -1,19 +1,40 @@
 
 Components.utils.import("resource://gre/modules/ctypes.jsm");
 
+Components.utils.import("resource://edscalendar/utils.jsm");
+
 var EXPORTED_SYMBOLS = ["glib"];
 
 var glib =
     {
 
-      glibPath : "libglib-2.0.so.0",
+      binaries : ["libglib-2.0.so.0", "libglib-2.0.so"],
 
       lib : null,
 
       init : function() {
 
-        this.lib = ctypes.open(this.glibPath);
+        addLogger(this, "glib");
+        for (let path of this.binaries) {
+          try {
+            this.lib = ctypes.open(path);
+            this.LOG("Opened " + path);
+            break;
+          } catch (err) {
+            this.WARN("Failed to open " + path + ": " + err);
+          }
+        }
+        
+        this.declareGStructures();
+        this.declareMemAlloc();
+        this.declareGMainContext();
+        this.declareGError();
+        this.declareGList();
+        this.declareGSList();
 
+      },
+      
+      declareGStructures : function() {
         // Structures
         this.GQuark = ctypes.uint32_t;
         this.gchar = ctypes.char;
@@ -29,88 +50,81 @@ var glib =
         this.gdouble = ctypes.double;
         this.gpointer = ctypes.void_t.ptr;
         this.gconstpointer = ctypes.void_t.ptr;
-
-        this.declareMemAlloc(this);
-        this.declareGMainContext(this);
-        this.declareGError(this);
-        this.declareGList(this);
-        this.declareGSList(this);
-
       },
 
 
-      declareMemAlloc : function(parent) {
+      declareMemAlloc : function() {
 
-        parent.g_free = parent.lib.declare("g_free",
+        this.g_free = this.lib.declare("g_free",
             ctypes.default_abi,
             ctypes.void_t, // return
             glib.gpointer); // mem
 
       },
 
-      declareGMainContext : function (parent) {
-        parent._GMainContext = new ctypes.StructType("_GMainContext");
-        parent.GMainContext = parent._GMainContext;
+      declareGMainContext : function () {
+        this._GMainContext = new ctypes.StructType("_GMainContext");
+        this.GMainContext = this._GMainContext;
       },
 
-      declareGError : function(parent) {
-        parent._GError = new ctypes.StructType("_GError", [{domain: glib.GQuark}, 
+      declareGError : function() {
+        this._GError = new ctypes.StructType("_GError", [{domain: glib.GQuark}, 
                                                            {code: glib.gint}, 
                                                            {message: glib.gchar.ptr}]);
-        parent.GError = parent._GError;
+        this.GError = this._GError;
         
-        parent.g_error_free = parent.lib.declare("g_error_free", ctypes.default_abi,
-            ctypes.void_t, parent.GError.ptr);
+        this.g_error_free = this.lib.declare("g_error_free", ctypes.default_abi,
+            ctypes.void_t, this.GError.ptr);
       },
 
-      declareGList : function(parent) {
+      declareGList : function() {
 
-        parent._GList = new ctypes.StructType("_Glist");
-        parent._GList.define([ 
+        this._GList = new ctypes.StructType("_Glist");
+        this._GList.define([ 
                               { data : glib.gpointer }, 
-                              {	next : parent._GList.ptr },
-                              {	prev : parent._GList.ptr }
+                              {	next : this._GList.ptr },
+                              {	prev : this._GList.ptr }
                               ]);
 
-        parent.GList = parent._GList;
+        this.GList = this._GList;
 
         // Methods
-        parent.g_list_alloc = parent.lib.declare("g_list_alloc",
-            ctypes.default_abi, parent.GList.ptr);
+        this.g_list_alloc = this.lib.declare("g_list_alloc",
+            ctypes.default_abi, this.GList.ptr);
 
-        parent.g_list_free_full = parent.lib.declare("g_list_free_full",
-            ctypes.default_abi, ctypes.void_t, parent.GList.ptr, glib.gpointer);
+        this.g_list_free_full = this.lib.declare("g_list_free_full",
+            ctypes.default_abi, ctypes.void_t, this.GList.ptr, glib.gpointer);
 
-        parent.g_list_length = parent.lib.declare("g_list_length",
-            ctypes.default_abi, glib.guint, parent.GList.ptr);
+        this.g_list_length = this.lib.declare("g_list_length",
+            ctypes.default_abi, glib.guint, this.GList.ptr);
 
-        parent.g_list_next = function (list) {
-          return list.isNull() ? parent.GList.ptr : list.contents.next; 
+        this.g_list_next = function (list) {
+          return list.isNull() ? this.GList.ptr : list.contents.next; 
         };
 
       },
       
-      declareGSList : function(parent) {
+      declareGSList : function() {
 
-        parent._GSList = new ctypes.StructType("_GSlist");
-        parent._GSList.define([ 
+        this._GSList = new ctypes.StructType("_GSlist");
+        this._GSList.define([ 
                               { data : glib.gpointer }, 
-                              { next : parent._GSList.ptr }
+                              { next : this._GSList.ptr }
                               ]);
 
-        parent.GSList = parent._GSList;
+        this.GSList = this._GSList;
 
         // Methods
-        parent.g_slist_alloc = parent.lib.declare("g_slist_alloc",
-            ctypes.default_abi, parent.GSList.ptr);
+        this.g_slist_alloc = this.lib.declare("g_slist_alloc",
+            ctypes.default_abi, this.GSList.ptr);
 
-        parent.g_slist_free_full = parent.lib.declare("g_slist_free_full",
-            ctypes.default_abi, ctypes.void_t, parent.GSList.ptr, glib.gpointer);
+        this.g_slist_free_full = this.lib.declare("g_slist_free_full",
+            ctypes.default_abi, ctypes.void_t, this.GSList.ptr, glib.gpointer);
 
-        parent.g_slist_length = parent.lib.declare("g_slist_length",
-            ctypes.default_abi, glib.guint, parent.GSList.ptr);
+        this.g_slist_length = this.lib.declare("g_slist_length",
+            ctypes.default_abi, glib.guint, this.GSList.ptr);
 
-        parent.g_slist_next = function (list) {
+        this.g_slist_next = function (list) {
           return list.isNull() ? NULL : list.next; 
         };
 

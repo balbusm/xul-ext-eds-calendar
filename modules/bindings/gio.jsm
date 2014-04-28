@@ -1,29 +1,40 @@
 
 Components.utils.import("resource://gre/modules/ctypes.jsm");
 
+Components.utils.import("resource://edscalendar/utils.jsm");
+
 var EXPORTED_SYMBOLS = ["gio"];
 
 var gio =
     {
 
-      gioPath : "libgio-2.0.so",
+      binaries : ["libgio-2.0.so.0", "libgio-2.0.so"],
 
       lib : null,
 
       init : function() {
 
-        this.lib = ctypes.open(this.gioPath);
-        this.declareGCancellable(this);
+        addLogger(this, "gio");
+        for (let path of this.binaries) {
+          try {
+            this.lib = ctypes.open(path);
+            this.LOG("Opened " + path);
+            break;
+          } catch (err) {
+            this.WARN("Failed to open " + path + ": " + err);
+          }
+        }
+        this.declareGCancellable();
       },
 
-      declareGCancellable : function(parent) {
+      declareGCancellable : function() {
 
-        parent._GCancellable = new ctypes.StructType("_GCancellable");
-        parent.GCancellable = parent._GCancellable;
+        this._GCancellable = new ctypes.StructType("_GCancellable");
+        this.GCancellable = this._GCancellable;
 
-        parent.g_cancellable_new = parent.lib.declare("g_cancellable_new", ctypes.default_abi, parent.GCancellable.ptr);
-        parent.createGCancellable = function() {
-          return parent.g_cancellable_new();
+        this.g_cancellable_new = this.lib.declare("g_cancellable_new", ctypes.default_abi, this.GCancellable.ptr);
+        this.createGCancellable = function() {
+          return this.g_cancellable_new();
         };
       },
 

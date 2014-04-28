@@ -54,6 +54,7 @@ Components.utils.import("resource://edscalendar/utils.jsm");
 function calEDSProvider() {
     this.initProviderBase();
     addLogger(this, "calEDSProvider");
+    Services.obs.addObserver(this, "quit-application-granted", false);
     glib.init();
     gio.init();
     gobject.init();
@@ -79,7 +80,8 @@ calEDSProvider.prototype = {
             Components.interfaces.nsISupports,
             Components.interfaces.calICalendar,
             Components.interfaces.nsIClassInfo, 
-            Components.interfaces.calICompositeCalendar
+            Components.interfaces.calICompositeCalendar,
+            Components.interfaces.nsIObserver
         ];
         count.value = ifaces.length;
         return ifaces;
@@ -95,7 +97,8 @@ calEDSProvider.prototype = {
                                            Components.interfaces.nsISupports,
                                            Components.interfaces.calICalendar,
                                            Components.interfaces.nsIClassInfo, 
-                                           Components.interfaces.calICompositeCalendar
+                                           Components.interfaces.calICompositeCalendar,
+                                           Components.interfaces.nsIObserver
                                            ]),
 
     get type() {
@@ -369,6 +372,53 @@ calEDSProvider.prototype = {
       return itemcomp;
     },
     
+    retrieveRecurrenceItems : function retrieveRecurrenceItems(item) {
+      let count = {};
+      // get parent item
+      var recurrenceItems = [ item ];
+      // get recurrenceItems
+      if (item.recurrenceInfo) {
+        let recurrenceIds = item.recurrenceInfo.getExceptionIds(count);
+        for (let recurreneId of recurrenceIds) {
+          recurrenceItems.push(item.recurrenceInfo.getExceptionFor(recurreneId));
+        }
+      }
+      return recurrenceItems;
+    },
+    
+    modifySingleItem : function modifySingleItem(item) {
+
+      let modified;
+      
+      // for manual remove
+      let comp;
+      let subcomp;
+      let client;
+
+      try {
+      let error = glib.GError.ptr();
+      // FIXME: Check if source exists
+      let eSourceProvider = this.findESource.bind(this);
+        
+      client = this.getECalClient(item, eSourceProvider);
+      let objModType = this.getObjModType(item);
+      comp = libical.icalcomponent_new_from_string(item.icalString);
+      subcomp = this.vcalendarAddTimezonesGetItem(client, comp);
+  
+      modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
+      this.checkGError("Error modifying item:", error);
+      return modified;
+  
+      } finally {
+        if (this.checkCDataNotNull(client)) {
+          this.deleteECalClient(client);
+        }
+        if (this.checkCDataNotNull(comp)) {
+          libical.icalcomponent_free(comp);
+        }
+      }
+    },
+    
     // calICalendar
     adoptItem : function adoptItem(aItem, aListener) {
       var nserror;
@@ -446,23 +496,52 @@ calEDSProvider.prototype = {
       var nserror;
       let modified;
       
-      // to manual remove
-      let client;
-      let comp;
-      let subcomp;
-
       try {
-        let error = glib.GError.ptr();
-        // FIXME: Check if source exists
-        let eSourceProvider = this.getESource.bind(this);
-        client = this.getECalClient(aNewItem, eSourceProvider);
-        let objModType = this.getObjModType(aNewItem);
-        comp = libical.icalcomponent_new_from_string(aNewItem.icalString);
-        subcomp = this.vcalendarAddTimezonesGetItem(client, comp);
-  
-        modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
-        this.checkGError("Error modifying item:", error);
-  
+        let oldRecurrenceItems = this.retrieveRecurrenceItems(aOldItem);
+        let newRecurrenceItems = this.retrieveRecurrenceItems(aNewItem);
+        // TODO put it to separate method
+        let itemsDiffFilter = { 
+            // array filter implementation
+            diffRecurrenceItems : function diffRecurrenceItems(recurrenceItem) {
+              for(contentItem of this.content) {
+                if (this.sameRecurrenceItems(contentItem, recurrenceItem)) {
+                  // filter out item
+                  return false;
+                }
+              }
+              // keep item
+              return true;
+            },
+            
+            sameRecurrenceItems : function sameRecurrenceItems(itemA, itemB) {
+              if (itemA.recurrenceId && itemB.recurrenceId) {
+                if (itemA.recurrenceId.icalString == itemB.recurrenceId.icalString) {
+                  return true;
+                }
+              } else if (itemA.recurrenceId || itemB.recurrenceId) {
+                return false;
+              } else if (itemA.id === itemB.id) {
+                return true;
+              }
+              return false;
+            },
+        };
+        
+        itemsDiffFilter.content = newRecurrenceItems;
+        let removedRecurrences = oldRecurrenceItems.filter(itemsDiffFilter.diffRecurrenceItems, itemsDiffFilter);
+        
+        itemsDiffFilter.content = removedRecurrences;
+        let modifiedRecurrences = newRecurrenceItems.filter(itemsDiffFilter.diffRecurrenceItems, itemsDiffFilter);
+        
+        for (let removedRecurrence of removedRecurrences) {
+          // this could have better listener handling
+          this.deleteItem(removedRecurrence, aListener);
+        }
+        
+        for (let modifiedRecurrence of modifiedRecurrences) {
+          modified = this.modifySingleItem(modifiedRecurrence);
+        }
+        
         this.LOG("Modified item " +  aNewItem.title + " " + aNewItem.id);
         this.mObservers.notify("onModifyItem", [aNewItem, aOldItem]);
         nserror = Components.results.NS_OK;
@@ -472,14 +551,7 @@ calEDSProvider.prototype = {
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
-      } finally {
-        if (this.checkCDataNotNull(client)) {
-          this.deleteECalClient(client);
-        }
-        if (this.checkCDataNotNull(comp)) {
-          libical.icalcomponent_free(comp);
-        }
-      }
+      } 
 
       this.notifyOperationComplete(aListener,
           nserror,
@@ -500,11 +572,16 @@ calEDSProvider.prototype = {
       try {
         let error = glib.GError.ptr();
         // FIXME: Check if source exists
-        let eSourceProvider = this.getESource.bind(this);
+        let eSourceProvider = this.findESource.bind(this);
         client = this.getECalClient(aItem, eSourceProvider);
         let objModType = this.getObjModType(aItem);
         
-        removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, aItem.recurrenceId, objModType, null, error.address());
+        let rid = null;
+        if (aItem.recurrenceId) {
+          rid = aItem.recurrenceId.icalString;
+        }
+        this.LOG("Removing aItem.id " + aItem.id, + " objModType " + objModType + " rid " + rid);
+        removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, rid, objModType, null, error.address());
         this.checkGError("Error removing item:", error);
   
         this.LOG("Removed item " +  aItem.title + " " + aItem.id);
@@ -817,6 +894,14 @@ calEDSProvider.prototype = {
     // calICompositeCalendar
     setStatusObserver : function (/*calIStatusObserver*/ aStatusObserver, /*nsIDOMChromeWindow*/ aWindow) {
       throw "Unsupported operation setStatusObserver";
+    },
+    
+    // nsIObserver
+    observe : function (aSubject, aTopic, aData) {
+      if (aTopic === "quit-application-granted") {
+        Services.obs.removeObserver(this, "quit-application-granted");
+        this.shutdown();
+      }
     },
     
     shutdown : function shutdown() {

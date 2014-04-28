@@ -1,19 +1,27 @@
 
 Components.utils.import("resource://gre/modules/ctypes.jsm");
 
+Components.utils.import("resource://edscalendar/utils.jsm");
+
 var EXPORTED_SYMBOLS = ["libical"];
 
 var libical = {
 
-	icallibPath : "libical.so",
+  binaries : [ "libical.so.1", "libical.so"],
 
 	lib : null,
 
 	init : function() {
-
-
-		this.lib = ctypes.open(this.icallibPath);
-
+    addLogger(this, "libical");
+    for (let path of this.binaries) {
+      try {
+        this.lib = ctypes.open(path);
+        this.LOG("Opened " + path);
+        break;
+      } catch (err) {
+        this.WARN("Failed to open " + path + ": " + err);
+      }
+    }
 		this.declareICalComponentType();
 		this.declareICalComponent();
 		this.declareICalTimezone();

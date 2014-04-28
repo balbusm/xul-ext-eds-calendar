@@ -559,6 +559,10 @@ function testAddRecurringItem() {
         "END:VCALENDAR",
         clone : function() { return this;}
         };
+  // TODO add single occurence modification
+  // TODO add single occurence delete (first, last, middle)
+  // TODO add single occurence modification + delete
+  // TODO add single occurence modification + delete all
   this.calendarsItems.push(item);
   let assertContainer = new this.AssertContainer();
   let resultListener = new this.ResultListener([item], assertContainer);
@@ -725,6 +729,61 @@ function disabledtestAddEvolutionTodoItem() {
         "CREATED:20140112T181633Z\n" +
         "LAST-MODIFIED:20140112T181633Z\n" +
         "END:VTODO\n" +
+        "END:VCALENDAR",
+
+        clone : function() { return this;}
+        };
+  this.calendarsItems.push(item);
+  let assertContainer = new this.AssertContainer();
+  let resultListener = new this.ResultListener([item], assertContainer);
+  this.edsCalendarService.addItem(item, resultListener);
+  assertContainer.assertErrors();
+}
+
+function testEditRecurrenceItem() {
+  var calendar = {id: "f8192dac-61dc-11e3-a20e-010b628cae11", name: "testEditItemCal" };
+  this.calendars.push(calendar);
+  // FIXME: There is a bug in EDS that doesn't remove esource nor item
+  // as a workaround generate different item each time
+  let uuid = this.uuidGenerator.generateUUID();
+  let uuidString = uuid.toString();
+  var item = {id: uuidString, name: "testItem1",
+      QueryInterface: XPCOMUtils.generateQI([
+                                             Components.interfaces.nsISupports,
+                                             Components.interfaces.calIEvent
+                                           ]),
+      calendar: calendar, icalString:
+        "BEGIN:VCALENDAR\n" +
+        "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" + 
+        "VERSION:2.0\n" + 
+        "BEGIN:VTIMEZONE\n" + 
+        "TZID:Europe/Warsaw\n" + 
+        "X-LIC-LOCATION:Europe/Warsaw\n" + 
+        "BEGIN:DAYLIGHT\n" + 
+        "TZOFFSETFROM:+0100\n" + 
+        "TZOFFSETTO:+0200\n" + 
+        "TZNAME:CEST\n" + 
+        "DTSTART:19700329T020000\n" + 
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\n" + 
+        "END:DAYLIGHT\n" + 
+        "BEGIN:STANDARD\n" + 
+        "TZOFFSETFROM:+0200\n" + 
+        "TZOFFSETTO:+0100\n" + 
+        "TZNAME:CET\n" + 
+        "DTSTART:19701025T030000\n" + 
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\n" + 
+        "END:STANDARD\n" + 
+        "END:VTIMEZONE\n" + 
+        "BEGIN:VEVENT\n" + 
+        "CREATED:20140428T194726Z\n" + 
+        "LAST-MODIFIED:20140428T194739Z\n" + 
+        "DTSTAMP:20140428T194739Z\n" + 
+        "UID:" + uuidString + "\n" +
+        "SUMMARY:New Event\n" + 
+        "RRULE:FREQ=DAILY;UNTIL=20140504T200000Z\n" + 
+        "DTSTART;TZID=Europe/Warsaw:20140415T220000\n" + 
+        "DTEND;TZID=Europe/Warsaw:20140415T230000\n" + 
+        "END:VEVENT\n" + 
         "END:VCALENDAR",
 
         clone : function() { return this;}

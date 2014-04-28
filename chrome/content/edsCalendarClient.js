@@ -27,7 +27,6 @@ var edsCalendarClient = {
         this.calendar.removeObserver(this.calendarObserver);
         this.calendar.addObserver(this.calendarObserver);
       }
-
     },
     
     operationTypeToString : function operationTypeToString(operationType) {
@@ -51,11 +50,7 @@ var edsCalendarClient = {
       }
       return result;
     },
-    
-    uninit : function uninit() {
-      this.edsCalendarService.close();
-    },
-    
+
     calendarGetListener : {
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) { 
         if (!Components.isSuccessCode(aStatus)) {
@@ -183,4 +178,3 @@ var edsCalendarClient = {
 };
 
 window.addEventListener("load", function() {edsCalendarClient.init();}, false);
-window.addEventListener("unload", function() {edsCalendarClient.uninit();}, false);

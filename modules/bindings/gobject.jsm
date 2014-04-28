@@ -1,30 +1,41 @@
 
-Components.utils.import("resource://edscalendar/bindings/glib.jsm");
-
 Components.utils.import("resource://gre/modules/ctypes.jsm");
+
+Components.utils.import("resource://edscalendar/bindings/glib.jsm");
+Components.utils.import("resource://edscalendar/utils.jsm");
+
 
 var EXPORTED_SYMBOLS = ["gobject"];
 
 var gobject =
     {
 
-      gobjectPath : "libgobject-2.0.so.0",
+      binaries : ["libgobject-2.0.so.0", "libgobject-2.0.so" ],
 
       lib : null,
 
       init : function() {
 
-        this.lib = ctypes.open(this.gobjectPath);
-        this.declareGObject(this);
+        addLogger(this, "gobject");
+        for (let path of this.binaries) {
+          try {
+            this.lib = ctypes.open(path);
+            this.LOG("Opened " + path);
+            break;
+          } catch (err) {
+            this.WARN("Failed to open " + path + ": " + err);
+          }
+        }
+        this.declareGObject();
       },
 
 
-      declareGObject : function(parent) {
+      declareGObject : function() {
 
-        parent._GObject = new ctypes.StructType("_GObject");
-        parent.GObject = parent._GObject;
+        this._GObject = new ctypes.StructType("_GObject");
+        this.GObject = this._GObject;
 
-        parent.g_object_unref = parent.lib.declare("g_object_unref",
+        this.g_object_unref = this.lib.declare("g_object_unref",
          ctypes.default_abi,
          ctypes.void_t, // return
          glib.gpointer); // mem

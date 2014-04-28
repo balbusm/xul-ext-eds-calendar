@@ -5,44 +5,53 @@ Components.utils.import("resource://edscalendar/bindings/glib.jsm");
 Components.utils.import("resource://edscalendar/bindings/gio.jsm");
 Components.utils.import("resource://edscalendar/bindings/libical.jsm");
 Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
+Components.utils.import("resource://edscalendar/utils.jsm");
 
 var EXPORTED_SYMBOLS = ["libedataserver"];
 
 var libedataserver =
     {
 
-      glibPath : "libedataserver-1.2.so.17",
+      binaries : [ "libedataserver-1.2.so.17", "libedataserver-1.2.so.18", "libedataserver-1.2.so" ],
 
       lib : null,
 
       init : function() {
+        addLogger(this, "libedataserver");
+        for (let path of this.binaries) {
+          try {
+            this.lib = ctypes.open(path);
+            this.LOG("Opened " + path);
+            break;
+          } catch (err) {
+            this.WARN("Failed to open " + path + ": " + err);
+          }
+        }
 
-        this.lib = ctypes.open(this.glibPath);
-
-        this.declareESourceBackend(this);
-        this.declareESourceRegistry(this);
-        this.declareESourceCalendar(this);
-        this.declareESourceTaskList(this);
-        this.declareEClient(this);
-        this.declareEUid(this);
+        this.declareESourceBackend();
+        this.declareESourceRegistry();
+        this.declareESourceCalendar();
+        this.declareESourceTaskList();
+        this.declareEClient();
+        this.declareEUid();
       },
 
-      declareESourceBackend : function(parent) {
+      declareESourceBackend : function() {
         // Structures
-        parent._ESourceBackend = new ctypes.StructType("_ESourceBackend");
-        parent.ESourceBackend = parent._ESourceBackend;
+        this._ESourceBackend = new ctypes.StructType("_ESourceBackend");
+        this.ESourceBackend = this._ESourceBackend;
 
         // ESourceBackend
-        parent.e_source_backend_set_backend_name =
-            parent.lib.declare(
+        this.e_source_backend_set_backend_name =
+            this.lib.declare(
                 "e_source_backend_set_backend_name",
                 ctypes.default_abi,
                 ctypes.void_t,
-                parent.ESourceBackend.ptr,
+                this.ESourceBackend.ptr,
                 glib.gchar.ptr);
 
-        parent.e_source_backend_get_backend_name =
-            parent.lib.declare(
+        this.e_source_backend_get_backend_name =
+            this.lib.declare(
                 "e_source_backend_get_backend_name",
                 ctypes.default_abi,
                 glib.gchar.ptr,
@@ -50,90 +59,90 @@ var libedataserver =
 
       },
 
-      declareESourceRegistry : function(parent) {
+      declareESourceRegistry : function() {
 
         // Structures
-        parent._ESourceRegistry = new ctypes.StructType("_ESourceRegistry");
-        parent.ESourceRegistry = parent._ESourceRegistry;
+        this._ESourceRegistry = new ctypes.StructType("_ESourceRegistry");
+        this.ESourceRegistry = this._ESourceRegistry;
 
         // Methods
-        parent.e_source_registry_new_sync =
-            parent.lib.declare(
+        this.e_source_registry_new_sync =
+            this.lib.declare(
                 "e_source_registry_new_sync",
                 ctypes.default_abi,
-                parent.ESourceRegistry.ptr,
+                this.ESourceRegistry.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_source_registry_list_sources =
-            parent.lib.declare(
+        this.e_source_registry_list_sources =
+            this.lib.declare(
                 "e_source_registry_list_sources",
                 ctypes.default_abi,
                 glib.GList.ptr,
-                parent.ESourceRegistry.ptr,
+                this.ESourceRegistry.ptr,
                 glib.gchar.ptr);
         
-        parent.e_source_registry_check_enabled =
-          parent.lib.declare(
+        this.e_source_registry_check_enabled =
+          this.lib.declare(
               "e_source_registry_check_enabled",
               ctypes.default_abi,
               glib.gboolean,
-              parent.ESourceRegistry.ptr,
+              this.ESourceRegistry.ptr,
               libecal.ESource.ptr);
         
-        parent.e_source_registry_commit_source_sync =
-            parent.lib.declare(
+        this.e_source_registry_commit_source_sync =
+            this.lib.declare(
                 "e_source_registry_commit_source_sync",
                 ctypes.default_abi,
                 glib.gboolean,
-                parent.ESourceRegistry.ptr,
+                this.ESourceRegistry.ptr,
                 libecal.ESource.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
-        parent.e_source_registry_ref_source =
-            parent.lib.declare(
+        this.e_source_registry_ref_source =
+            this.lib.declare(
                 "e_source_registry_ref_source",
                 ctypes.default_abi,
                 libecal.ESource.ptr,
-                parent.ESourceRegistry.ptr,
+                this.ESourceRegistry.ptr,
                 glib.gchar.ptr);
 
       },
 
-      declareESourceCalendar : function(parent) {
-        parent.ESourceCalendar = {
+      declareESourceCalendar : function() {
+        this.ESourceCalendar = {
           E_SOURCE_EXTENSION_CALENDAR : "Calendar"
         };
 
       },
       
-      declareESourceTaskList : function(parent) {
-        parent.ESourceTaskList = {
+      declareESourceTaskList : function() {
+        this.ESourceTaskList = {
             E_SOURCE_EXTENSION_TASK_LIST : "Task List"
           };
         
       },
       
-      declareEClient : function(parent) {
+      declareEClient : function() {
         // Structures
-        parent._EClient = new ctypes.StructType("_EClient");
-        parent.EClient = parent._EClient;
+        this._EClient = new ctypes.StructType("_EClient");
+        this.EClient = this._EClient;
         
         // Methods
-        parent.e_client_get_source =
-          parent.lib.declare(
+        this.e_client_get_source =
+          this.lib.declare(
               "e_client_get_source",
               ctypes.default_abi,
               libecal.ESource.ptr,
-              parent.EClient.ptr);
+              this.EClient.ptr);
 
       },
 
       
-      declareEUid : function(parent) {
-        parent.e_uid_new =
-          parent.lib.declare(
+      declareEUid : function() {
+        this.e_uid_new =
+          this.lib.declare(
               "e_uid_new",
               ctypes.default_abi,
               glib.gchar.ptr);
