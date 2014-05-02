@@ -373,14 +373,14 @@ calEDSProvider.prototype = {
     },
     
     retrieveRecurrenceItems : function retrieveRecurrenceItems(item) {
-      let count = {};
       // get parent item
       var recurrenceItems = [ item ];
       // get recurrenceItems
       if (item.recurrenceInfo) {
+        let count = {};
         let recurrenceIds = item.recurrenceInfo.getExceptionIds(count);
-        for (let recurreneId of recurrenceIds) {
-          recurrenceItems.push(item.recurrenceInfo.getExceptionFor(recurreneId));
+        for (let recurrenceId of recurrenceIds) {
+          recurrenceItems.push(item.recurrenceInfo.getExceptionFor(recurrenceId));
         }
       }
       return recurrenceItems;
@@ -404,7 +404,9 @@ calEDSProvider.prototype = {
       let objModType = this.getObjModType(item);
       comp = libical.icalcomponent_new_from_string(item.icalString);
       subcomp = this.vcalendarAddTimezonesGetItem(client, comp);
-  
+
+      this.LOG("Modifying \n" +item.icalString);
+      
       modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
       this.checkGError("Error modifying item:", error);
       return modified;
@@ -515,12 +517,15 @@ calEDSProvider.prototype = {
             
             sameRecurrenceItems : function sameRecurrenceItems(itemA, itemB) {
               if (itemA.recurrenceId && itemB.recurrenceId) {
-                if (itemA.recurrenceId.icalString == itemB.recurrenceId.icalString) {
+                // check same recurrence item
+                if (itemA.recurrenceId.compare(itemB.recurrenceId)) {
                   return true;
                 }
               } else if (itemA.recurrenceId || itemB.recurrenceId) {
+                // compering recurrence item with parent item
                 return false;
               } else if (itemA.id === itemB.id) {
+                // same parent items
                 return true;
               }
               return false;
