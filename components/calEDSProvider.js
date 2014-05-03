@@ -341,7 +341,7 @@ calEDSProvider.prototype = {
       return objModType;
     },
 
-    vcalendarAddTimezonesGetItem: function vcalendarAddTimezonesGetItem(client, comp) {
+    vcalendarAddTimezonesGetItem: function vcalendarAddTimezonesGetItem(client, comp, item) {
       let error = glib.GError.ptr();
       let subcomp = libical.icalcomponent_get_first_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       var itemcomp = null;
@@ -364,12 +364,30 @@ calEDSProvider.prototype = {
         case libical.icalcomponent_kind.ICAL_VTODO_COMPONENT:
         case libical.icalcomponent_kind.ICAL_VJOURNAL_COMPONENT:
           itemcomp = subcomp;
+          this.vcalendarChangeAlarmDescription(client, itemcomp, item);
           break;
         }
         subcomp = libical.icalcomponent_get_next_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       }
 
       return itemcomp;
+    },
+    
+    vcalendarChangeAlarmDescription : function vcalendarChangeAlarmDescription(client, comp, item) {
+      let subcomp = libical.icalcomponent_get_first_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
+      while (!subcomp.isNull()) {
+        switch (libical.icalcomponent_isa(subcomp)) {
+        case libical.icalcomponent_kind.ICAL_VALARM_COMPONENT: {
+          let description = libical.icalcomponent_get_description(subcomp);
+          // Remove "Default Mozilla Description" as Thunderbird puts it when description is null
+          if (description.readString() === "Default Mozilla Description") {
+            libical.icalcomponent_set_description(subcomp, item.title);
+          }
+          break;
+        }
+        }
+        subcomp = libical.icalcomponent_get_next_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
+      }
     },
     
     retrieveRecurrenceItems : function retrieveRecurrenceItems(item) {
@@ -403,7 +421,7 @@ calEDSProvider.prototype = {
       client = this.getECalClient(item, eSourceProvider);
       let objModType = this.getObjModType(item);
       comp = libical.icalcomponent_new_from_string(item.icalString);
-      subcomp = this.vcalendarAddTimezonesGetItem(client, comp);
+      subcomp = this.vcalendarAddTimezonesGetItem(client, comp, item);
 
       this.LOG("Modifying \n" +item.icalString);
       
@@ -451,7 +469,7 @@ calEDSProvider.prototype = {
         this.LOG("Given icalString " + aItem.icalString);
         uid = glib.gchar.ptr();
   
-        itemcomp = this.vcalendarAddTimezonesGetItem(client, comp);
+        itemcomp = this.vcalendarAddTimezonesGetItem(client, comp, aItem);
   
         created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error.address());
         this.checkGError("Error adding item:", error);

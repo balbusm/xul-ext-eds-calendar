@@ -108,6 +108,14 @@ var libical = {
 				this.icalcomponent.ptr, this.icalcomponent.ptr,
 				this.icalcomponent_kind.type);
 
+    this.icalcomponent_get_description = this.lib.declare(
+        "icalcomponent_get_description", ctypes.default_abi,
+        ctypes.char.ptr, this.icalcomponent.ptr);
+    
+    this.icalcomponent_set_description = this.lib.declare(
+        "icalcomponent_set_description", ctypes.default_abi,
+        ctypes.void_t, this.icalcomponent.ptr, ctypes.char.ptr);
+    
 		this.icalcomponent_isa = this.lib
 				.declare("icalcomponent_isa", ctypes.default_abi,
 						this.icalcomponent_kind.type, this.icalcomponent.ptr);
@@ -115,6 +123,7 @@ var libical = {
 		this.icalcomponent_free = this.lib
         .declare("icalcomponent_free", ctypes.default_abi,
         ctypes.void_t, this.icalcomponent.ptr);
+		
 	},
 	
 	shutdown : function() {
