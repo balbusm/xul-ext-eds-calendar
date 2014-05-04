@@ -63,43 +63,28 @@ function calEDSProvider() {
     libedataserver.init();
 }
 
+const calEDSProviderClassID = Components.ID("{4640356f-42a2-4a83-9924-3bda9492ad31}");
+const calEDSProviderInterfaces = [
+  Components.interfaces.nsIClassInfo, 
+  Components.interfaces.nsIObserver,
+  Components.interfaces.calICalendar,
+  Components.interfaces.calICompositeCalendar
+];
 calEDSProvider.prototype = {
     __proto__: cal.ProviderBase.prototype,
+    classID: calEDSProviderClassID,
+    QueryInterface: XPCOMUtils.generateQI(calEDSProviderInterfaces),
+    classInfo: XPCOMUtils.generateCI({
+        classID: calEDSProviderClassID,
+        contractID: "@mozilla.org/calendar/calendar;1?type=eds",
+        classDescription: "EDS Provider",
+        interfaces: calEDSProviderInterfaces
+    }),
 
-    classDescription: "EDS Provider",
-    contractID: "@mozilla.org/calendar/calendar;1?type=eds",
-    classID:  Components.ID("{4640356f-42a2-4a83-9924-3bda9492ad31}"),
-    
     mBatchCalendar : null,
     mBatchClient : null,
     
     registry : null,
-
-    getInterfaces: function getInterfaces (count) {
-        var ifaces = [
-            Components.interfaces.nsISupports,
-            Components.interfaces.calICalendar,
-            Components.interfaces.nsIClassInfo, 
-            Components.interfaces.calICompositeCalendar,
-            Components.interfaces.nsIObserver
-        ];
-        count.value = ifaces.length;
-        return ifaces;
-    },
-
-    getHelperForLanguage: function getHelperForLanguage(aLanguage) {
-        return null;
-    },
-
-    implementationLanguage: Components.interfaces.nsIProgrammingLanguage.JAVASCRIPT,
-    flags: 0,
-    QueryInterface: XPCOMUtils.generateQI([
-                                           Components.interfaces.nsISupports,
-                                           Components.interfaces.calICalendar,
-                                           Components.interfaces.nsIClassInfo, 
-                                           Components.interfaces.calICompositeCalendar,
-                                           Components.interfaces.nsIObserver
-                                           ]),
 
     get type() {
         return "eds";
@@ -138,20 +123,89 @@ calEDSProvider.prototype = {
     },
 
     getProperty: function getProperty(aName) {
-        switch (aName) {
-              case "imip.identity.disabled":
-                  return true;
-              case "organizerId":
-              case "organizerCN":
-                  return "mailto:eds";
-              case "itip.transport":
-                  return null;
-              case "disabled":
-                  // Pretend to be disabled if the calendar could not be opened
-                  // to avoid getItems requests on a null calendar
-                  return false;
-        }
+      let complexProperties = aName.split("::");
+      if (complexProperties.length == 2) {
+        return this.getCalendarProperty(complexProperties[0], complexProperties[1]);
+      } else {
         return this.__proto__.__proto__.getProperty.apply(this, arguments);
+      }
+    },
+    
+    getCalendarProperty : function getCalendarProperty(calendarId, name) {
+      var property = null;
+      switch (name) {
+      case "name": {
+        function namePropertyGetter(registry, source) {
+          let displayName = libecal.e_source_dup_display_name(source);
+          var result = displayName.readString();
+          glib.g_free(displayName);
+          return result;
+        };
+        property = this.retrieveESourceAndCallCommand(namePropertyGetter, calendarId, null);
+        break;
+      }
+      case "color": {
+        function colorPropertyGetter(registry, source) {
+          let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+          let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr);
+          let color = libedataserver.e_source_selectable_dup_color(selectableSourceExtension);
+          var result = color.readString();
+          glib.g_free(color);
+          return result;
+        };
+        property = this.retrieveESourceAndCallCommand(colorPropertyGetter, calendarId, null);
+        break;
+      }
+      }
+      return property;
+    },
+    
+    setProperty : function setProperty(aName, aValue) {
+      let complexProperties = aName.split("::");
+      if (complexProperties.length == 2) {
+        this.setCalendarProperty(complexProperties[0], complexProperties[1], aValue);
+      } else {
+        this.__proto__.__proto__.setProperty.apply(this, arguments);
+      }
+      
+    },
+    
+    setCalendarProperty : function (calendarId, name, value) {
+      switch (name) {
+      case "name": {
+        function namePropertySetter(registry, source) {
+          let error = glib.GError.ptr();
+          let displayName = libecal.e_source_set_display_name(source, value);
+          libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
+        };
+        this.retrieveESourceAndCallCommand(namePropertySetter, calendarId);
+        break;
+      }
+      case "color": {
+        function colorPropertySetter(registry, source) {
+          let error = glib.GError.ptr();
+          let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+          this.setESourceColor(sourceExtension, value);
+          libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
+          this.checkGError("Couldn't change property color in source:", error);
+        };
+        this.retrieveESourceAndCallCommand(colorPropertySetter, calendarId);
+        break;
+      }
+      }
+    },
+    
+    retrieveESourceAndCallCommand : function retrieveESourceAndCallCommand(nextCommand, calendarId, defaultResult) {
+      let registry = this.getERegistry();
+      
+      // look for exising calendar
+      let source = this.findESourceByCalendarId(registry, calendarId);
+      if (source.isNull()) {
+        this.WARN("Calendar " + this.id + " doesn't exist. Unable to call " + nextCommand.name);
+        return defaultResult;
+      }
+      var result = nextCommand.call(this, registry, source);
+      return result;
     },
     
     checkCDataNotNull : function checkCData(obj) {
@@ -226,7 +280,8 @@ calEDSProvider.prototype = {
       libecal.e_source_set_display_name(source, calendar.name);
       libecal.e_source_set_parent(source, "local-stub");
       // TODO add task list support
-      this.prepareSourceExtension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+      let sourceExtension = this.prepareESourceExtension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+      this.setESourceColor(sourceExtension, calendar.getProperty("color"));
       libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
       this.checkGError("Couldn't commit source:", error);
       
@@ -234,9 +289,18 @@ calEDSProvider.prototype = {
 
     },
 
-    prepareSourceExtension : function prepareSourceExtension(source, extensionType) {
+    prepareESourceExtension : function prepareESourceExtension(source, extensionType) {
       let sourceExtension = libecal.e_source_get_extension(source, extensionType);
-      libedataserver.e_source_backend_set_backend_name(ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr), "local");
+      let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr);
+      libedataserver.e_source_backend_set_backend_name(selectableSourceExtension, "local");
+      return sourceExtension;
+    },
+    
+    setESourceColor : function (sourceExtension, color) {
+      // fall back to default calendar color
+      if (!color)
+        color = "#A8C2E1";
+      libedataserver.e_source_selectable_set_color(ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr), color);
     },
     
     getItemSourceType : function getItemSourceType(item) {
@@ -376,15 +440,13 @@ calEDSProvider.prototype = {
     vcalendarChangeAlarmDescription : function vcalendarChangeAlarmDescription(client, comp, item) {
       let subcomp = libical.icalcomponent_get_first_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       while (!subcomp.isNull()) {
-        switch (libical.icalcomponent_isa(subcomp)) {
-        case libical.icalcomponent_kind.ICAL_VALARM_COMPONENT: {
+        if (libical.icalcomponent_isa(subcomp) === libical.icalcomponent_kind.ICAL_VALARM_COMPONENT) {
           let description = libical.icalcomponent_get_description(subcomp);
           // Remove "Default Mozilla Description" as Thunderbird puts it when description is null
           if (description.readString() === "Default Mozilla Description") {
             libical.icalcomponent_set_description(subcomp, item.title);
           }
           break;
-        }
         }
         subcomp = libical.icalcomponent_get_next_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       }

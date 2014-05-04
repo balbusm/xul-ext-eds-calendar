@@ -11,7 +11,7 @@ XPCOMUtils.defineLazyGetter(this, "ctypes", function() {
   return ctypes;
 });
 
-var EXPORTED_SYMBOLS = ["CTypesUtils", "addLogger", "SimpleObjectWrapper"];
+var EXPORTED_SYMBOLS = ["CTypesUtils", "addLogger", "SimpleObjectWrapper", "loadLib"];
 
 var gBase;
 var gLogPrefRoot;
@@ -790,4 +790,18 @@ function SimpleObjectWrapper(aObject) {
   }
 
   return new Wrapper();
+}
+
+function loadLib(libsABIs) {
+  var lib = null;
+  for (let path of libsABIs) {
+    try {
+      lib = ctypes.open(path);
+      LOG("Opened " + path);
+      break;
+    } catch (err) {
+      WARN("Failed to open " + path + ": " + err);
+    }
+  }
+  return lib;
 }

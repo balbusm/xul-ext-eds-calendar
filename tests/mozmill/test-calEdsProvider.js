@@ -376,3 +376,18 @@ function testEditRemovalAllRecurrenceItem() {
   testUtils.removeItemFromArray(oldItem, this.calendarsItems);
 }
 
+function testSetCalendarColor() {
+  debugger;
+  let currentTestData = testData.testSetCalendarColor;
+  var calendar = testUtils.prepareCalendar(currentTestData.calendar);
+  this.edsCalendarService.addCalendar(calendar);
+  this.calendars.push(calendar);
+  let color = this.edsCalendarService.getProperty(calendar.id + "::" + "color");
+  this.assert.equal(color, testData.testSetCalendarColor.calendar.properties.color, "Color not set for new calendar");
+  
+  this.edsCalendarService.setProperty(calendar.id + "::" + "color", "#0000FF");
+  
+  color = this.edsCalendarService.getProperty(calendar.id + "::" + "color");
+  this.assert.equal(color, "#0000FF", "Color not changed by setProperty");
+}
+

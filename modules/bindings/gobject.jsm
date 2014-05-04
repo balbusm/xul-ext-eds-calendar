@@ -17,15 +17,8 @@ var gobject =
       init : function() {
 
         addLogger(this, "gobject");
-        for (let path of this.binaries) {
-          try {
-            this.lib = ctypes.open(path);
-            this.LOG("Opened " + path);
-            break;
-          } catch (err) {
-            this.WARN("Failed to open " + path + ": " + err);
-          }
-        }
+        this.lib = loadLib(this.binaries);
+
         this.declareGObject();
       },
 

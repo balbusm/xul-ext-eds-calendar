@@ -157,20 +157,19 @@ var edsCalendarClient = {
 
       // calIObserver
       onStartBatch : function onStartBatch() {
-        this.mBatchCount++;
       },
 
       // calIObserver
       onEndBatch : function onEndBatch() {
-        this.mBatchCount--;
-        if (this.mBatchCount === 0) {
-          this.edsCalendarService.refreshCalendarQuery();
-        }
       },
 
       onError : function onError() { ; },
-      onPropertyChanged : function onPropertyChanged() { ; },
-      onPropertyDeleting : function onPropertyDeleting() { ; },
+      onPropertyChanged : function onPropertyChanged(aCalendar, aName, aValue, aOldValue) { 
+        edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, aValue);
+      },
+      onPropertyDeleting : function onPropertyDeleting(aCalendar, aName) { 
+        edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, null);
+      },
       onDefaultCalendarChanged : function onDefaultCalendarChanged() { ; },
       onLoad : function onLoad() { ; }
     }

@@ -20,6 +20,11 @@ exports.clone = function clone(object) {
 
 exports.prepareCalendar = function prepareCalendar(calData) {
   let calendar = exports.clone(calData);
+  calendar.getProperty = function (name) {
+    if (calData.properties)
+      return calData.properties[name];
+    return undefined;
+  };
   calendar.QueryInterface = XPCOMUtils.generateQI([Components.interfaces.calICalendar]);
   return calendar;
 };

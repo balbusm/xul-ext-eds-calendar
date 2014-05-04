@@ -811,3 +811,9 @@ exports.testEditRemovalAllRecurrenceItem = {
         "END:VEVENT\n" +
         "END:VCALENDAR"
 };
+
+exports.testSetCalendarColor = {
+    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae15", name: "testSetCalendarColor", type: "dummy",
+      properties : { color : "#FF0000"}
+    }
+};

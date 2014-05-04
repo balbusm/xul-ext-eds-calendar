@@ -18,17 +18,10 @@ var libedataserver =
 
       init : function() {
         addLogger(this, "libedataserver");
-        for (let path of this.binaries) {
-          try {
-            this.lib = ctypes.open(path);
-            this.LOG("Opened " + path);
-            break;
-          } catch (err) {
-            this.WARN("Failed to open " + path + ": " + err);
-          }
-        }
+        this.lib = loadLib(this.binaries);
 
         this.declareESourceBackend();
+        this.declareESourceSelectable();
         this.declareESourceRegistry();
         this.declareESourceCalendar();
         this.declareESourceTaskList();
@@ -50,12 +43,35 @@ var libedataserver =
                 this.ESourceBackend.ptr,
                 glib.gchar.ptr);
 
-        this.e_source_backend_get_backend_name =
+        this.e_source_backend_dup_backend_name =
             this.lib.declare(
-                "e_source_backend_get_backend_name",
+                "e_source_backend_dup_backend_name",
                 ctypes.default_abi,
                 glib.gchar.ptr,
-                libecal.ESource.ptr);
+                this.ESourceBackend.ptr);
+
+      },
+      
+      declareESourceSelectable : function() {
+        // Structures
+        this._ESourceSelectable = new ctypes.StructType("_ESourceSelectable");
+        this.ESourceSelectable = this._ESourceSelectable;
+
+        // ESourceSelectable
+        this.e_source_selectable_set_color =
+            this.lib.declare(
+                "e_source_selectable_set_color",
+                ctypes.default_abi,
+                ctypes.void_t,
+                this.ESourceSelectable.ptr,
+                glib.gchar.ptr);
+
+        this.e_source_selectable_dup_color =
+            this.lib.declare(
+                "e_source_selectable_dup_color",
+                ctypes.default_abi,
+                glib.gchar.ptr,
+                this.ESourceSelectable.ptr);
 
       },
 
