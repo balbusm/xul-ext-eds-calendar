@@ -34,6 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+"use strict";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/AddonManager.jsm");
@@ -135,17 +136,17 @@ calEDSProvider.prototype = {
       var property = null;
       switch (name) {
       case "name": {
-        function namePropertyGetter(registry, source) {
+        let namePropertyGetter = function (registry, source) {
           let displayName = libecal.e_source_dup_display_name(source);
           var result = displayName.readString();
           glib.g_free(displayName);
           return result;
         };
-        property = this.retrieveESourceAndCallCommand(namePropertyGetter, calendarId, null);
+        property = this.retrieveESourceAndProcess(namePropertyGetter, calendarId, null);
         break;
       }
       case "color": {
-        function colorPropertyGetter(registry, source) {
+        let colorPropertyGetter = function (registry, source) {
           let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
           let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr);
           let color = libedataserver.e_source_selectable_dup_color(selectableSourceExtension);
@@ -153,7 +154,7 @@ calEDSProvider.prototype = {
           glib.g_free(color);
           return result;
         };
-        property = this.retrieveESourceAndCallCommand(colorPropertyGetter, calendarId, null);
+        property = this.retrieveESourceAndProcess(colorPropertyGetter, calendarId, null);
         break;
       }
       }
@@ -173,29 +174,29 @@ calEDSProvider.prototype = {
     setCalendarProperty : function (calendarId, name, value) {
       switch (name) {
       case "name": {
-        function namePropertySetter(registry, source) {
+        let namePropertySetter = function (registry, source) {
           let error = glib.GError.ptr();
           let displayName = libecal.e_source_set_display_name(source, value);
           libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
         };
-        this.retrieveESourceAndCallCommand(namePropertySetter, calendarId);
+        this.retrieveESourceAndProcess(namePropertySetter, calendarId);
         break;
       }
       case "color": {
-        function colorPropertySetter(registry, source) {
+        let colorPropertySetter = function (registry, source) {
           let error = glib.GError.ptr();
           let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
           this.setESourceColor(sourceExtension, value);
           libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
           this.checkGError("Couldn't change property color in source:", error);
         };
-        this.retrieveESourceAndCallCommand(colorPropertySetter, calendarId);
+        this.retrieveESourceAndProcess(colorPropertySetter, calendarId);
         break;
       }
       }
     },
     
-    retrieveESourceAndCallCommand : function retrieveESourceAndCallCommand(nextCommand, calendarId, defaultResult) {
+    retrieveESourceAndProcess : function retrieveESourceAndProcess(nextCommand, calendarId, defaultResult) {
       let registry = this.getERegistry();
       
       // look for exising calendar
@@ -204,8 +205,15 @@ calEDSProvider.prototype = {
         this.WARN("Calendar " + this.id + " doesn't exist. Unable to call " + nextCommand.name);
         return defaultResult;
       }
-      var result = nextCommand.call(this, registry, source);
-      return result;
+      try {
+        var result = nextCommand.call(this, registry, source);
+        return result;
+      } finally {
+        if (this.checkCDataNotNull(source)) {
+          this.LOG("retrieveESourceAndProcess: Removing source " + source.toString());
+          gobject.g_object_unref(source);
+        }
+      }
     },
     
     checkCDataNotNull : function checkCData(obj) {
@@ -585,7 +593,7 @@ calEDSProvider.prototype = {
         let itemsDiffFilter = { 
             // array filter implementation
             diffRecurrenceItems : function diffRecurrenceItems(recurrenceItem) {
-              for(contentItem of this.content) {
+              for(let contentItem of this.content) {
                 if (this.sameRecurrenceItems(contentItem, recurrenceItem)) {
                   // filter out item
                   return false;
