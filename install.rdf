@@ -8,7 +8,7 @@
     <em:id>{e6696d02-466a-11e3-a162-04e36188709b}</em:id>
     <em:name>EDS Calendar Integration</em:name>
     <em:version>0.4</em:version>
-    <em:description>Synchronizes calendars with Evolution Database Server</em:description>
+    <em:description>Synchronizes calendars with Evolution Data Server</em:description>
     <em:creator>Mateusz Balbus</em:creator>
     <em:homepageURL>https://bitbucket.org/balbusm/xul-ext-eds-calendar</em:homepageURL>
     <em:type>2</em:type>
