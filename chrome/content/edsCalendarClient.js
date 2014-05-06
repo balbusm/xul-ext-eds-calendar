@@ -133,37 +133,29 @@ var edsCalendarClient = {
     },
     
     calendarObserver : {
-      QueryInterface : function QueryInterface(aIID) {
-        if (!aIID.equals(Components.interfaces.calIObserver) &&
-            !aIID.equals(Components.interfaces.calICompositeObserver) &&
-            !aIID.equals(Components.interfaces.nsISupports)) {
-          throw Components.results.NS_ERROR_NO_INTERFACE;
-        }
-        return this;
-      },
+      QueryInterface : XPCOMUtils.generateQI([
+           Components.interfaces.calIObserver,
+           Components.interfaces.calICompositeObserver
+      ]),
       
       // calIObserver
       onAddItem : function onAddItem(aItem) {
-        debugger;
         edsCalendarClient.edsCalendarService.addItem(aItem, this.calendarChangeListener);
         
       },
 
       // calIObserver
       onDeleteItem : function onDeleteItem(aItem) {
-        debugger;
         edsCalendarClient.edsCalendarService.deleteItem(aItem, this.calendarChangeListener);
       },
 
       // calIObserver
       onModifyItem : function onModifyItem(aNewItem, aOldItem) {
-        debugger;
         edsCalendarClient.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
       },
 
       // calICompositeObserver
       onCalendarAdded : function onCalendarAdded(aCalendar) {
-        debugger;
         // This is called when a new calendar is added.
         // We can get all the items from the calendar and add them one by one to
         // Evolution Data Server
@@ -172,7 +164,6 @@ var edsCalendarClient = {
 
       // calICompositeObserver
       onCalendarRemoved : function onCalendarRemoved(aCalendar) {
-        debugger;
         edsCalendarClient.edsCalendarService.removeCalendar(aCalendar);
       },
 

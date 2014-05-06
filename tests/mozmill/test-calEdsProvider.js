@@ -360,7 +360,6 @@ function testEditRemovalAllRecurrenceItem() {
 }
 
 function testSetCalendarColor() {
-  debugger;
   let currentTestData = testData.testSetCalendarColor;
   var calendar = testUtils.prepareCalendar(currentTestData.calendar);
   this.edsCalendarService.addCalendar(calendar);

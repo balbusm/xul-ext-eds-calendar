@@ -85,9 +85,6 @@ calEDSProvider.prototype = {
 
     set uri(val) {
         this.mUri = val;
-//        if (this.mId && this.mUri) {
-//            this.openEDSCalendar();
-//        }
         return this.mUri;
     },
 
@@ -97,9 +94,6 @@ calEDSProvider.prototype = {
 
     set id(val) {
         this.mId = val;
-//        if (this.mId && this.mUri) {
-//            this.openEDSCalendar();
-//        }
         return this.mId;
     },
 
@@ -148,7 +142,7 @@ calEDSProvider.prototype = {
     setProperty : function setProperty(aName, aValue) {
       let complexProperties = aName.split("::");
       if (complexProperties.length == 2) {
-        this.setCalendarProperty(complexProperties[0], complexProperties[1], aValue);
+//        this.setCalendarProperty(complexProperties[0], complexProperties[1], aValue);
       } else {
         this.__proto__.__proto__.setProperty.apply(this, arguments);
       }
@@ -234,7 +228,6 @@ calEDSProvider.prototype = {
     deleteERegistry : function deleteERegistry() {
       if (!this.registry || this.registry.isNull())
         return;
-      this.LOG("deleteERegistry: Removing registry " + this.registry.toString());
       gobject.g_object_unref(this.registry);
       this.registry = null;
     },
@@ -303,8 +296,6 @@ calEDSProvider.prototype = {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
       else
         sourceType = null;
-      if (item._testItem) 
-        sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
       return sourceType;
     },
     
@@ -359,13 +350,11 @@ calEDSProvider.prototype = {
       // keep e cal client when batch is enabled
       if (this.mBatchCount > 0)
         return;
-      this.LOG("Removing client");
+      this.LOG("Removing cal client");
       if (this.checkCDataNotNull(client)) {
         let source = libedataserver.e_client_get_source(ctypes.cast(client, libedataserver.EClient.ptr));
-        this.LOG("deleteECalClient: Removing client " + client.toString());
         gobject.g_object_unref(client);
         if (this.checkCDataNotNull(source)) {
-          this.LOG("deleteECalClient: Removing source " + source.toString());
           gobject.g_object_unref(source);
         }
       }
@@ -477,10 +466,9 @@ calEDSProvider.prototype = {
       comp = libical.icalcomponent_new_from_string(item.icalString);
       subcomp = this.vcalendarAddTimezonesGetItem(client, comp, item);
 
-      this.LOG("Modifying \n" +item.icalString);
-      
+      this.LOG("Modifying single item " +  item.title + " " + item.id);
       modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
-      this.checkGError("Error modifying item:", error);
+      this.checkGError("Error modifying single item:", error);
       return modified;
   
       } finally {
@@ -491,6 +479,43 @@ calEDSProvider.prototype = {
           libical.icalcomponent_free(comp);
         }
       }
+    },
+    
+    // array filter implementation
+    createKeepDifferentFilter : function createKeepDifferentFilter(content) {
+      // TODO extract to separate file
+      var KeepDifferentFilter = function (content) {
+        this.content = content;
+      };
+      KeepDifferentFilter.prototype = {
+          filter : function filter(recurrenceItem) {
+            for(let contentItem of this.content) {
+              if (this.compareRecurrenceItems(contentItem, recurrenceItem)) {
+                // filter out item
+                return false;
+              }
+            }
+            // keep item
+            return true;
+          },
+        
+          compareRecurrenceItems : function compareRecurrenceItems(itemA, itemB) {
+            if (itemA.recurrenceId && itemB.recurrenceId) {
+              // check same recurrence item
+              if (itemA.recurrenceId.compare(itemB.recurrenceId)) {
+                return true;
+              }
+            } else if (itemA.recurrenceId || itemB.recurrenceId) {
+              // compering recurrence item with parent item
+              return false;
+            } else if (itemA.id === itemB.id) {
+              // same parent items
+              return true;
+            }
+            return false;
+          }          
+      };
+      return new KeepDifferentFilter(content);
     },
     
     // calICalendar
@@ -520,7 +545,6 @@ calEDSProvider.prototype = {
         }
   
         comp = libical.icalcomponent_new_from_string(aItem.icalString);
-        this.LOG("Given icalString " + aItem.icalString);
         uid = glib.gchar.ptr();
   
         itemcomp = this.vcalendarAddTimezonesGetItem(client, comp, aItem);
@@ -573,42 +597,12 @@ calEDSProvider.prototype = {
       try {
         let oldRecurrenceItems = this.retrieveRecurrenceItems(aOldItem);
         let newRecurrenceItems = this.retrieveRecurrenceItems(aNewItem);
-        // TODO put it to separate method
-        let itemsDiffFilter = { 
-            // array filter implementation
-            diffRecurrenceItems : function diffRecurrenceItems(recurrenceItem) {
-              for(let contentItem of this.content) {
-                if (this.sameRecurrenceItems(contentItem, recurrenceItem)) {
-                  // filter out item
-                  return false;
-                }
-              }
-              // keep item
-              return true;
-            },
-            
-            sameRecurrenceItems : function sameRecurrenceItems(itemA, itemB) {
-              if (itemA.recurrenceId && itemB.recurrenceId) {
-                // check same recurrence item
-                if (itemA.recurrenceId.compare(itemB.recurrenceId)) {
-                  return true;
-                }
-              } else if (itemA.recurrenceId || itemB.recurrenceId) {
-                // compering recurrence item with parent item
-                return false;
-              } else if (itemA.id === itemB.id) {
-                // same parent items
-                return true;
-              }
-              return false;
-            },
-        };
+        // TODO use prototype instead
+        let itemFilter = this.createKeepDifferentFilter(newRecurrenceItems);
+        let removedRecurrences = oldRecurrenceItems.filter(itemFilter.filter, itemFilter);
         
-        itemsDiffFilter.content = newRecurrenceItems;
-        let removedRecurrences = oldRecurrenceItems.filter(itemsDiffFilter.diffRecurrenceItems, itemsDiffFilter);
-        
-        itemsDiffFilter.content = removedRecurrences;
-        let modifiedRecurrences = newRecurrenceItems.filter(itemsDiffFilter.diffRecurrenceItems, itemsDiffFilter);
+        itemFilter = this.createKeepDifferentFilter(removedRecurrences);
+        let modifiedRecurrences = newRecurrenceItems.filter(itemFilter.filter, itemFilter);
         
         for (let removedRecurrence of removedRecurrences) {
           // this could have better listener handling
@@ -657,7 +651,6 @@ calEDSProvider.prototype = {
         if (aItem.recurrenceId) {
           rid = aItem.recurrenceId.icalString;
         }
-        this.LOG("Removing aItem.id " + aItem.id, + " objModType " + objModType + " rid " + rid);
         removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, rid, objModType, null, error.address());
         this.checkGError("Error removing item:", error);
   
@@ -693,6 +686,7 @@ calEDSProvider.prototype = {
       let sourcesList;
       var calendarItem = null;
       // TODO this method needs refactoring
+      // Currently getItem is used only for testing purposes
       try {
         registry = this.getERegistry();
         sourcesList = libedataserver.e_source_registry_list_sources(registry, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
@@ -714,7 +708,7 @@ calEDSProvider.prototype = {
             
             // look for item in every client/calendar
             let item = { id: aId };
-            let icalcomponent = this.findItem(client, item, error);
+            let icalcomponent = this.findItem(client, item);
             if (!icalcomponent.isNull()) {
               let calendar = this.createCalendarFromESource(source);
               calendarItem = this.icalcomponentToCalendarItem(icalcomponent, calendar);
@@ -772,95 +766,50 @@ calEDSProvider.prototype = {
     },
   
     createCalendarFromESource : function createCalendarFromESource(source) {
-      let localCalendarUri = Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService)
-        .newURI("moz-storage-calendar://", null, null);
-      // FIXME register calendar, set name
-      var calendar = cal.getCalendarManager().createCalendar("storage", localCalendarUri);
+      // FIXME create proper calendar
+      // calendar should be able to return all fields
+      // calendar needs to be read only
+      // extract it to separate file
+      var EdsCalendar = function (id, name) {
+         this.mId = id;
+         this.mName = name;
+      };
+      EdsCalendar.prototype = {
+          get name() {
+            return this.mName;
+          },
+          
+          get id() {
+            return this.mId;
+          },
+          
+          QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
+      };
       // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
       let sourceId = libecal.e_source_dup_uid(source);
       let id = sourceId.readString();
-      calendar.id = id;
       let sourceName = libecal.e_source_dup_display_name(source);
       let name = sourceName.readString();
-      calendar.name = name;
+
+      var calendar = new EdsCalendar(id, name);
 
       glib.g_free(sourceId);
       glib.g_free(sourceName);
-      
+
       this.LOG("Created calendar " + calendar.name + " - " + calendar.id);
       return calendar;
     },
 
     
-    /**
-     * Obsolete. Do not use!
-     */
-    glist_to_item_array: function glist_to_item_array(glistptr, calendar) {
-        let items = [];
-        let current = glistptr;
-        while (!current.isNull()) {
-            let icomp = ctypes.cast(glistptr.contents.data, libical.icalcomponent.ptr);
-
-            // TODO This is not super since we parse the string again. When
-            // lightning moves to using js-ctypes for libical, we can just pass
-            // the icalcomponent to the item and have it take what it needs
-            let icalstring = libical.icalcomponent_as_ical_string(icomp);
-            let item = cal.createEvent(icalstring.readString());
-
-            // Set up the calendar for this item
-            item.calendar = calendar;
-            items.push(item);
-            current = current.contents.next;
-        }
-
-        return items;
-    },
 
     // calICalendar
-    /**
-     * Obsolete. Do not use!
-     */
     getItems: function getItems(aItemFilter,
                                     aCount,
                                     aRangeStart,
                                     aRangeEnd,
                                     aListener) {
-
-        let objects = glib.GList.ptr();
-        let error = glib.GError.ptr();
-        let nserror;
-        let query = "#t";
-        if (aRangeStart && aRangeEnd) {
-            query = '(occur-in-time-range? (make-time"{from}") (make-time"{to}"))'
-            query = query.replace("{from}", aRangeStart.icalString);
-            query = query.replace("{to}", aRangeEnd.icalString);
-        }
-
-        this.LOG("EDS: Query is " + query);
-
-        if (libecal.e_cal_get_object_list(this.ecal, query, objects.address(), error.address())) {
-            let items = this.glist_to_item_array(objects, this.superCalendar);
-            aListener.onGetResult (this.superCalendar,
-                                   Components.results.NS_OK,
-                                   Components.interfaces.calIEvent,
-                                   null,
-                                   items.length,
-                                   items);
-            nserror = Components.results.NS_OK;
-        } else {
-            this.ERROR("EDS: Error retrieving items: " + 
-                      error.contents.code + " - " +
-                      error.contents.message.readString());
-            glib.g_error_free(error);
-            nserror = Components.results.NS_ERROR_FAILURE;
-        }
-
-        libecal.e_cal_free_object_list(objects);
-
-        this.notifyOperationComplete(aListener, nserror, 
-                                     Components.interfaces.calIOperationListener.GET,
-                                     null, null);
+      // FIXME implement
+      throw NS_ERROR_NOT_IMPLEMENTED;
     },
     
     // calICalendar
@@ -886,7 +835,6 @@ calEDSProvider.prototype = {
         // FIXME: add calendar items
       } finally {
         if (this.checkCDataNotNull(source)) {
-          this.LOG("addCalendar: Removing source " + source.toString());
           gobject.g_object_unref(source);
         }
       }
@@ -916,12 +864,10 @@ calEDSProvider.prototype = {
         // FIXME: add notification
         
       } catch (e if e instanceof CalendarServiceException) {
-//        nserror = Components.results.NS_ERROR_FAILURE;        
         detail = e.message;
         this.ERROR(detail);
       } finally {
         if (this.checkCDataNotNull(source)) {
-          this.LOG("removeCalendar: Removing source " + source.toString());
           gobject.g_object_unref(source);
         }
       }
@@ -944,12 +890,10 @@ calEDSProvider.prototype = {
         
         calendar = this.createCalendarFromESource(source);
       } catch (e if e instanceof CalendarServiceException) {
-//        nserror = Components.results.NS_ERROR_FAILURE;        
         detail = e.message;
         this.ERROR(detail);
       } finally {
         if (this.checkCDataNotNull(source)) {
-          this.LOG("getCalendarById: Removing source " + source.toString());
           gobject.g_object_unref(source);
         }
       }
@@ -958,7 +902,8 @@ calEDSProvider.prototype = {
     
     // calICompositeCalendar
     getCalendars : function getCalendars(count, aCalendars){
-      // TODO: implement
+      // FIXME implement
+      throw NS_ERROR_NOT_IMPLEMENTED;
     },
 
     // calICompositeCalendar
@@ -970,7 +915,8 @@ calEDSProvider.prototype = {
     
     // calICompositeCalendar
     setStatusObserver : function (/*calIStatusObserver*/ aStatusObserver, /*nsIDOMChromeWindow*/ aWindow) {
-      throw "Unsupported operation setStatusObserver";
+      // FIXME implement
+      throw NS_ERROR_NOT_IMPLEMENTED;
     },
     
     // nsIObserver
