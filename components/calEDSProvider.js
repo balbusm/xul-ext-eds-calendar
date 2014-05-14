@@ -142,7 +142,7 @@ calEDSProvider.prototype = {
     setProperty : function setProperty(aName, aValue) {
       let complexProperties = aName.split("::");
       if (complexProperties.length == 2) {
-//        this.setCalendarProperty(complexProperties[0], complexProperties[1], aValue);
+        this.setCalendarProperty(complexProperties[0], complexProperties[1], aValue);
       } else {
         this.__proto__.__proto__.setProperty.apply(this, arguments);
       }
