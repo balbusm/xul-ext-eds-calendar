@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
- * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
+ * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,21 @@ Components.utils.import("resource://gre/modules/ctypes.jsm");
 Components.utils.import("resource://edscalendar/bindings/glib.jsm");
 Components.utils.import("resource://edscalendar/bindings/gio.jsm");
 Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.import("resource://edscalendar/bindings/libedataserver.jsm");
 Components.utils.import("resource://edscalendar/utils.jsm");
-
 
 var EXPORTED_SYMBOLS = ["libecal"];
 
 var libecal =
     {
 
-      binaries : [ "libecal-1.2.so.15", "libecal-1.2.so.16", "libecal-1.2.so" ],
-
+      binaries : ["libecal-1.2.so.15",
+                  "libecal-1.2.so.16",
+                  "libecal-1.2.so.18",
+                  "libecal-1.2.so.20",
+                  "libecal-1.2.so"
+                  ],
+                
       lib : null,
 
       init : function() {
@@ -40,91 +45,9 @@ var libecal =
         addLogger(this, "libecal");
         this.lib = loadLib(this.binaries);
 
-        this.declareESource();
         this.declareECalClientSourceType();
         this.declareECalObjModType();
         this.declareECalClient();
-
-      },
-
-      declareESource : function() {
-
-        // Structures
-        this._ESource = new ctypes.StructType("_ESource");
-
-        this.ESource = this._ESource;
-
-        // Methods
-        this.e_source_new_with_uid =
-            this.lib.declare(
-                "e_source_new_with_uid",
-                ctypes.default_abi,
-                this.ESource.ptr,
-                glib.gchar.ptr,
-                glib.GMainContext.ptr,
-                glib.GError.ptr.ptr);
-
-        this.e_source_get_extension =
-            this.lib.declare(
-                "e_source_get_extension",
-                ctypes.default_abi,
-                glib.gpointer,
-                this.ESource.ptr,
-                glib.gchar.ptr);
-
-        this.e_source_set_display_name =
-            this.lib.declare(
-                "e_source_set_display_name",
-                ctypes.default_abi,
-                ctypes.void_t,
-                this.ESource.ptr,
-                glib.gchar.ptr);
-
-        this.e_source_get_display_name =
-            this.lib.declare("e_source_get_display_name",
-                ctypes.default_abi,
-                glib.gchar.ptr,
-                this.ESource.ptr);
-        
-        this.e_source_dup_display_name =
-          this.lib.declare("e_source_dup_display_name",
-              ctypes.default_abi,
-              glib.gchar.ptr,
-              this.ESource.ptr);
-
-        this.e_source_get_uid =
-            this.lib.declare("e_source_get_uid",
-                ctypes.default_abi,
-                glib.gchar.ptr,
-                this.ESource.ptr);
-
-        this.e_source_dup_uid =
-          this.lib.declare("e_source_dup_uid",
-              ctypes.default_abi,
-              glib.gchar.ptr,
-              this.ESource.ptr);
-        
-        this.e_source_set_parent =
-            this.lib.declare(
-                "e_source_set_parent",
-                ctypes.default_abi,
-                ctypes.void_t,
-                this.ESource.ptr,
-                glib.gchar.ptr);
-
-        this.e_source_get_uid =
-            this.lib.declare("e_source_get_parent",
-                ctypes.default_abi,
-                glib.gchar.ptr,
-                this.ESource.ptr);
-
-        this.e_source_remove_sync =
-          this.lib.declare("e_source_remove_sync",
-              ctypes.default_abi,
-              glib.gboolean, // return
-              this.ESource.ptr, // source
-              gio.GCancellable.ptr, // cancellable
-              glib.GError.ptr.ptr); // error
 
       },
 
@@ -156,17 +79,10 @@ var libecal =
         // Structures
         this._ECalClient = new ctypes.StructType("_ECalClient");
         this.ECalClient = this._ECalClient;
+        this.DONT_WAIT = -1;
 
         // Methods
-        this.e_cal_client_connect_sync =
-            this.lib.declare(
-                "e_cal_client_connect_sync",
-                ctypes.default_abi,
-                this.ECalClient.ptr,
-                libecal.ESource.ptr,
-                libecal.ECalClientSourceType.type,
-                gio.GCancellable.ptr,
-                glib.GError.ptr.ptr);
+        this.declareECalClientConnectSync();
 
         this.e_cal_client_create_object_sync =
             this.lib.declare(
@@ -227,7 +143,54 @@ var libecal =
 
 
           },
-
+          
+      declareECalClientConnectSync : function() {
+        // e_cal_client_connect_sync has changed declaration over the time
+        // newer version takes ECalClientSourceType, gint, GCancellable, GError
+        // older version takes ECalClientSourceType, GCancellable, GError
+        // as a workaround load old version when new one fails
+        // and create proxy for old version to ignore unnecessary argument
+        try {
+            this.LOG("Loading new declaration of e_cal_client_connect_sync...");
+            this.e_cal_client_connect_sync =
+              this.lib.declare(
+                "e_cal_client_connect_sync",
+                ctypes.default_abi,
+                this.ECalClient.ptr,
+                libedataserver.ESource.ptr,
+                libecal.ECalClientSourceType.type,
+                glib.gint,
+                gio.GCancellable.ptr,
+                glib.GError.ptr.ptr);
+          } catch (error) {
+            this.LOG("Failed to load a new declaration of e_cal_client_connect_sync: " + error.message);
+            this.LOG("Trying old...");
+            this._e_cal_client_connect_sync =
+              this.lib.declare(
+                "e_cal_client_connect_sync",
+                ctypes.default_abi,
+                this.ECalClient.ptr,
+                libedataserver.ESource.ptr,
+                libecal.ECalClientSourceType.type,
+                gio.GCancellable.ptr,
+                glib.GError.ptr.ptr);
+            this.e_cal_client_connect_sync = function() {
+              // copy args to array (shouldn't be in separate method)
+              var args = new Array(arguments.length);
+              for(var i = 0; i < args.length; ++i) {
+                          //i is always valid index in the arguments object
+                  args[i] = arguments[i];
+              }
+              
+              args.splice(2, 1);
+              this.LOG("Calling e_cal_client_connect_sync without timeout");
+              return this._e_cal_client_connect_sync.apply(this, args);
+            }
+          }
+          this.LOG("Successfully loaded e_cal_client_connect_sync");
+          
+      },
+      
       shutdown : function() {
         this.lib.close();
       }

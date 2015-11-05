@@ -6,6 +6,8 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+Cu.import("resource://edscalendar/exceptions.jsm");
+
 XPCOMUtils.defineLazyGetter(this, "ctypes", function() {
   Cu.import("resource://gre/modules/ctypes.jsm");
   return ctypes;
@@ -798,10 +800,11 @@ function loadLib(libsABIs) {
     try {
       lib = ctypes.open(path);
       LOG("Opened " + path);
-      break;
+      return lib;
     } catch (err) {
       WARN("Failed to open " + path + ": " + err);
     }
   }
-  return lib;
+  throw new LoadingLibException("Unable to load library");
 }
+

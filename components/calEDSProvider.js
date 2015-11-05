@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
- * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
+ * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ function calEDSProvider() {
     gio.init();
     gobject.init();
     libical.init();
-    libecal.init();
     libedataserver.init();
+    libecal.init();
 }
 
 const calEDSProviderClassID = Components.ID("{4640356f-42a2-4a83-9924-3bda9492ad31}");
@@ -154,7 +154,7 @@ calEDSProvider.prototype = {
       case "name": {
         let namePropertySetter = function (registry, source) {
           let error = glib.GError.ptr();
-          let displayName = libecal.e_source_set_display_name(source, value);
+          let displayName = libedataserver.e_source_set_display_name(source, value);
           libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
         };
         this.retrieveESourceAndProcess(namePropertySetter, calendarId);
@@ -163,7 +163,7 @@ calEDSProvider.prototype = {
       case "color": {
         let colorPropertySetter = function (registry, source) {
           let error = glib.GError.ptr();
-          let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+          let sourceExtension = libedataserver.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
           this.setESourceColor(sourceExtension, value);
           libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
           this.checkGError("Couldn't change property color in source:", error);
@@ -211,6 +211,7 @@ calEDSProvider.prototype = {
     },
     
     getERegistry : function getERegistry() {
+      this.LOG("Getting ERegistry...");
       let error = glib.GError.ptr();
       let registry = libedataserver.e_source_registry_new_sync(null, error.address());
       this.checkGError("Couldn't get source registry:", error);
@@ -247,6 +248,7 @@ calEDSProvider.prototype = {
      */
     getESource : function getESource(registry, calendar) {
       // look for existing calendar
+      this.LOG("Getting ESource...")
       var source = this.findESource(registry, calendar);
       // do not create new one if calendar exists
       if (source.isNull()) {
@@ -259,11 +261,11 @@ calEDSProvider.prototype = {
     createESource : function createESource(calendar, registry) {
       let error = glib.GError.ptr();
 
-      var source = libecal.e_source_new_with_uid(calendar.id, null, error.address());
+      var source = libedataserver.e_source_new_with_uid(calendar.id, null, error.address());
       this.checkGError("Couldn't create new source:", error);
 
-      libecal.e_source_set_display_name(source, calendar.name);
-      libecal.e_source_set_parent(source, "local-stub");
+      libedataserver.e_source_set_display_name(source, calendar.name);
+      libedataserver.e_source_set_parent(source, "local-stub");
       // TODO add task list support
       let sourceExtension = this.prepareESourceExtension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
       this.setESourceColor(sourceExtension, calendar.getProperty("color"));
@@ -275,7 +277,7 @@ calEDSProvider.prototype = {
     },
 
     prepareESourceExtension : function prepareESourceExtension(source, extensionType) {
-      let sourceExtension = libecal.e_source_get_extension(source, extensionType);
+      let sourceExtension = libedataserver.e_source_get_extension(source, extensionType);
       let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr);
       libedataserver.e_source_backend_set_backend_name(selectableSourceExtension, "local");
       return sourceExtension;
@@ -322,8 +324,10 @@ calEDSProvider.prototype = {
         source = eSourceProvider(registry, calendar);
         let sourceType = this.getItemSourceType(item);
         
+        this.LOG("Connecting ECalClient...");
         client = libecal.e_cal_client_connect_sync(source, 
           sourceType,
+          libecal.DONT_WAIT,
           null,
           error.address());
         this.checkGError("Couldn't connect to source:", error);
@@ -341,8 +345,10 @@ calEDSProvider.prototype = {
       if (this.mBatchCount > 0) {
         this.mBatchClient = client;
         this.mBatchCalendar = calendar;
+        this.LOG("Saved ECalClient for batch mode");
       }
 
+      this.LOG("ECalClient is ready to use!");
       return client;
     },
     
@@ -363,15 +369,18 @@ calEDSProvider.prototype = {
     findItem : function findItem(client, item) {
       let error = glib.GError.ptr();
       var icalcomponent = libical.icalcomponent.ptr();
-
+      this.LOG("Looking for an item...");
       let found = libecal.e_cal_client_get_object_sync(client, item.id, null, icalcomponent.address(), null, error.address());
       // Ignore error code 1, it is raised when item doesn't exist
       if (!found && !error.isNull()) {
         if (error.contents.code != 1) {
-          this.checkGError("Couldn't find item:", error);
+          this.checkGError("Error while looking for an item:", error);
         } else {
+          this.LOG("Couldn't find an item");
           glib.g_error_free(error);
         }
+      } else {
+        this.LOG("Found an item");
       }
       return icalcomponent;
     },
@@ -695,13 +704,14 @@ calEDSProvider.prototype = {
           let icalcomponent;
           try {
             // create client for each source
-            let source = ctypes.cast(iter.contents.data, libecal.ESource.ptr);
+            let source = ctypes.cast(iter.contents.data, libedataserver.ESource.ptr);
             if (!libedataserver.e_source_registry_check_enabled(registry, source)) {
               continue;
             }
             // FIXME: implement switching the source type
             client = libecal.e_cal_client_connect_sync(source, 
                 libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
+                libecal.DONT_WAIT,
                 null,
                 error.address());
             this.checkGError("Couldn't connect to source:", error);
@@ -786,9 +796,9 @@ calEDSProvider.prototype = {
           QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
       };
       // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
-      let sourceId = libecal.e_source_dup_uid(source);
+      let sourceId = libedataserver.e_source_dup_uid(source);
       let id = sourceId.readString();
-      let sourceName = libecal.e_source_dup_display_name(source);
+      let sourceName = libedataserver.e_source_dup_display_name(source);
       let name = sourceName.readString();
 
       var calendar = new EdsCalendar(id, name);
@@ -858,7 +868,7 @@ calEDSProvider.prototype = {
         }
   
         // TODO: Shoud items be removed first?
-        let removed = libecal.e_source_remove_sync(source, null, error.address());
+        let removed = libedataserver.e_source_remove_sync(source, null, error.address());
         this.checkGError("Couldn't remove calendar:", error);
         this.LOG("Removed calendar " +  aCalendar.name + " " + aCalendar.id);
         // FIXME: add notification
@@ -930,8 +940,8 @@ calEDSProvider.prototype = {
     shutdown : function shutdown() {
       this.LOG("Closing EDS Calendar Service");
       this.deleteERegistry();
-      libedataserver.shutdown();
       libecal.shutdown();
+      libedataserver.shutdown();
       libical.shutdown();
       gobject.shutdown();
       gio.shutdown();

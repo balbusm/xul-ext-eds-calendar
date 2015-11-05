@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
- * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
+ * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ Components.utils.import("resource://gre/modules/ctypes.jsm");
 Components.utils.import("resource://edscalendar/bindings/glib.jsm");
 Components.utils.import("resource://edscalendar/bindings/gio.jsm");
 Components.utils.import("resource://edscalendar/bindings/libical.jsm");
-Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
 Components.utils.import("resource://edscalendar/utils.jsm");
 
 var EXPORTED_SYMBOLS = ["libedataserver"];
@@ -31,7 +30,10 @@ var EXPORTED_SYMBOLS = ["libedataserver"];
 var libedataserver =
     {
 
-      binaries : [ "libedataserver-1.2.so.17", "libedataserver-1.2.so.18", "libedataserver-1.2.so" ],
+      binaries : [ "libedataserver-1.2.so.17",
+                   "libedataserver-1.2.so.18",
+                   "libedataserver-1.2.so.20",
+                   "libedataserver-1.2.so" ],
 
       lib : null,
 
@@ -39,6 +41,8 @@ var libedataserver =
         addLogger(this, "libedataserver");
         this.lib = loadLib(this.binaries);
 
+        this.declareESource();
+        this.declareESourceRegistry();
         this.declareESourceBackend();
         this.declareESourceSelectable();
         this.declareESourceRegistry();
@@ -47,6 +51,138 @@ var libedataserver =
         this.declareEClient();
         this.declareEUid();
       },
+      
+      declareESource : function() {
+
+          // Structures
+          this._ESource = new ctypes.StructType("_ESource");
+
+          this.ESource = this._ESource;
+
+          // Methods
+          this.e_source_new_with_uid =
+              this.lib.declare(
+                  "e_source_new_with_uid",
+                  ctypes.default_abi,
+                  this.ESource.ptr,
+                  glib.gchar.ptr,
+                  glib.GMainContext.ptr,
+                  glib.GError.ptr.ptr);
+
+          this.e_source_get_extension =
+              this.lib.declare(
+                  "e_source_get_extension",
+                  ctypes.default_abi,
+                  glib.gpointer,
+                  this.ESource.ptr,
+                  glib.gchar.ptr);
+
+          this.e_source_set_display_name =
+              this.lib.declare(
+                  "e_source_set_display_name",
+                  ctypes.default_abi,
+                  ctypes.void_t,
+                  this.ESource.ptr,
+                  glib.gchar.ptr);
+
+          this.e_source_get_display_name =
+              this.lib.declare("e_source_get_display_name",
+                  ctypes.default_abi,
+                  glib.gchar.ptr,
+                  this.ESource.ptr);
+          
+          this.e_source_dup_display_name =
+            this.lib.declare("e_source_dup_display_name",
+                ctypes.default_abi,
+                glib.gchar.ptr,
+                this.ESource.ptr);
+
+          this.e_source_get_uid =
+              this.lib.declare("e_source_get_uid",
+                  ctypes.default_abi,
+                  glib.gchar.ptr,
+                  this.ESource.ptr);
+
+          this.e_source_dup_uid =
+            this.lib.declare("e_source_dup_uid",
+                ctypes.default_abi,
+                glib.gchar.ptr,
+                this.ESource.ptr);
+          
+          this.e_source_set_parent =
+              this.lib.declare(
+                  "e_source_set_parent",
+                  ctypes.default_abi,
+                  ctypes.void_t,
+                  this.ESource.ptr,
+                  glib.gchar.ptr);
+
+          this.e_source_get_uid =
+              this.lib.declare("e_source_get_parent",
+                  ctypes.default_abi,
+                  glib.gchar.ptr,
+                  this.ESource.ptr);
+
+          this.e_source_remove_sync =
+            this.lib.declare("e_source_remove_sync",
+                ctypes.default_abi,
+                glib.gboolean, // return
+                this.ESource.ptr, // source
+                gio.GCancellable.ptr, // cancellable
+                glib.GError.ptr.ptr); // error
+
+        },
+        
+        declareESourceRegistry : function() {
+
+            // Structures
+            this._ESourceRegistry = new ctypes.StructType("_ESourceRegistry");
+            this.ESourceRegistry = this._ESourceRegistry;
+
+            // Methods
+            this.e_source_registry_new_sync =
+                this.lib.declare(
+                    "e_source_registry_new_sync",
+                    ctypes.default_abi,
+                    this.ESourceRegistry.ptr,
+                    gio.GCancellable.ptr,
+                    glib.GError.ptr.ptr);
+
+            this.e_source_registry_list_sources =
+                this.lib.declare(
+                    "e_source_registry_list_sources",
+                    ctypes.default_abi,
+                    glib.GList.ptr,
+                    this.ESourceRegistry.ptr,
+                    glib.gchar.ptr);
+            
+            this.e_source_registry_check_enabled =
+              this.lib.declare(
+                  "e_source_registry_check_enabled",
+                  ctypes.default_abi,
+                  glib.gboolean,
+                  this.ESourceRegistry.ptr,
+                  libedataserver.ESource.ptr);
+            
+            this.e_source_registry_commit_source_sync =
+                this.lib.declare(
+                    "e_source_registry_commit_source_sync",
+                    ctypes.default_abi,
+                    glib.gboolean,
+                    this.ESourceRegistry.ptr,
+                    libedataserver.ESource.ptr,
+                    gio.GCancellable.ptr,
+                    glib.GError.ptr.ptr);
+
+            this.e_source_registry_ref_source =
+                this.lib.declare(
+                    "e_source_registry_ref_source",
+                    ctypes.default_abi,
+                    libedataserver.ESource.ptr,
+                    this.ESourceRegistry.ptr,
+                    glib.gchar.ptr);
+
+          },
 
       declareESourceBackend : function() {
         // Structures
@@ -123,7 +259,7 @@ var libedataserver =
               ctypes.default_abi,
               glib.gboolean,
               this.ESourceRegistry.ptr,
-              libecal.ESource.ptr);
+              libedataserver.ESource.ptr);
         
         this.e_source_registry_commit_source_sync =
             this.lib.declare(
@@ -131,7 +267,7 @@ var libedataserver =
                 ctypes.default_abi,
                 glib.gboolean,
                 this.ESourceRegistry.ptr,
-                libecal.ESource.ptr,
+                libedataserver.ESource.ptr,
                 gio.GCancellable.ptr,
                 glib.GError.ptr.ptr);
 
@@ -139,7 +275,7 @@ var libedataserver =
             this.lib.declare(
                 "e_source_registry_ref_source",
                 ctypes.default_abi,
-                libecal.ESource.ptr,
+                libedataserver.ESource.ptr,
                 this.ESourceRegistry.ptr,
                 glib.gchar.ptr);
 
@@ -169,7 +305,7 @@ var libedataserver =
           this.lib.declare(
               "e_client_get_source",
               ctypes.default_abi,
-              libecal.ESource.ptr,
+              libedataserver.ESource.ptr,
               this.EClient.ptr);
 
       },
