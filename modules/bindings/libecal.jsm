@@ -148,8 +148,8 @@ var libecal =
         // e_cal_client_connect_sync has changed declaration over the time
         // newer version takes ECalClientSourceType, gint, GCancellable, GError
         // older version takes ECalClientSourceType, GCancellable, GError
-        // as a workaround load old version when new one fails
-        // and create proxy for old version to ignore unnecessary argument
+        // check which version is used
+        // create proxy for old version to ignore unnecessary argument
         var versionIssue = libedataserver.eds_check_version(3, 16, 0);
         if (versionIssue.isNull()) {
           this.LOG("Loading new declaration of e_cal_client_connect_sync...");
