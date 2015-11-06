@@ -150,47 +150,47 @@ var libecal =
         // older version takes ECalClientSourceType, GCancellable, GError
         // as a workaround load old version when new one fails
         // and create proxy for old version to ignore unnecessary argument
-        try {
-            this.LOG("Loading new declaration of e_cal_client_connect_sync...");
-            this.e_cal_client_connect_sync =
-              this.lib.declare(
-                "e_cal_client_connect_sync",
-                ctypes.default_abi,
-                this.ECalClient.ptr,
-                libedataserver.ESource.ptr,
-                libecal.ECalClientSourceType.type,
-                glib.gint,
-                gio.GCancellable.ptr,
-                glib.GError.ptr.ptr);
-          } catch (error) {
-            this.LOG("Failed to load a new declaration of e_cal_client_connect_sync: " + error.message);
-            this.LOG("Trying old...");
-            this._e_cal_client_connect_sync =
-              this.lib.declare(
-                "e_cal_client_connect_sync",
-                ctypes.default_abi,
-                this.ECalClient.ptr,
-                libedataserver.ESource.ptr,
-                libecal.ECalClientSourceType.type,
-                gio.GCancellable.ptr,
-                glib.GError.ptr.ptr);
-            this.e_cal_client_connect_sync = function() {
-              // copy args to array (shouldn't be in separate method)
-              var args = new Array(arguments.length);
-              for(var i = 0; i < args.length; ++i) {
-                          //i is always valid index in the arguments object
-                  args[i] = arguments[i];
-              }
-              
-              args.splice(2, 1);
-              this.LOG("Calling e_cal_client_connect_sync without timeout");
-              return this._e_cal_client_connect_sync.apply(this, args);
+        var versionIssue = libedataserver.eds_check_version(3, 16, 0);
+        if (versionIssue.isNull()) {
+          this.LOG("Loading new declaration of e_cal_client_connect_sync...");
+          this.e_cal_client_connect_sync = this.lib.declare(
+              "e_cal_client_connect_sync",
+              ctypes.default_abi,
+              this.ECalClient.ptr,
+              libedataserver.ESource.ptr,
+              libecal.ECalClientSourceType.type,
+              glib.gint,
+              gio.GCancellable.ptr,
+              glib.GError.ptr.ptr);
+    
+        } else {
+          this.LOG("Loading old declaration of e_cal_client_connect_sync. Reason: "
+              + versionIssue.readString());
+          this._e_cal_client_connect_sync = this.lib.declare(
+              "e_cal_client_connect_sync",
+              ctypes.default_abi,
+              this.ECalClient.ptr,
+              libedataserver.ESource.ptr,
+              libecal.ECalClientSourceType.type,
+              gio.GCancellable.ptr,
+              glib.GError.ptr.ptr);
+          this.e_cal_client_connect_sync = function() {
+            // copy args to array (shouldn't be in separate method)
+            var args = new Array(arguments.length);
+            for (var i = 0; i < args.length; ++i) {
+              //i is always valid index in the arguments object
+              args[i] = arguments[i];
             }
+
+            args.splice(2, 1);
+            this.LOG("Calling e_cal_client_connect_sync without timeout");
+            return this._e_cal_client_connect_sync.apply(this, args);
           }
-          this.LOG("Successfully loaded e_cal_client_connect_sync");
-          
+        }
+        this.LOG("Successfully loaded e_cal_client_connect_sync");
+
       },
-      
+
       shutdown : function() {
         this.lib.close();
       }

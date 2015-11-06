@@ -41,6 +41,7 @@ var libedataserver =
         addLogger(this, "libedataserver");
         this.lib = loadLib(this.binaries);
 
+        this.declareVersionChecking();
         this.declareESource();
         this.declareESourceRegistry();
         this.declareESourceBackend();
@@ -50,6 +51,17 @@ var libedataserver =
         this.declareESourceTaskList();
         this.declareEClient();
         this.declareEUid();
+      },
+      
+      declareVersionChecking : function() {
+        this.eds_check_version = 
+          this.lib.declare(
+              "eds_check_version",
+              ctypes.default_abi,
+              glib.gchar.ptr,
+              glib.gint,
+              glib.gint,
+              glib.gint);
       },
       
       declareESource : function() {
