@@ -3,7 +3,7 @@ Section: mail
 Priority: optional
 Maintainer: Mateusz Balbus <balbusm@gmail.com>
 Uploaders: Mateusz Balbus <balbusm@gmail.com>
-Build-Depends: debhelper (>= 9), mozilla-devscripts (>= 0.34~)
+Build-Depends: debhelper (>= 9), mozilla-devscripts (>= 0.34~), cdbs
 Standards-Version: 3.9.4
 Homepage: https://github.com/balbusm/xul-ext-eds-calendar
 Vcs-Git: https://github.com/balbusm/xul-ext-eds-calendar.git
