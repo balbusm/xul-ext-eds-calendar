@@ -1,7 +1,14 @@
 #!/usr/bin/make -f
 
-MOZ_XPI_BUILD_COMMAND = bash build.sh
-MOZ_XPI_FILE = output/edscalendar.xpi
+%:
+	dh $@ --with xul-ext
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/mozilla-devscripts/xpi.mk
+override_dh_auto_build:
+	bash build.sh
+
+override_dh_auto_install:
+	install-xpi output/xul-ext-eds-calendar.xpi
+
+override_dh_auto_clean:
+	rm -fr output
+	rm -f files
