@@ -1,17 +1,17 @@
-xul-ext-eds-calendar (0.4.2-1) trusty; urgency=low
+xul-ext-eds-calendar (0.4.2-1) unstable; urgency=low
 
   * Added Ubuntu 15.10 support.
 
  -- Mateusz Balbus <balbusm@gmail.com>  Thu, 5 Nov 2015 15:43:32 +0200
 
 
-xul-ext-eds-calendar (0.4.1-1) trusty; urgency=low
+xul-ext-eds-calendar (0.4.1-1) unstable; urgency=low
 
   * Added Sea Monkey support.
 
  -- Mateusz Balbus <balbusm@gmail.com>  Fri, 16 May 2014 15:43:32 +0200
 
-xul-ext-eds-calendar (0.4.0-1) trusty; urgency=low
+xul-ext-eds-calendar (0.4.0-1) unstable; urgency=low
 
   * Initial release.
 
