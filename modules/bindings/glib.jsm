@@ -27,14 +27,12 @@ var EXPORTED_SYMBOLS = ["glib"];
 var glib =
     {
 
-      binaries : ["libglib-2.0.so.0", "libglib-2.0.so"],
-
       lib : null,
 
       init : function() {
 
         addLogger(this, "glib");
-        this.lib = loadLib(this.binaries);
+        this.lib = loadLib("libglib-2.0.so", "0");
 
         this.declareGStructures();
         this.declareMemAlloc();

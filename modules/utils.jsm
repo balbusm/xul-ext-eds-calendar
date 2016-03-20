@@ -794,17 +794,31 @@ function SimpleObjectWrapper(aObject) {
   return new Wrapper();
 }
 
-function loadLib(libsABIs) {
+function loadLib(libName, startFromABI, tryNextABIs = 20) {
   var lib = null;
-  for (let path of libsABIs) {
-    try {
-      lib = ctypes.open(path);
-      LOG("Opened " + path);
+  var maxABI = startFromABI + tryNextABIs;
+  
+  for (abi = startFromABI; abi <= maxABI; abi++ ) {
+    lib = tryLoadLib(libName + "." + abi);
+    if (lib !== null) {
       return lib;
-    } catch (err) {
-      WARN("Failed to open " + path + ": " + err);
     }
   }
-  throw new LoadingLibException("Unable to load library");
+  // Last resort try without ABI
+  lib = tryloadLib(libName);
+  if (lib !== null) {
+    return lib;
+  }
+  throw new LoadingLibException("Unable to load library " + libName + " with ABI " + startFromABI + " till " + maxABI);
+}
+
+function tryLoadLib(libName) {
+  try {
+    lib = ctypes.open(libName);
+    LOG("Opened " + libName);
+    return lib;
+  } catch (err) {
+    return null;
+  }
 }
 

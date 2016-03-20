@@ -30,16 +30,11 @@ var EXPORTED_SYMBOLS = ["libedataserver"];
 var libedataserver =
     {
 
-      binaries : [ "libedataserver-1.2.so.17",
-                   "libedataserver-1.2.so.18",
-                   "libedataserver-1.2.so.20",
-                   "libedataserver-1.2.so" ],
-
       lib : null,
 
       init : function() {
         addLogger(this, "libedataserver");
-        this.lib = loadLib(this.binaries);
+        this.lib = loadLib("libedataserver-1.2.so", "17");
 
         this.declareVersionChecking();
         this.declareESource();

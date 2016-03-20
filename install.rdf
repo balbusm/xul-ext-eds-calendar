@@ -10,7 +10,7 @@
     <em:version>0.4.3</em:version>
     <em:description>Synchronizes calendars with Evolution Data Server</em:description>
     <em:creator>Mateusz Balbus</em:creator>
-    <em:homepageURL>https://bitbucket.org/balbusm/xul-ext-eds-calendar</em:homepageURL>
+    <em:homepageURL>https://github.com/balbusm/xul-ext-eds-calendar</em:homepageURL>
     <em:type>2</em:type>
     <em:targetPlatform>Linux</em:targetPlatform>
 

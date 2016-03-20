@@ -27,14 +27,12 @@ var EXPORTED_SYMBOLS = ["gio"];
 var gio =
     {
 
-      binaries : ["libgio-2.0.so.0", "libgio-2.0.so"],
-
       lib : null,
 
       init : function() {
 
         addLogger(this, "gio");
-        this.lib = loadLib(this.binaries);
+        this.lib = loadLib("libgio-2.0.so", "0");
         
         this.declareGCancellable();
       },

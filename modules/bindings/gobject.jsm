@@ -29,14 +29,12 @@ var EXPORTED_SYMBOLS = ["gobject"];
 var gobject =
     {
 
-      binaries : ["libgobject-2.0.so.0", "libgobject-2.0.so" ],
-
       lib : null,
 
       init : function() {
 
         addLogger(this, "gobject");
-        this.lib = loadLib(this.binaries);
+        this.lib = loadLib("libgobject-2.0.so", "0");
 
         this.declareGObject();
       },

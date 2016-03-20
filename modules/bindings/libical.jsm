@@ -26,13 +26,11 @@ var EXPORTED_SYMBOLS = ["libical"];
 
 var libical = {
 
-  binaries : [ "libical.so.1", "libical.so"],
-
 	lib : null,
 
 	init : function() {
     addLogger(this, "libical");
-    this.lib = loadLib(this.binaries);
+    this.lib = loadLib("libical.so", "1");
 
 		this.declareICalComponentType();
 		this.declareICalComponent();

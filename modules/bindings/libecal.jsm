@@ -31,19 +31,12 @@ var EXPORTED_SYMBOLS = ["libecal"];
 var libecal =
     {
 
-      binaries : ["libecal-1.2.so.15",
-                  "libecal-1.2.so.16",
-                  "libecal-1.2.so.18",
-                  "libecal-1.2.so.20",
-                  "libecal-1.2.so"
-                  ],
-                
       lib : null,
 
       init : function() {
         
         addLogger(this, "libecal");
-        this.lib = loadLib(this.binaries);
+        this.lib = loadLib("libecal-1.2.so", "15");
 
         this.declareECalClientSourceType();
         this.declareECalObjModType();
