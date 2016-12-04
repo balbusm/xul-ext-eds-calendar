@@ -31,14 +31,17 @@ var edsCalendarClient = {
     
     calendar : null,
     
-    init : function int() {
+    init : function init() {
       addLogger(this, "edsCalendarClient");
+      edsCalendarClient.LOG("Init start");
       this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
       // TODO: Add cache?
       // get all the items from all calendars and add them to EDS
-      for (let aCalendar of cal.getCalendarManager().getCalendars({})) {
-        aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, this.calendarGetListener);
-      }
+      function processCalendars(calendar) {
+        calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
+      } 
+      edsCalendarClient.asyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars);
+      
       
       // setting up listeners etc
       if (this.calendar === null) {
@@ -48,6 +51,8 @@ var edsCalendarClient = {
         this.calendar.removeObserver(this.calendarObserver);
         this.calendar.addObserver(this.calendarObserver);
       }
+      edsCalendarClient.LOG("Init finished");
+      
     },
     
     operationTypeToString : function operationTypeToString(operationType) {
@@ -71,8 +76,30 @@ var edsCalendarClient = {
       }
       return result;
     },
+    
+    thread : Components.classes["@mozilla.org/thread-manager;1"]
+      .getService(Components.interfaces.nsIThreadManager)
+      .currentThread,
+    
+    asyncLoop : function asyncLoop(collection, callback) {
+      var itemNumber = -1;
+      function asyncLoopInternal() {
+        itemNumber++;
+        if (itemNumber  >= collection.length) {
+          return;
+        }
+        var item = collection[itemNumber];
+        callback.call(this, item);
+        edsCalendarClient.thread.dispatch(asyncLoopInternal, edsCalendarClient.thread.DISPATCH_NORMAL);
+        
+      }
+      
+      asyncLoopInternal();
+      
+    },
 
     calendarGetListener : {
+    
       onOperationComplete : function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) { 
         if (!Components.isSuccessCode(aStatus)) {
           edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
@@ -100,11 +127,15 @@ var edsCalendarClient = {
           return;
         }
         edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
+        
         edsCalendarClient.edsCalendarService.startBatch();
-        for (let item of aItemscalendar) {
+        
+        function processItem (item) {
           edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
           edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
+          
         }
+        edsCalendarClient.asyncLoop(aItemscalendar, processItem);
         edsCalendarClient.edsCalendarService.endBatch();
       }
     },
@@ -185,7 +216,8 @@ var edsCalendarClient = {
       onDefaultCalendarChanged : function onDefaultCalendarChanged() { ; },
       onLoad : function onLoad() { ; }
     }
-
 };
 
-window.addEventListener("load", function() {edsCalendarClient.init();}, false);
+window.addEventListener("load", function() {edsCalendarClient.init()}, false);
+
+
