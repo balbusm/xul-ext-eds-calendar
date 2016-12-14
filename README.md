@@ -15,8 +15,12 @@ If you have any issues please collect logs and attach them to the issue.
 To enable addon logging:
 
 In Thunderbird go to Preferences > Preferences > Advanced > Config Editor
+
 Set entry "extensions.edscalendar.logging.enabled" to true
+
 Close Thunderbird
+
 Start Thunderbird from terminal
+
 Logs should start displaying on the screen.
 
