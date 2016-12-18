@@ -552,13 +552,18 @@ calEDSProvider.prototype = {
           libical.icalcomponent_free(icalcomponent);
           return;
         }
-  
+        
+        this.LOG("iCalString" + aItem.icalString);
+        
         comp = libical.icalcomponent_new_from_string(aItem.icalString);
         uid = glib.gchar.ptr();
   
+        this.LOG("Timezone calculation");
         itemcomp = this.vcalendarAddTimezonesGetItem(client, comp, aItem);
-  
+        this.LOG("After timezone calculation");
+        
         created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error.address());
+        this.LOG("After creation of ecal obj");
         this.checkGError("Error adding item:", error);
         
         // notify obeservers that given item has been synchronized
