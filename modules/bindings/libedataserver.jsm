@@ -34,7 +34,7 @@ var libedataserver =
 
       init : function() {
         addLogger(this, "libedataserver");
-        this.lib = loadLib("libedataserver-1.2.so", "17");
+        this.lib = loadLib("libedataserver-1.2.so", 17);
 
         this.declareVersionChecking();
         this.declareESource();

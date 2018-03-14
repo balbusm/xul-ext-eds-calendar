@@ -34,7 +34,7 @@ var gobject =
       init : function() {
 
         addLogger(this, "gobject");
-        this.lib = loadLib("libgobject-2.0.so", "0");
+        this.lib = loadLib("libgobject-2.0.so", 0);
 
         this.declareGObject();
       },

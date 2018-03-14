@@ -7,7 +7,7 @@
 
     <em:id>{e6696d02-466a-11e3-a162-04e36188709b}</em:id>
     <em:name>EDS Calendar Integration</em:name>
-    <em:version>0.5</em:version>
+    <em:version>0.5.1</em:version>
     <em:description>Synchronizes calendars with Evolution Data Server</em:description>
     <em:creator>Mateusz Balbus</em:creator>
     <em:homepageURL>https://github.com/balbusm/xul-ext-eds-calendar</em:homepageURL>
@@ -19,7 +19,7 @@
         <Description>
             <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id>
             <em:minVersion>24.0</em:minVersion>
-            <em:maxVersion>52.*</em:maxVersion>
+            <em:maxVersion>61.*</em:maxVersion>
         </Description>
     </em:targetApplication>
     <!-- Seamonkey  -->

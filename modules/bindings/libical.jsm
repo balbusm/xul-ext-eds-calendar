@@ -30,7 +30,7 @@ var libical = {
 
 	init : function() {
     addLogger(this, "libical");
-    this.lib = loadLib("libical.so", "1");
+    this.lib = loadLib("libical.so", 1);
 
 		this.declareICalComponentType();
 		this.declareICalComponent();

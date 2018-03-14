@@ -32,7 +32,7 @@ var gio =
       init : function() {
 
         addLogger(this, "gio");
-        this.lib = loadLib("libgio-2.0.so", "0");
+        this.lib = loadLib("libgio-2.0.so", 0);
         
         this.declareGCancellable();
       },

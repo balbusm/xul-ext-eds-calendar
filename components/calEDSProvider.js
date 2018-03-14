@@ -331,7 +331,10 @@ calEDSProvider.prototype = {
           null,
           error.address());
         this.checkGError("Couldn't connect to source:", error);
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;  
+        }
         // release source in case of error in retreiving client
         // if client is created source is released along with client
         if (this.checkCDataNotNull(source)) {
@@ -567,7 +570,10 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_OK;
         detail = aItem;
       
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         nserror = Components.results.NS_ERROR_FAILURE;
         detail = e.message;
         this.ERROR(detail);
@@ -627,7 +633,10 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_OK;
         detail = aNewItem;
 
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
@@ -668,7 +677,10 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_OK;
         detail = aItem;
 
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
@@ -744,7 +756,10 @@ calEDSProvider.prototype = {
         }
         nserror = Components.results.NS_OK;
         
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         nserror = Components.results.NS_ERROR_FAILURE;        
         detail = e.message;
         this.ERROR(detail);
@@ -873,7 +888,10 @@ calEDSProvider.prototype = {
         this.LOG("Removed calendar " +  aCalendar.name + " " + aCalendar.id);
         // FIXME: add notification
         
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         detail = e.message;
         this.ERROR(detail);
       } finally {
@@ -899,7 +917,10 @@ calEDSProvider.prototype = {
         }
         
         calendar = this.createCalendarFromESource(source);
-      } catch (e if e instanceof CalendarServiceException) {
+      } catch (e) {
+        if (!e instanceof CalendarServiceException) {
+          throw e;
+        }
         detail = e.message;
         this.ERROR(detail);
       } finally {

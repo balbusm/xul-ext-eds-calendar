@@ -173,7 +173,7 @@ function addLogger(aTarget, aDomain) {
   let logger = new Logger(domain);
 
   ["log", "warn", "error"].forEach(function(name) {
-    upper = name.toUpperCase();
+    let upper = name.toUpperCase();
     delete aTarget[upper];
     aTarget[upper] = function() {
       logger[name].apply(logger, arguments);
@@ -216,7 +216,7 @@ function CTypesLibrary(aName, aABIs, aDefines) {
     var library;
     var abi;
 
-    for each (let i in aABIs) {
+    for (let i of aABIs) {
       let soname = "lib" + aName + ".so." + i.toString();
       try {
         library = ctypes.open(soname);
@@ -794,27 +794,26 @@ function SimpleObjectWrapper(aObject) {
   return new Wrapper();
 }
 
-function loadLib(libName, startFromABI, tryNextABIs = 20) {
+function loadLib(libName, startFromABI, tryNextABIs = 30) {
   var lib = null;
   var maxABI = startFromABI + tryNextABIs;
-  
-  for (abi = startFromABI; abi <= maxABI; abi++ ) {
+  for (let abi = startFromABI; abi <= maxABI; abi++ ) {
     lib = tryLoadLib(libName + "." + abi);
     if (lib !== null) {
       return lib;
     }
   }
   // Last resort try without ABI
-  lib = tryloadLib(libName);
+  lib = tryLoadLib(libName);
   if (lib !== null) {
     return lib;
   }
-  throw new LoadingLibException("Unable to load library " + libName + " with ABI " + startFromABI + " till " + maxABI);
+  throw new LoadingLibException("Unable to load library " + libName + " with any ABI from " + startFromABI + " to " + maxABI);
 }
 
 function tryLoadLib(libName) {
   try {
-    lib = ctypes.open(libName);
+    let lib = ctypes.open(libName);
     LOG("Opened " + libName);
     return lib;
   } catch (err) {
