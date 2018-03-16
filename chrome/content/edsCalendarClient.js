@@ -42,10 +42,9 @@ var edsCalendarClient = {
       } 
       edsCalendarClient.asyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars);
       
-      
       // setting up listeners etc
       if (this.calendar === null) {
-        this.calendar = getCompositeCalendar();
+        this.calendar = cal.getCompositeCalendar(window);
       }
       if (this.calendar) {
         this.calendar.removeObserver(this.calendarObserver);
