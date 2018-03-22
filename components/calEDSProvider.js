@@ -125,7 +125,7 @@ calEDSProvider.prototype = {
       }
       case "color": {
         let colorPropertyGetter = function (registry, source) {
-          let sourceExtension = libecal.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
+          let sourceExtension = libedataserver.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
           let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr);
           let color = libedataserver.e_source_selectable_dup_color(selectableSourceExtension);
           var result = color.readString();
