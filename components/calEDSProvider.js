@@ -209,7 +209,13 @@ calEDSProvider.prototype = {
         throw new CalendarServiceException(message);
       }
     },
-    
+
+    rethrowNotCalendarServiceException : function rethrowNotCalendarServiceException(exception) {
+      if (!exception instanceof CalendarServiceException) {
+        throw exception;
+      }
+    },
+
     getERegistry : function getERegistry() {
       this.LOG("Getting ERegistry...");
       let error = glib.GError.ptr();
@@ -332,9 +338,7 @@ calEDSProvider.prototype = {
           error.address());
         this.checkGError("Couldn't connect to source:", error);
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;  
-        }
+        this.rethrowNotCalendarServiceException(e);
         // release source in case of error in retreiving client
         // if client is created source is released along with client
         if (this.checkCDataNotNull(source)) {
@@ -343,6 +347,7 @@ calEDSProvider.prototype = {
         }
         throw e;
       }
+      
       // FIXME: Unref old client
       // store new batch client
       if (this.mBatchCount > 0) {
@@ -571,13 +576,12 @@ calEDSProvider.prototype = {
         detail = aItem;
       
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         nserror = Components.results.NS_ERROR_FAILURE;
         detail = e.message;
         this.ERROR(detail);
         this.ERROR(e.stack);
+        this.ERROR("Exception for Item icalString:\n" + aItem.icalString);
       } finally {
         if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
@@ -634,12 +638,12 @@ calEDSProvider.prototype = {
         detail = aNewItem;
 
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
+        this.ERROR("Exception for NewItem.icalString:\n" + aNewItem.icalString);
+        this.ERROR("Exception for OldItem.icalString:\n" + aOldItem.icalString);
       } 
 
       this.notifyOperationComplete(aListener,
@@ -678,12 +682,12 @@ calEDSProvider.prototype = {
         detail = aItem;
 
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
+        this.ERROR("Exception for Item icalString:\n" + aItem.icalString);
+
       } finally {
         if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
@@ -757,9 +761,7 @@ calEDSProvider.prototype = {
         nserror = Components.results.NS_OK;
         
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         nserror = Components.results.NS_ERROR_FAILURE;        
         detail = e.message;
         this.ERROR(detail);
@@ -889,9 +891,7 @@ calEDSProvider.prototype = {
         // FIXME: add notification
         
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         detail = e.message;
         this.ERROR(detail);
       } finally {
@@ -918,9 +918,7 @@ calEDSProvider.prototype = {
         
         calendar = this.createCalendarFromESource(source);
       } catch (e) {
-        if (!e instanceof CalendarServiceException) {
-          throw e;
-        }
+        this.rethrowNotCalendarServiceException(e);
         detail = e.message;
         this.ERROR(detail);
       } finally {

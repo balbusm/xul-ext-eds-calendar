@@ -88,7 +88,7 @@ var edsCalendarClient = {
           return;
         }
         var item = collection[itemNumber];
-        callback.call(this, item);
+        callback.call(edsCalendarClient, item);
         edsCalendarClient.thread.dispatch(asyncLoopInternal, edsCalendarClient.thread.DISPATCH_NORMAL);
         
       }
@@ -127,15 +127,12 @@ var edsCalendarClient = {
         }
         edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
         
-        edsCalendarClient.edsCalendarService.startBatch();
-        
         function processItem (item) {
           edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
           edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
           
         }
         edsCalendarClient.asyncLoop(aItemscalendar, processItem);
-        edsCalendarClient.edsCalendarService.endBatch();
       }
     },
     
