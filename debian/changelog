@@ -1,5 +1,11 @@
 xul-ext-eds-calendar (0.4.3) unstable; urgency=low
 
+  * Added TB59 support.
+
+ -- Mateusz Balbus <balbusm@gmail.com>  Wed, 4 Apr 2018 15:43:32 +0200
+
+xul-ext-eds-calendar (0.4.3) unstable; urgency=low
+
   * Added Fedora 23 support.
 
  -- Mateusz Balbus <balbusm@gmail.com>  Thu, 5 Nov 2015 15:43:32 +0200
