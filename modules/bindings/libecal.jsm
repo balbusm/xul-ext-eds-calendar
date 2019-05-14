@@ -36,7 +36,7 @@ var libecal =
       init : function() {
         
         addLogger(this, "libecal");
-        this.lib = loadLib("libecal-1.2.so", 15);
+        this.lib = loadLib("libecal-1.2.so", 17);
 
         this.declareECalClientSourceType();
         this.declareECalObjModType();

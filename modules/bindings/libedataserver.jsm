@@ -34,7 +34,9 @@ var libedataserver =
 
       init : function() {
         addLogger(this, "libedataserver");
-        this.lib = loadLib("libedataserver-1.2.so", 17);
+        // Workaround to make sure that invalid version of libedataserver-1.2.so
+        // is not loaded (libecal makes libedataserver load)
+        this.lib = loadLib("libecal-1.2.so", 17);
 
         this.declareVersionChecking();
         this.declareESource();
