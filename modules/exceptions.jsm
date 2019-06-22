@@ -17,9 +17,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = [ "CalendarServiceException", "LoadingLibException"];
+var EXPORTED_SYMBOLS = ["CalendarServiceException", "LoadingLibException"];
 
-var IntermediateInheritor = function() {}
+var IntermediateInheritor = function () { }
 IntermediateInheritor.prototype = Error.prototype;
 
 function CalendarServiceException() {

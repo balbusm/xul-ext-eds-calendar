@@ -20,20 +20,20 @@
 
 "use strict";
 
-Components.utils.import("resource://calendar/modules/calUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
+var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-Components.utils.import("resource://edscalendar/utils.jsm");
-Components.utils.import("resource://edscalendar/edsPreferences.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
+var { edsPerformance } = ChromeUtils.import("resource://edscalendar/edsPreferences.jsm");
 
 var edsCalendarClient = {
     
     calendar : null,
     
-    init: function init() {
-      addLogger(this, "edsCalendarClient");
+    init : function init() {
+      edsUtils.addLogger(this, "edsCalendarClient");
 
       this.preferences = new EdsPreferences();
       this.attachDebuggerIfNeeded();
@@ -52,7 +52,7 @@ var edsCalendarClient = {
         .then(() => edsCalendarClient.LOG("Init finished"));
       
     },
-
+      
     initCompositeCalendar : function initCompositeCalendar() {
       if (edsCalendarClient.calendar === null) {
         edsCalendarClient.calendar = cal.getCompositeCalendar(window);
@@ -66,7 +66,7 @@ var edsCalendarClient = {
       }
       
     },
-
+    
 
 
     attachDebuggerIfNeeded : function attachDebuggerIfNeeded () {
@@ -116,7 +116,7 @@ var edsCalendarClient = {
       var itemNumber = -1;
       function asyncLoopInternal(resolve, reject) {
         itemNumber++;
-        if (itemNumber >= collection.length) {
+        if (itemNumber  >= collection.length) {
           resolve();
           return;
         }
@@ -125,7 +125,7 @@ var edsCalendarClient = {
         window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
       }
       edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay} ms`);
-
+      
       return new Promise(asyncLoopInternal);
       
     },

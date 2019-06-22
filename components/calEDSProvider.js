@@ -20,25 +20,24 @@
 
 "use strict";
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/ctypes.jsm");
-Components.utils.import("resource://calendar/modules/calUtils.jsm");
-Components.utils.import("resource://calendar/modules/calProviderUtils.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
-Components.utils.import("resource://edscalendar/bindings/gio.jsm");
-Components.utils.import("resource://edscalendar/bindings/glib.jsm");
-Components.utils.import("resource://edscalendar/bindings/gobject.jsm");
-Components.utils.import("resource://edscalendar/bindings/libical.jsm");
-Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
-Components.utils.import("resource://edscalendar/bindings/libedataserver.jsm");
-Components.utils.import("resource://edscalendar/exceptions.jsm");
-Components.utils.import("resource://edscalendar/utils.jsm");
+var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
+var { gobject } = ChromeUtils.import("resource://edscalendar/bindings/gobject.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical.jsm");
+var { libecal } = ChromeUtils.import("resource://edscalendar/bindings/libecal.jsm");
+var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
+var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/exceptions.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 
 function calEDSProvider() {
     this.initProviderBase();
-    addLogger(this, "calEDSProvider");
+    edsUtils.addLogger(this, "calEDSProvider");
     Services.obs.addObserver(this, "quit-application-granted", false);
     glib.init();
     gio.init();

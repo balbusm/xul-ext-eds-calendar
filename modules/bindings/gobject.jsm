@@ -18,41 +18,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://gre/modules/ctypes.jsm");
+var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 
-Components.utils.import("resource://edscalendar/bindings/glib.jsm");
-Components.utils.import("resource://edscalendar/utils.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
 
 
 var EXPORTED_SYMBOLS = ["gobject"];
 
 var gobject =
-    {
+{
 
-      lib : null,
+  lib: null,
 
-      init : function() {
+  init: function () {
 
-        addLogger(this, "gobject");
-        this.lib = loadLib("libgobject-2.0.so", 0);
+    edsUtils.addLogger(this, "gobject");
+    this.lib = edsUtils.loadLib("libgobject-2.0.so", 0);
 
-        this.declareGObject();
-      },
+    this.declareGObject();
+  },
 
 
-      declareGObject : function() {
+  declareGObject: function () {
 
-        this._GObject = new ctypes.StructType("_GObject");
-        this.GObject = this._GObject;
+    this._GObject = new ctypes.StructType("_GObject");
+    this.GObject = this._GObject;
 
-        this.g_object_unref = this.lib.declare("g_object_unref",
-         ctypes.default_abi,
-         ctypes.void_t, // return
-         glib.gpointer); // mem
+    this.g_object_unref = this.lib.declare("g_object_unref",
+      ctypes.default_abi,
+      ctypes.void_t, // return
+      glib.gpointer); // mem
 
-      },
+  },
 
-      shutdown: function() {
-        this.lib.close();
-      }
-    };
+  shutdown: function () {
+    this.lib.close();
+  }
+};

@@ -1,15 +1,15 @@
-const { classes: Cc, interfaces: Ci, results: Cr, utils: Cu } = Components;
+const { classes: Cc, interfaces: Ci, results: Cr} = Components;
 
 const NS_PREFBRANCH_PREFCHANGE_TOPIC_ID = "nsPref:changed";
 
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-Cu.import("resource://edscalendar/exceptions.jsm");
+var exceptions = ChromeUtils.import("resource://edscalendar/exceptions.jsm");
 
 XPCOMUtils.defineLazyGetter(this, "ctypes", function() {
-  Cu.import("resource://gre/modules/ctypes.jsm");
+  ChromeUtils.import("resource://gre/modules/ctypes.jsm");
   return ctypes;
 });
 
