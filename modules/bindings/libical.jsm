@@ -28,8 +28,8 @@ var libical = {
 	lib: null,
 
 	init: function () {
-		addLogger(this, "libical");
-		this.lib = loadLib("libical.so", 1);
+		edsUtils.addLogger(this, "libical");
+		this.lib = edsUtils.loadLib("libical.so", 1);
 
 		this.declareICalComponentType();
 		this.declareICalComponent();

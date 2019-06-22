@@ -55,15 +55,9 @@ const calEDSProviderInterfaces = [
   Components.interfaces.calICompositeCalendar
 ];
 calEDSProvider.prototype = {
-    __proto__: cal.ProviderBase.prototype,
+    __proto__: cal.provider.BaseClass.prototype,
     classID: calEDSProviderClassID,
-    QueryInterface: XPCOMUtils.generateQI(calEDSProviderInterfaces),
-    classInfo: XPCOMUtils.generateCI({
-        classID: calEDSProviderClassID,
-        contractID: "@mozilla.org/calendar/calendar;1?type=eds",
-        classDescription: "EDS Provider",
-        interfaces: calEDSProviderInterfaces
-    }),
+    QueryInterface: ChromeUtils.generateQI(calEDSProviderInterfaces),
 
     mBatchCalendar : null,
     mBatchClient : null,
@@ -809,7 +803,7 @@ calEDSProvider.prototype = {
             return this.mId;
           },
           
-          QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
+          QueryInterface: ChromeUtils.generateQI([Components.interfaces.calICalendar]),
       };
       // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
       let sourceId = libedataserver.e_source_dup_uid(source);
