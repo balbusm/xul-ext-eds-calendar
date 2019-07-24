@@ -21,7 +21,7 @@ var gBindNow = false;
 var gCallbacks = {};
 
 function formatLogMessage(aType, aDomain, aStr, aException) {
-  let message = aType.toUpperCase() + " " + aDomain + ": " + aStr;
+  let message = `${new Date().toISOString()} ${aType.toUpperCase()}  ${aDomain} : ${aStr}`;
   if (aException)
     return message + ": " + aException;
   return message;

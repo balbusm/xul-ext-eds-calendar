@@ -26,21 +26,27 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 Components.utils.import("resource://edscalendar/utils.jsm");
+Components.utils.import("resource://edscalendar/edsPreferences.jsm");
 
 var edsCalendarClient = {
     
     calendar : null,
     
-    init : function init() {
+    init: function init() {
       addLogger(this, "edsCalendarClient");
+
+      this.preferences = new EdsPreferences();
+      this.attachDebuggerIfNeeded();
+
       edsCalendarClient.LOG("Init start");
+
       this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
       // TODO: Add cache?
       // get all the items from all calendars and add them to EDS
       function processCalendars(calendar) {
         calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
       } 
-      edsCalendarClient.asyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars);
+      edsCalendarClient.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars);
       
       // setting up listeners etc
       if (this.calendar === null) {
@@ -52,6 +58,14 @@ var edsCalendarClient = {
       }
       edsCalendarClient.LOG("Init finished");
       
+    },
+
+    attachDebuggerIfNeeded : function () {
+      // Use below command to start debugging on start-up
+      // thunderbird --start-debugger-server --jsdebugger --wait-for-jsdebugger
+      if (edsCalendarClient.preferences.isDebugEnabled()) {
+        debugger;
+      }
     },
     
     operationTypeToString : function operationTypeToString(operationType) {
@@ -80,19 +94,26 @@ var edsCalendarClient = {
       .getService(Components.interfaces.nsIThreadManager)
       .currentThread,
     
+    delayedAsyncLoop : function delayedAsyncLoop(collection, callback) {
+      let delay = edsCalendarClient.preferences.getInitialProcressingDelay();
+      edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`)
+      window.setTimeout(function(){ edsCalendarClient.asyncLoop(collection, callback); }, delay);
+    }, 
+
     asyncLoop : function asyncLoop(collection, callback) {
+      var itemProcessingDelay = edsCalendarClient.preferences.getItemProcessingDelay();
       var itemNumber = -1;
       function asyncLoopInternal() {
         itemNumber++;
-        if (itemNumber  >= collection.length) {
+        if (itemNumber >= collection.length) {
           return;
         }
         var item = collection[itemNumber];
         callback.call(edsCalendarClient, item);
-        edsCalendarClient.thread.dispatch(asyncLoopInternal, edsCalendarClient.thread.DISPATCH_NORMAL);
-        
+        window.setTimeout(asyncLoopInternal, itemProcessingDelay);
       }
-      
+      edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay}`);
+
       asyncLoopInternal();
       
     },
@@ -167,17 +188,19 @@ var edsCalendarClient = {
       
       // calIObserver
       onAddItem : function onAddItem(aItem) {
+        edsCalendarClient.LOG("onAddItem");        
         edsCalendarClient.edsCalendarService.addItem(aItem, this.calendarChangeListener);
-        
       },
 
       // calIObserver
       onDeleteItem : function onDeleteItem(aItem) {
+        edsCalendarClient.LOG("onDeleteItem");
         edsCalendarClient.edsCalendarService.deleteItem(aItem, this.calendarChangeListener);
       },
 
       // calIObserver
       onModifyItem : function onModifyItem(aNewItem, aOldItem) {
+        edsCalendarClient.LOG("onModifyItem");
         edsCalendarClient.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
       },
 
@@ -186,11 +209,13 @@ var edsCalendarClient = {
         // This is called when a new calendar is added.
         // We can get all the items from the calendar and add them one by one to
         // Evolution Data Server
+        edsCalendarClient.LOG("onCalendarAdded");
         aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
       },
 
       // calICompositeObserver
       onCalendarRemoved : function onCalendarRemoved(aCalendar) {
+        edsCalendarClient.LOG("onCalendarRemoved");
         edsCalendarClient.edsCalendarService.removeCalendar(aCalendar);
       },
 
