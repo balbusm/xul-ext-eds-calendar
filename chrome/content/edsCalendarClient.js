@@ -47,24 +47,22 @@ var edsCalendarClient = {
         calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
       } 
       edsCalendarClient.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars)
-        .then(() =>{
-
-        });
-      
-      edsCalendarClient.LOG("Init finished");
+        .then(edsCalendarClient.initCompositeCalendar)
+        .then(edsCalendarClient.attachCalendarObservers)
+        .then(() => edsCalendarClient.LOG("Init finished"));
       
     },
 
     initCompositeCalendar : function initCompositeCalendar() {
-      if (this.calendar === null) {
-        this.calendar = cal.getCompositeCalendar(window);
+      if (edsCalendarClient.calendar === null) {
+        edsCalendarClient.calendar = cal.getCompositeCalendar(window);
       }
     },
 
     attachCalendarObservers : function attachCalendarObservers() {
-      if (this.calendar) {
-        this.calendar.removeObserver(this.calendarObserver);
-        this.calendar.addObserver(this.calendarObserver);
+      if (edsCalendarClient.calendar) {
+        edsCalendarClient.calendar.removeObserver(edsCalendarClient.calendarObserver);
+        edsCalendarClient.calendar.addObserver(edsCalendarClient.calendarObserver);
       }
       
     },
@@ -110,7 +108,7 @@ var edsCalendarClient = {
       edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`)
       return new Promise((resolve, reject) => {
         window.setTimeout(() => { resolve() } , delay)
-      }).then(() => edsCalendarClient.asyncLoop);
+      }).then(() => edsCalendarClient.asyncLoop(collection, callback));
     }, 
 
     asyncLoop : function asyncLoop(collection, callback) {
@@ -124,7 +122,7 @@ var edsCalendarClient = {
         }
         var item = collection[itemNumber];
         callback.call(edsCalendarClient, item);
-        window.setTimeout(asyncLoopInternal, itemProcessingDelay);
+        window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
       }
       edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay}`);
 
