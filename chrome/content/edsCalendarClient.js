@@ -124,7 +124,7 @@ var edsCalendarClient = {
         callback.call(edsCalendarClient, item);
         window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
       }
-      edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay}`);
+      edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay} ms`);
 
       return new Promise(asyncLoopInternal);
       
