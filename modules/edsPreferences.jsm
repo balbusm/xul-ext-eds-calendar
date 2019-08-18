@@ -18,7 +18,7 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-Components.utils.import("resource://gre/modules/Services.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var EXPORTED_SYMBOLS = [ "EdsPreferences" ];
 
