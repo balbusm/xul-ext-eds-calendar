@@ -25,7 +25,7 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
-var edsPreferences = ChromeUtils.import("resource://edscalendar/edsPreferences.jsm");
+var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/edsPreferences.jsm");
 
 var edsCalendarClient = {
 
@@ -34,7 +34,7 @@ var edsCalendarClient = {
   init: function init() {
     edsUtils.addLogger(this, "edsCalendarClient");
 
-    this.preferences = new edsPreferences.EdsPreferences();
+    this.preferences = new EdsPreferences();
     this.attachDebuggerIfNeeded();
 
     edsCalendarClient.LOG("Init start");
