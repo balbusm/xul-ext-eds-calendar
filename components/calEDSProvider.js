@@ -367,6 +367,29 @@ calEDSProvider.prototype = {
       }
     },
 
+    itemExists : function itemExist(item) {
+      let client;
+      let icalcomponent;
+      try {
+        // FIXME: Check if source exists
+        let eSourceProvider = this.findESource.bind(this);
+          
+        client = this.getECalClient(item, eSourceProvider);
+
+        icalcomponent = this.findItem(client, item);
+        return !icalcomponent.isNull();
+
+      } finally {
+          if (this.checkCDataNotNull(client)) {
+            this.deleteECalClient(client);
+          }
+          if (this.checkCDataNotNull(icalcomponent)) {
+            libical.icalcomponent_free(icalcomponent);
+          }
+
+      }
+    },
+  
     findItem : function findItem(client, item) {
       let error = glib.GError.ptr();
       var icalcomponent = libical.icalcomponent.ptr();
@@ -622,7 +645,13 @@ calEDSProvider.prototype = {
         }
         
         for (let modifiedRecurrence of modifiedRecurrences) {
-          modified = this.modifySingleItem(modifiedRecurrence);
+          if (this.itemExists(modifiedRecurrence)) {
+            modified = this.modifySingleItem(modifiedRecurrence);
+          } else {
+            this.LOG("No old item to modify. Adding single item " +  modifiedRecurrence.title + " " + modifiedRecurrence.id);  
+            this.addItem(modifiedRecurrence, aListener);
+            modified = true;   
+          }
         }
         
         this.LOG("Modified item " +  aNewItem.title + " " + aNewItem.id);
