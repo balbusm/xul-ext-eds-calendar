@@ -20,25 +20,24 @@
 
 "use strict";
 
-Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/ctypes.jsm");
-Components.utils.import("resource://calendar/modules/calUtils.jsm");
-Components.utils.import("resource://calendar/modules/calProviderUtils.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 
-Components.utils.import("resource://edscalendar/bindings/gio.jsm");
-Components.utils.import("resource://edscalendar/bindings/glib.jsm");
-Components.utils.import("resource://edscalendar/bindings/gobject.jsm");
-Components.utils.import("resource://edscalendar/bindings/libical.jsm");
-Components.utils.import("resource://edscalendar/bindings/libecal.jsm");
-Components.utils.import("resource://edscalendar/bindings/libedataserver.jsm");
-Components.utils.import("resource://edscalendar/exceptions.jsm");
-Components.utils.import("resource://edscalendar/utils.jsm");
+var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
+var { gobject } = ChromeUtils.import("resource://edscalendar/bindings/gobject.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical.jsm");
+var { libecal } = ChromeUtils.import("resource://edscalendar/bindings/libecal.jsm");
+var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
+var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/exceptions.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 
 function calEDSProvider() {
     this.initProviderBase();
-    addLogger(this, "calEDSProvider");
+    edsUtils.addLogger(this, "calEDSProvider");
     Services.obs.addObserver(this, "quit-application-granted", false);
     glib.init();
     gio.init();
@@ -56,15 +55,9 @@ const calEDSProviderInterfaces = [
   Components.interfaces.calICompositeCalendar
 ];
 calEDSProvider.prototype = {
-    __proto__: cal.ProviderBase.prototype,
+    __proto__: cal.provider.BaseClass.prototype,
     classID: calEDSProviderClassID,
-    QueryInterface: XPCOMUtils.generateQI(calEDSProviderInterfaces),
-    classInfo: XPCOMUtils.generateCI({
-        classID: calEDSProviderClassID,
-        contractID: "@mozilla.org/calendar/calendar;1?type=eds",
-        classDescription: "EDS Provider",
-        interfaces: calEDSProviderInterfaces
-    }),
+    QueryInterface: ChromeUtils.generateQI(calEDSProviderInterfaces),
 
     mBatchCalendar : null,
     mBatchClient : null,
@@ -810,7 +803,7 @@ calEDSProvider.prototype = {
             return this.mId;
           },
           
-          QueryInterface: XPCOMUtils.generateQI([Components.interfaces.calICalendar]),
+          QueryInterface: ChromeUtils.generateQI([Components.interfaces.calICalendar]),
       };
       // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
       let sourceId = libedataserver.e_source_dup_uid(source);

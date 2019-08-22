@@ -6,9 +6,4 @@
 
     <script type="application/javascript" src="chrome://edscalendar/content/edsCalendarClient.js"></script>
 
-    <stringbundleset id="stringbundleset">
-    <stringbundle id="edscalendar-strings" 
-        src="chrome://edscalendar/locale/overlay.properties"/>
-    </stringbundleset>
-
 </overlay>

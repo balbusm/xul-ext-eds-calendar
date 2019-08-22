@@ -43,7 +43,7 @@ exports.prepareCalendar = function prepareCalendar(calData) {
       return calData.properties[name];
     return undefined;
   };
-  calendar.QueryInterface = XPCOMUtils.generateQI([Components.interfaces.calICalendar]);
+  calendar.QueryInterface = ChromeUtils.generateQI([Components.interfaces.calICalendar]);
   return calendar;
 };
 
