@@ -22,7 +22,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://mozmill/modules/assertions.js");
 
-Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.import("resource://edscalendar/bindings/libical-glib.jsm");
 
 Components.utils.import("resource://edscalendar/utils.jsm");
 

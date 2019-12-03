@@ -18,13 +18,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 
 var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
 var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical-glib.jsm");
 var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
+var { edslib } = ChromeUtils.import("resource://edscalendar/bindings/edslib.jsm");
 
 var EXPORTED_SYMBOLS = ["libecal"];
 
@@ -36,7 +38,7 @@ var libecal =
   init: function () {
 
     edsUtils.addLogger(this, "libecal");
-    this.lib = edsUtils.loadLib("libecal-1.2.so", 17);
+    this.lib = edslib.loadEdsLib();
 
     this.declareECalClientSourceType();
     this.declareECalObjModType();
@@ -129,57 +131,20 @@ var libecal =
         gio.GCancellable.ptr, // cancellable
         glib.GError.ptr.ptr); // error
 
-    //    	this.e_cal_client_get_objects_for_uid_sync = this.lib.declare(
-    //    			"e_cal_client_get_objects_for_uid_sync", ctypes.default_abi,
-    //    			glib.gboolean, this.ECalClient.ptr, glib.gchar.ptr, glib.GSList.ptr.ptr,
-    //    			gio.GCancellable.ptr, glib.GError.ptr.ptr);
-
-
   },
 
   declareECalClientConnectSync: function () {
-    // e_cal_client_connect_sync has changed declaration over the time
-    // newer version takes ECalClientSourceType, gint, GCancellable, GError
-    // older version takes ECalClientSourceType, GCancellable, GError
-    // check which version is used
-    // create proxy for old version to ignore unnecessary argument
-    var versionIssue = libedataserver.eds_check_version(3, 16, 0);
-    if (versionIssue.isNull()) {
-      this.LOG("Loading new declaration of e_cal_client_connect_sync...");
-      this.e_cal_client_connect_sync = this.lib.declare(
-        "e_cal_client_connect_sync",
-        ctypes.default_abi,
-        this.ECalClient.ptr,
-        libedataserver.ESource.ptr,
-        libecal.ECalClientSourceType.type,
-        glib.gint,
-        gio.GCancellable.ptr,
-        glib.GError.ptr.ptr);
+    this.LOG("Loading new declaration of e_cal_client_connect_sync...");
+    this.e_cal_client_connect_sync = this.lib.declare(
+      "e_cal_client_connect_sync",
+      ctypes.default_abi,
+      this.ECalClient.ptr,
+      libedataserver.ESource.ptr,
+      libecal.ECalClientSourceType.type,
+      glib.gint,
+      gio.GCancellable.ptr,
+      glib.GError.ptr.ptr);
 
-    } else {
-      this.LOG("Loading old declaration of e_cal_client_connect_sync. Reason: "
-        + versionIssue.readString());
-      this._e_cal_client_connect_sync = this.lib.declare(
-        "e_cal_client_connect_sync",
-        ctypes.default_abi,
-        this.ECalClient.ptr,
-        libedataserver.ESource.ptr,
-        libecal.ECalClientSourceType.type,
-        gio.GCancellable.ptr,
-        glib.GError.ptr.ptr);
-      this.e_cal_client_connect_sync = function () {
-        // copy args to array (shouldn't be in separate method)
-        var args = new Array(arguments.length);
-        for (var i = 0; i < args.length; ++i) {
-          //i is always valid index in the arguments object
-          args[i] = arguments[i];
-        }
-
-        args.splice(2, 1);
-        this.LOG("Calling e_cal_client_connect_sync without timeout");
-        return this._e_cal_client_connect_sync.apply(this, args);
-      }
-    }
     this.LOG("Successfully loaded e_cal_client_connect_sync");
 
   },

@@ -23,7 +23,7 @@ var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 
 var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
 var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical.jsm");
+var { edslib } = ChromeUtils.import("resource://edscalendar/bindings/edslib.jsm");
 
 var EXPORTED_SYMBOLS = ["libedataserver"];
 
@@ -34,10 +34,10 @@ var libedataserver =
 
     init: function () {
         edsUtils.addLogger(this, "libedataserver");
-        // Workaround to make sure that invalid version of libedataserver-1.2.so
+        // Workaround to make sure that invalid version of libedataserver-2.0.so
         // is not loaded (libecal makes libedataserver load)
-        this.lib = edsUtils.loadLib("libecal-1.2.so", 17);
-
+        this.lib = edslib.loadEdsLib();
+        
         this.declareVersionChecking();
         this.declareESource();
         this.declareESourceRegistry();

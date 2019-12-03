@@ -29,7 +29,7 @@ var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
 var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
 var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
 var { gobject } = ChromeUtils.import("resource://edscalendar/bindings/gobject.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical-glib.jsm");
 var { libecal } = ChromeUtils.import("resource://edscalendar/bindings/libecal.jsm");
 var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
 var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/exceptions.jsm");
@@ -42,8 +42,8 @@ function calEDSProvider() {
     glib.init();
     gio.init();
     gobject.init();
-    libical.init();
     libedataserver.init();
+    libical.init();
     libecal.init();
 }
 
