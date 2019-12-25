@@ -20,3 +20,5 @@ To enable addon logging:
 - Start Thunderbird from terminal
 - Logs should start displaying on the screen.
 
+## More questions?
+[See FAQ for more](https://github.com/balbusm/xul-ext-eds-calendar/wiki)
