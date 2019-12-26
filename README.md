@@ -21,4 +21,4 @@ To enable addon logging:
 - Logs should start displaying on the screen.
 
 ## More questions?
-[See FAQ for more](https://github.com/balbusm/xul-ext-eds-calendar/wiki)
+[See FAQ for more](https://github.com/balbusm/xul-ext-eds-calendar/wiki/FAQ)
