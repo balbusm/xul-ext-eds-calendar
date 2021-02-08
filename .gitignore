@@ -3,3 +3,6 @@ output
 .project
 files
 output
+
+dist
+node_modules

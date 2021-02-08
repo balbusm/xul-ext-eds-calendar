@@ -20,5 +20,11 @@ To enable addon logging:
 - Start Thunderbird from terminal
 - Logs should start displaying on the screen.
 
+
+## Development setup
+1. Install Node.js 14.x
+2. Run<br /> 
+   `npm run full-build`
+
 ## More questions?
 [See FAQ for more](https://github.com/balbusm/xul-ext-eds-calendar/wiki/FAQ)

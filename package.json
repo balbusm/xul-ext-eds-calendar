@@ -1,0 +1,25 @@
+{
+  "name": "eds-calendar",
+  "description": "EDS Calendar Integration",
+  "version": "0.9.0",
+  "private": true,
+  "license": "GPL-2.0",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "full-build": "npm install && npm run clean && npm run build",
+    "build": "mkdir -p dist && (cd src && zip -9r ../dist/$npm_package_name-$npm_package_version.xpi *)",
+    "clean": "rm -rf dist",
+    "bump": "bumper() { bump package.json \"$1\"; bump src/manifest.json \"$1\"; }; bumper",
+    "tag": "git tag v$(jq -r '.version' src/manifest.json)",
+    "lint": "eslint --ext '.jsm' . || true"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "action-thunderbird-tests": "github:kewisch/action-thunderbird-tests#master",
+    "bump-file": "2.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "7.19.0"
+  }
+}
