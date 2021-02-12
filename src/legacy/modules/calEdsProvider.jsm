@@ -70,29 +70,29 @@ class CalEdsProvider extends cal.provider.BaseClass {
 
     get canRefresh() {
         return true;
-    };
+    }
 
     get uri() {
         return this.mUri;
-    };
+    }
 
     set uri(val) {
         this.mUri = val;
         return this.mUri;
-    };
+    }
 
     get id() {
         return this.mId;
-    };
+    }
 
     set id(val) {
         this.mId = val;
         return this.mId;
-    };
+    }
 
     refresh() {
         this.mObservers.notify("onLoad", [this]);
-    };
+    }
 
     getProperty(aName) {
       let complexProperties = aName.split("::");
@@ -101,13 +101,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
       } else {
         return this.__proto__.__proto__.getProperty.apply(this, arguments);
       }
-    };
-    
+    }
+
     getCalendarProperty(calendarId, name) {
       var property = null;
       switch (name) {
       case "name": {
-        let namePropertyGetter = function (registry, source) {
+        let namePropertyGetter = function(registry, source) {
           let displayName = libecal.e_source_dup_display_name(source);
           var result = displayName.readString();
           glib.g_free(displayName);
@@ -117,9 +117,9 @@ class CalEdsProvider extends cal.provider.BaseClass {
         break;
       }
       case "color": {
-        let colorPropertyGetter = function (registry, source) {
+        let colorPropertyGetter = function(registry, source) {
           let sourceExtension = libedataserver.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
-          let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr);
+          let selectableSourceExtension = ctypes.cast(sourceExtension, libedataserver.ESourceSelectable.ptr);
           let color = libedataserver.e_source_selectable_dup_color(selectableSourceExtension);
           var result = color.readString();
           glib.g_free(color);
@@ -130,8 +130,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
       }
       }
       return property;
-    };
-    
+    }
+
     setProperty(aName, aValue) {
       let complexProperties = aName.split("::");
       if (complexProperties.length == 2) {
@@ -139,13 +139,12 @@ class CalEdsProvider extends cal.provider.BaseClass {
       } else {
         this.__proto__.__proto__.setProperty.apply(this, arguments);
       }
-      
-    };
-    
+    }
+
     setCalendarProperty(calendarId, name, value) {
       switch (name) {
       case "name": {
-        let namePropertySetter = function (registry, source) {
+        let namePropertySetter = function(registry, source) {
           let error = glib.GError.ptr();
           let displayName = libedataserver.e_source_set_display_name(source, value);
           libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
@@ -154,7 +153,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         break;
       }
       case "color": {
-        let colorPropertySetter = function (registry, source) {
+        let colorPropertySetter = function(registry, source) {
           let error = glib.GError.ptr();
           let sourceExtension = libedataserver.e_source_get_extension(source, libedataserver.ESourceCalendar.E_SOURCE_EXTENSION_CALENDAR);
           this.setESourceColor(sourceExtension, value);
@@ -165,11 +164,11 @@ class CalEdsProvider extends cal.provider.BaseClass {
         break;
       }
       }
-    };
-    
+    }
+
     retrieveESourceAndProcess(nextCommand, calendarId, defaultResult) {
       let registry = this.getERegistry();
-      
+
       // look for exising calendar
       let source = this.findESourceByCalendarId(registry, calendarId);
       if (source.isNull()) {
@@ -185,13 +184,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
           gobject.g_object_unref(source);
         }
       }
-    };
-    
+    }
+
     checkCDataNotNull(obj) {
       return obj && !obj.isNull();
     }
-    
-    checkGError(message, error){
+
+    checkGError(message, error) {
       if (!error.isNull()) {
         if (message.length > 0) {
           message += " ";
@@ -201,20 +200,20 @@ class CalEdsProvider extends cal.provider.BaseClass {
         glib.g_error_free(error);
         throw new CalendarServiceException(message);
       }
-    };
+    }
 
     rethrowNotCalendarServiceException(exception) {
       if (!exception instanceof CalendarServiceException) {
         throw exception;
       }
-    };
+    }
 
     getERegistry() {
       this.LOG("Getting ERegistry...");
       let error = glib.GError.ptr();
       let registry = libedataserver.e_source_registry_new_sync(null, error.address());
       this.checkGError("Couldn't get source registry:", error);
-      
+
       // delete old pointer
       // For some reason removing pointer
       // in try finally block as rest of the pointers
@@ -223,31 +222,33 @@ class CalEdsProvider extends cal.provider.BaseClass {
 
       this.registry = registry;
       return registry;
-    };
-    
+    }
+
     deleteERegistry() {
-      if (!this.registry || this.registry.isNull())
+      if (!this.registry || this.registry.isNull()) {
         return;
+      }
+
       gobject.g_object_unref(this.registry);
       this.registry = null;
-    };
+    }
 
     findESource(registry, calendar) {
       return this.findESourceByCalendarId(registry, calendar.id);
-    };
+    }
 
     findESourceByCalendarId(registry, id) {
       // look for exising calendar
       var source = libedataserver.e_source_registry_ref_source(registry, id);
       return source;
-    };
-    
+    }
+
     /**
      * Returns esource. Remember to call free by g_object_unref()
      */
     getESource(registry, calendar) {
       // look for existing calendar
-      this.LOG("Getting ESource...")
+      this.LOG("Getting ESource...");
       var source = this.findESource(registry, calendar);
       // do not create new one if calendar exists
       if (source.isNull()) {
@@ -255,7 +256,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         this.LOG("Created new source for calendar " + calendar.name + " - " + calendar.id);
       }
       return source;
-    };
+    }
 
     createESource(calendar, registry) {
       let error = glib.GError.ptr();
@@ -270,39 +271,40 @@ class CalEdsProvider extends cal.provider.BaseClass {
       this.setESourceColor(sourceExtension, calendar.getProperty("color"));
       libedataserver.e_source_registry_commit_source_sync(registry, source, null, error.address());
       this.checkGError("Couldn't commit source:", error);
-      
-      return source;
 
-    };
+      return source;
+    }
 
     prepareESourceExtension(source, extensionType) {
       let sourceExtension = libedataserver.e_source_get_extension(source, extensionType);
-      let selectableSourceExtension = ctypes.cast(sourceExtension,libedataserver.ESourceBackend.ptr);
+      let selectableSourceExtension = ctypes.cast(sourceExtension, libedataserver.ESourceBackend.ptr);
       libedataserver.e_source_backend_set_backend_name(selectableSourceExtension, "local");
       return sourceExtension;
-    };
-    
+    }
+
     setESourceColor(sourceExtension, color) {
       // fall back to default calendar color
-      if (!color)
+      if (!color) {
         color = "#A8C2E1";
-      libedataserver.e_source_selectable_set_color(ctypes.cast(sourceExtension,libedataserver.ESourceSelectable.ptr), color);
-    };
-    
+      }
+      libedataserver.e_source_selectable_set_color(ctypes.cast(sourceExtension, libedataserver.ESourceSelectable.ptr), color);
+    }
+
     getItemSourceType(item) {
       var sourceType;
-      if (item instanceof Components.interfaces.calITodo)
+      if (item instanceof Components.interfaces.calITodo) {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_TASKS;
-      else if (item instanceof Components.interfaces.calIEvent)
+      } else if (item instanceof Components.interfaces.calIEvent) {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
-      else
+      } else {
         sourceType = null;
+      }
       return sourceType;
-    };
-    
+    }
+
     getECalClient(item, eSourceProvider) {
       let calendar = item.calendar;
-      // check batch client 
+      // check batch client
       if (this.mBatchCount > 0 && this.mBatchClient !== null) {
         if (this.mBatchCalendar === calendar) {
           this.LOG("Batch used");
@@ -318,13 +320,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
       let registry;
       let source;
       let client;
-      try{
+      try {
         registry = this.getERegistry();
         source = eSourceProvider(registry, calendar);
         let sourceType = this.getItemSourceType(item);
-        
+
         this.LOG("Connecting ECalClient...");
-        client = libecal.e_cal_client_connect_sync(source, 
+        client = libecal.e_cal_client_connect_sync(source,
           sourceType,
           libecal.DONT_WAIT,
           null,
@@ -340,7 +342,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         }
         throw e;
       }
-      
+
       // FIXME: Unref old client
       // store new batch client
       if (this.mBatchCount > 0) {
@@ -351,12 +353,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
 
       this.LOG("ECalClient is ready to use!");
       return client;
-    };
-    
+    }
+
     deleteECalClient(client) {
       // keep e cal client when batch is enabled
-      if (this.mBatchCount > 0)
+      if (this.mBatchCount > 0) {
         return;
+      }
       this.LOG("Removing cal client");
       if (this.checkCDataNotNull(client)) {
         let source = libedataserver.e_client_get_source(ctypes.cast(client, libedataserver.EClient.ptr));
@@ -365,7 +368,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
           gobject.g_object_unref(source);
         }
       }
-    };
+    }
 
     itemExists(item) {
       let client;
@@ -373,12 +376,11 @@ class CalEdsProvider extends cal.provider.BaseClass {
       try {
         // FIXME: Check if source exists
         let eSourceProvider = this.findESource.bind(this);
-          
+
         client = this.getECalClient(item, eSourceProvider);
 
         icalcomponent = this.findItem(client, item);
         return !icalcomponent.isNull();
-
       } finally {
           if (this.checkCDataNotNull(client)) {
             this.deleteECalClient(client);
@@ -386,10 +388,9 @@ class CalEdsProvider extends cal.provider.BaseClass {
           if (this.checkCDataNotNull(icalcomponent)) {
             libical.icalcomponent_free(icalcomponent);
           }
-
       }
-    };
-  
+    }
+
     findItem(client, item) {
       let error = glib.GError.ptr();
       var icalcomponent = libical.icalcomponent.ptr();
@@ -407,8 +408,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
         this.LOG("Found an item");
       }
       return icalcomponent;
-    };
-    
+    }
+
     getObjModType(item) {
       var objModType;
       if (item.recurrenceId) {
@@ -417,7 +418,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         objModType = libecal.ECalObjModType.E_CAL_OBJ_MOD_ALL;
       }
       return objModType;
-    };
+    }
 
     vcalendarAddTimezonesGetItem(client, comp, item) {
       let error = glib.GError.ptr();
@@ -425,7 +426,6 @@ class CalEdsProvider extends cal.provider.BaseClass {
       var itemcomp = null;
       while (!subcomp.isNull()) {
         switch (libical.icalcomponent_isa(subcomp)) {
-
         case libical.icalcomponent_kind.ICAL_VTIMEZONE_COMPONENT: {
           let zone = libical.icaltimezone_new();
           try {
@@ -449,8 +449,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
       }
 
       return itemcomp;
-    };
-    
+    }
+
     vcalendarChangeAlarmDescription(client, comp, item) {
       let subcomp = libical.icalcomponent_get_first_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       while (!subcomp.isNull()) {
@@ -464,11 +464,11 @@ class CalEdsProvider extends cal.provider.BaseClass {
         }
         subcomp = libical.icalcomponent_get_next_component(comp, libical.icalcomponent_kind.ICAL_ANY_COMPONENT);
       }
-    };
-    
+    }
+
     retrieveRecurrenceItems(item) {
       // get parent item
-      var recurrenceItems = [ item ];
+      var recurrenceItems = [item];
       // get recurrenceItems
       if (item.recurrenceInfo) {
         let count = {};
@@ -478,32 +478,30 @@ class CalEdsProvider extends cal.provider.BaseClass {
         }
       }
       return recurrenceItems;
-    };
-    
-    modifySingleItem(item) {
+    }
 
+    modifySingleItem(item) {
       let modified;
-      
+
       // for manual remove
       let comp;
       let subcomp;
       let client;
 
       try {
-      let error = glib.GError.ptr();
-      // FIXME: Check if source exists
-      let eSourceProvider = this.findESource.bind(this);
-        
-      client = this.getECalClient(item, eSourceProvider);
-      let objModType = this.getObjModType(item);
-      comp = libical.icalcomponent_new_from_string(item.icalString);
-      subcomp = this.vcalendarAddTimezonesGetItem(client, comp, item);
+        let error = glib.GError.ptr();
+        // FIXME: Check if source exists
+        let eSourceProvider = this.findESource.bind(this);
 
-      this.LOG("Modifying single item " +  item.title + " " + item.id);
-      modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
-      this.checkGError("Error modifying single item:", error);
-      return modified;
-  
+        client = this.getECalClient(item, eSourceProvider);
+        let objModType = this.getObjModType(item);
+        comp = libical.icalcomponent_new_from_string(item.icalString);
+        subcomp = this.vcalendarAddTimezonesGetItem(client, comp, item);
+
+        this.LOG("Modifying single item " + item.title + " " + item.id);
+        modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
+        this.checkGError("Error modifying single item:", error);
+        return modified;
       } finally {
         if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
@@ -512,17 +510,17 @@ class CalEdsProvider extends cal.provider.BaseClass {
           libical.icalcomponent_free(comp);
         }
       }
-    };
-    
+    }
+
     // array filter implementation
     createKeepDifferentFilter(content) {
       // TODO extract to separate file
-      var KeepDifferentFilter = function (content) {
-        this.content = content;
+      var KeepDifferentFilter = function(contentArg) {
+        this.content = contentArg;
       };
       KeepDifferentFilter.prototype = {
-          filter : function filter(recurrenceItem) {
-            for(let contentItem of this.content) {
+          filter: function(recurrenceItem) {
+            for (let contentItem of this.content) {
               if (this.compareRecurrenceItems(contentItem, recurrenceItem)) {
                 // filter out item
                 return false;
@@ -531,8 +529,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
             // keep item
             return true;
           },
-        
-          compareRecurrenceItems : function compareRecurrenceItems(itemA, itemB) {
+
+          compareRecurrenceItems: function(itemA, itemB) {
             if (itemA.recurrenceId && itemB.recurrenceId) {
               // check same recurrence item
               if (itemA.recurrenceId.compare(itemB.recurrenceId)) {
@@ -546,29 +544,29 @@ class CalEdsProvider extends cal.provider.BaseClass {
               return true;
             }
             return false;
-          }          
+          }
       };
       return new KeepDifferentFilter(content);
-    };
-    
+    }
+
     // calICalendar
     adoptItem(aItem, aListener) {
       var nserror;
       var detail;
       let created;
-      
+
       // to manual remove
       let client;
       let icalcomponent;
       let comp;
       let itemcomp;
       let uid;
-      
+
       try {
         let error = glib.GError.ptr();
         let eSourceProvider = this.getESource.bind(this);
         client = this.getECalClient(aItem, eSourceProvider);
-        
+
         icalcomponent = this.findItem(client, aItem);
         // item exists in calendar, do not add it
         if (!icalcomponent.isNull()) {
@@ -576,21 +574,20 @@ class CalEdsProvider extends cal.provider.BaseClass {
           libical.icalcomponent_free(icalcomponent);
           return;
         }
-  
+
         comp = libical.icalcomponent_new_from_string(aItem.icalString);
         uid = glib.gchar.ptr();
-  
+
         itemcomp = this.vcalendarAddTimezonesGetItem(client, comp, aItem);
-  
+
         created = libecal.e_cal_client_create_object_sync(client, itemcomp, uid.address(), null, error.address());
         this.checkGError("Error adding item:", error);
-        
+
         // notify obeservers that given item has been synchronized
         this.LOG("Created new EDS item " + aItem.title + " - " + aItem.id);
         this.mObservers.notify("onAddItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
-      
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
         nserror = Components.results.NS_ERROR_FAILURE;
@@ -609,56 +606,54 @@ class CalEdsProvider extends cal.provider.BaseClass {
           glib.g_free(uid);
         }
       }
-      
+
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.ADD,
           (created ? aItem.id : null),
           detail);
-
-    };
+    }
 
     // calICalendar
     addItem(aItem, aListener) {
         return this.adoptItem(aItem.clone(), aListener);
-    };
+    }
 
     // calICalendar
     modifyItem(aNewItem, aOldItem, aListener) {
       var detail;
       var nserror;
       let modified;
-      
+
       try {
         let oldRecurrenceItems = this.retrieveRecurrenceItems(aOldItem);
         let newRecurrenceItems = this.retrieveRecurrenceItems(aNewItem);
         // TODO use prototype instead
         let itemFilter = this.createKeepDifferentFilter(newRecurrenceItems);
         let removedRecurrences = oldRecurrenceItems.filter(itemFilter.filter, itemFilter);
-        
+
         itemFilter = this.createKeepDifferentFilter(removedRecurrences);
         let modifiedRecurrences = newRecurrenceItems.filter(itemFilter.filter, itemFilter);
-        
+
         for (let removedRecurrence of removedRecurrences) {
           // this could have better listener handling
           this.deleteItem(removedRecurrence, aListener);
         }
-        
+
         for (let modifiedRecurrence of modifiedRecurrences) {
           if (this.itemExists(modifiedRecurrence)) {
             modified = this.modifySingleItem(modifiedRecurrence);
           } else {
-            this.LOG("No old item to modify. Adding single item " +  modifiedRecurrence.title + " " + modifiedRecurrence.id);  
+            this.LOG("No old item to modify. Adding single item " + modifiedRecurrence.title + " " + modifiedRecurrence.id);
             this.addItem(modifiedRecurrence, aListener);
-            modified = true;   
+            modified = true;
           }
         }
-        
-        this.LOG("Modified item " +  aNewItem.title + " " + aNewItem.id);
+
+        this.LOG("Modified item " + aNewItem.title + " " + aNewItem.id);
         this.mObservers.notify("onModifyItem", [aNewItem, aOldItem]);
         nserror = Components.results.NS_OK;
         detail = aNewItem;
-
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
         detail = e.message;
@@ -666,68 +661,66 @@ class CalEdsProvider extends cal.provider.BaseClass {
         this.ERROR(detail);
         this.ERROR("Exception for NewItem.icalString:\n" + aNewItem.icalString);
         this.ERROR("Exception for OldItem.icalString:\n" + aOldItem.icalString);
-      } 
+      }
 
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.MODIFY,
           (modified ? aNewItem.id : null),
           detail);
-    };
+    }
 
     // calICalendar
     deleteItem(aItem, aListener) {
       var detail;
       var nserror;
       let removed;
-      
+
       // for manual remove
       let client;
-      
+
       try {
         let error = glib.GError.ptr();
         // FIXME: Check if source exists
         let eSourceProvider = this.findESource.bind(this);
         client = this.getECalClient(aItem, eSourceProvider);
         let objModType = this.getObjModType(aItem);
-        
+
         let rid = null;
         if (aItem.recurrenceId) {
           rid = aItem.recurrenceId.icalString;
         }
         removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, rid, objModType, null, error.address());
         this.checkGError("Error removing item:", error);
-  
-        this.LOG("Removed item " +  aItem.title + " " + aItem.id);
+
+        this.LOG("Removed item " + aItem.title + " " + aItem.id);
         this.mObservers.notify("onDeleteItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
-
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
         detail = e.message;
         nserror = Components.results.NS_ERROR_FAILURE;
         this.ERROR(detail);
         this.ERROR("Exception for Item icalString:\n" + aItem.icalString);
-
       } finally {
         if (this.checkCDataNotNull(client)) {
           this.deleteECalClient(client);
         }
       }
-      
+
       this.notifyOperationComplete(aListener,
           nserror,
           Components.interfaces.calIOperationListener.DELETE,
           (removed ? aItem.id : null),
           detail);
-    };
+    }
 
     // calICalendar
     getItem(aId, aListener) {
       var nserror;
       var detail = null;
-      
+
       let error = glib.GError.ptr();
       let registry;
       let sourcesList;
@@ -747,16 +740,16 @@ class CalEdsProvider extends cal.provider.BaseClass {
               continue;
             }
             // FIXME: implement switching the source type
-            client = libecal.e_cal_client_connect_sync(source, 
+            client = libecal.e_cal_client_connect_sync(source,
                 libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS,
                 libecal.DONT_WAIT,
                 null,
                 error.address());
             this.checkGError("Couldn't connect to source:", error);
-            
+
             // look for item in every client/calendar
             let item = { id: aId };
-            let icalcomponent = this.findItem(client, item);
+            icalcomponent = this.findItem(client, item);
             if (!icalcomponent.isNull()) {
               let calendar = this.createCalendarFromESource(source);
               calendarItem = this.icalcomponentToCalendarItem(icalcomponent, calendar);
@@ -772,8 +765,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
           }
         }
 
-        if (calendarItem !== null) { 
-          aListener.onGetResult (calendarItem.calendar,
+        if (calendarItem !== null) {
+          aListener.onGetResult(calendarItem.calendar,
                                  Components.results.NS_OK,
                                  Components.interfaces.calIEvent,
                                  null,
@@ -781,26 +774,24 @@ class CalEdsProvider extends cal.provider.BaseClass {
                                  [calendarItem]);
         }
         nserror = Components.results.NS_OK;
-        
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
-        nserror = Components.results.NS_ERROR_FAILURE;        
+        nserror = Components.results.NS_ERROR_FAILURE;
         detail = e.message;
         this.ERROR(detail);
       } finally {
         if (this.checkCDataNotNull(sourcesList)) {
           this.LOG("getItem: Removing source list " + sourcesList.toString());
-          glib.g_list_free_full (sourcesList, gobject.g_object_unref);
+          glib.g_list_free_full(sourcesList, gobject.g_object_unref);
         }
       }
-      
-      this.notifyOperationComplete(aListener, nserror, 
+
+      this.notifyOperationComplete(aListener, nserror,
                                    Components.interfaces.calIOperationListener.GET,
                                    null, detail);
-    };
-    
-    icalcomponentToCalendarItem(icalcomponent, calendar) {
+    }
 
+    icalcomponentToCalendarItem(icalcomponent, calendar) {
       // TODO This is not super since we parse the string again. When
       // lightning moves to using js-ctypes for libical, we can just pass
       // the icalcomponent to the item and have it take what it needs
@@ -810,16 +801,16 @@ class CalEdsProvider extends cal.provider.BaseClass {
       item.calendar = calendar;
 
       glib.g_free(icalstring);
-      
+
       return item;
-    };
-  
+    }
+
     createCalendarFromESource(source) {
       // FIXME create proper calendar
       // calendar should be able to return all fields
       // calendar needs to be read only
       // extract it to separate file
-      var EdsCalendar = function (id, name) {
+      var EdsCalendar = function(id, name) {
          this.mId = id;
          this.mName = name;
       };
@@ -827,11 +818,11 @@ class CalEdsProvider extends cal.provider.BaseClass {
           get name() {
             return this.mName;
           },
-          
+
           get id() {
             return this.mId;
           },
-          
+
           QueryInterface: ChromeUtils.generateQI([Components.interfaces.calICalendar]),
       };
       // Using e_source_dup_uid since e_source_get_uid doesn't seem to work
@@ -847,9 +838,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
 
       this.LOG("Created calendar " + calendar.name + " - " + calendar.id);
       return calendar;
-    };
+    }
 
-    
 
     // calICalendar
     getItems(aItemFilter,
@@ -859,12 +849,12 @@ class CalEdsProvider extends cal.provider.BaseClass {
                                     aListener) {
       // FIXME implement
       throw NS_ERROR_NOT_IMPLEMENTED;
-    };
-    
+    }
+
     // calICalendar
-    endBatch(){
+    endBatch() {
       this.__proto__.__proto__.endBatch.apply(this, arguments);
-      if (this.mBatchCount === 0)  {
+      if (this.mBatchCount === 0) {
         this.LOG("Called endbatch");
         if (this.mBatchClient !== null) {
           this.deleteECalClient(this.mBatchClient);
@@ -872,10 +862,10 @@ class CalEdsProvider extends cal.provider.BaseClass {
         this.mBatchClient = null;
         this.mBatchCalendar = null;
       }
-    };
+    }
 
     // calICompositeCalendar
-    addCalendar(/*calICalendar*/ aCalendar) {
+    addCalendar(/* calICalendar */ aCalendar) {
       let registry;
       let source;
       try {
@@ -887,17 +877,17 @@ class CalEdsProvider extends cal.provider.BaseClass {
           gobject.g_object_unref(source);
         }
       }
-    };
-    
+    }
+
     // calICompositeCalendar
-    removeCalendar(/*calICalendar*/ aCalendar) {
+    removeCalendar(/* calICalendar */ aCalendar) {
       let error = glib.GError.ptr();
       let registry;
       let source;
       try {
         registry = this.getERegistry();
         this.LOG("Found registry");
-      
+
         // look for exising calendar
         source = this.findESource(registry, aCalendar);
         this.LOG("Found source");
@@ -905,13 +895,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
           this.WARN("Calendar " + aCalendar.name + " " + aCalendar.id + " doesn't exist. Unable to remove calendar.");
           return;
         }
-  
+
         // TODO: Shoud items be removed first?
         let removed = libedataserver.e_source_remove_sync(source, null, error.address());
         this.checkGError("Couldn't remove calendar:", error);
-        this.LOG("Removed calendar " +  aCalendar.name + " " + aCalendar.id);
+        this.LOG("Removed calendar " + aCalendar.name + " " + aCalendar.id);
         // FIXME: add notification
-        
+        // ---Place for notification---
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
         detail = e.message;
@@ -921,9 +911,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
           gobject.g_object_unref(source);
         }
       }
+    }
 
-    };
-    
     // calICompositeCalendar
     getCalendarById(aId) {
       let registry;
@@ -937,7 +926,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
           this.LOG("Couldn't find calendar " + aId);
           return null;
         }
-        
+
         calendar = this.createCalendarFromESource(source);
       } catch (e) {
         this.rethrowNotCalendarServiceException(e);
@@ -949,10 +938,10 @@ class CalEdsProvider extends cal.provider.BaseClass {
         }
       }
       return calendar;
-    };
-    
+    }
+
     // calICompositeCalendar
-    getCalendars(count, aCalendars){
+    getCalendars(count, aCalendars) {
       // FIXME implement
       throw NS_ERROR_NOT_IMPLEMENTED;
     }
@@ -963,13 +952,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
     prefPrefix = null;
 
     statusDisplayed = false;
-    
+
     // calICompositeCalendar
-    setStatusObserver = function (/*calIStatusObserver*/ aStatusObserver, /*nsIDOMChromeWindow*/ aWindow) {
+    setStatusObserver = function(/* calIStatusObserver */ aStatusObserver, /* nsIDOMChromeWindow */ aWindow) {
       // FIXME implement
       throw NS_ERROR_NOT_IMPLEMENTED;
     };
-    
+
     shutdown() {
       this.LOG("Closing EDS Calendar Service");
       this.deleteERegistry();
@@ -979,5 +968,5 @@ class CalEdsProvider extends cal.provider.BaseClass {
       gobject.shutdown();
       gio.shutdown();
       glib.shutdown();
-    };
-};
+    }
+}

@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -31,8 +31,7 @@ var gobject =
 
   lib: null,
 
-  init: function () {
-
+  init: function() {
     edsUtils.addLogger(this, "gobject");
     this.lib = edsUtils.loadLib("libgobject-2.0.so", 0);
 
@@ -40,8 +39,7 @@ var gobject =
   },
 
 
-  declareGObject: function () {
-
+  declareGObject: function() {
     this._GObject = new ctypes.StructType("_GObject");
     this.GObject = this._GObject;
 
@@ -49,10 +47,9 @@ var gobject =
       ctypes.default_abi,
       ctypes.void_t, // return
       glib.gpointer); // mem
-
   },
 
-  shutdown: function () {
+  shutdown: function() {
     this.lib.close();
   }
 };

@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -27,17 +27,16 @@ var libical = {
 
 	lib: null,
 
-	init: function () {
+	init: function() {
 		edsUtils.addLogger(this, "libical");
 		this.lib = edsUtils.loadLib("libical-glib.so", 3);
 
 		this.declareICalComponentType();
 		this.declareICalComponent();
 		this.declareICalTimezone();
-
 	},
 
-	declareICalComponentType: function () {
+	declareICalComponentType: function() {
 		// Enum
 		this.icalcomponent_kind = {
 			ICAL_NO_COMPONENT: 0,
@@ -70,10 +69,9 @@ var libical = {
 		};
 
 		this.icalcomponent_kind.type = ctypes.int;
-
 	},
 
-	declareICalTimezone: function () {
+	declareICalTimezone: function() {
 		this._icaltimezone = new ctypes.StructType("_icaltimezone");
 		this.icaltimezone = this._icaltimezone;
 
@@ -82,17 +80,16 @@ var libical = {
 			this.icaltimezone.ptr, this.icalcomponent.ptr);
 
 		this.icaltimezone_get_component = this.lib.declare("i_cal_timezone_get_component",
-		 ctypes.default_abi, this.icalcomponent.ptr, this.icaltimezone.ptr);
+			ctypes.default_abi, this.icalcomponent.ptr, this.icaltimezone.ptr);
 
 		this.icaltimezone_new = this.lib.declare("i_cal_timezone_new",
 			ctypes.default_abi, this.icaltimezone.ptr);
 
 		this.icaltimezone_free = this.lib.declare("i_cal_timezone_free",
 			ctypes.default_abi, ctypes.void_t, this.icaltimezone.ptr, ctypes.int);
-
 	},
 
-	declareICalComponent: function () {
+	declareICalComponent: function() {
 		// Structures
 		this.icalcomponent_impl = new ctypes.StructType("icalcomponent_impl");
 		this.icalcomponent = this.icalcomponent_impl;
@@ -135,10 +132,9 @@ var libical = {
 		this.icalcomponent_free = this.lib
 			.declare("i_cal_component_free", ctypes.default_abi,
 				ctypes.void_t, this.icalcomponent.ptr);
-
 	},
 
-	shutdown: function () {
+	shutdown: function() {
 		this.lib.close();
 	}
 };

@@ -450,7 +450,7 @@
      "prefer-spread": 2,
  
      // Disallow negated conditions
-     "no-negated-condition": 2,
+     "no-negated-condition": 0,
  
      // Enforce a maximum number of statements allowed per line
      "max-statements-per-line": [2, { max: 2 }],

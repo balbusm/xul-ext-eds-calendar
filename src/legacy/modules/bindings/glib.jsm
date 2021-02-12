@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -28,8 +28,7 @@ var glib =
 
   lib: null,
 
-  init: function () {
-
+  init: function() {
     edsUtils.addLogger(this, "glib");
     this.lib = edsUtils.loadLib("libglib-2.0.so", 0);
 
@@ -39,10 +38,9 @@ var glib =
     this.declareGError();
     this.declareGList();
     this.declareGSList();
-
   },
 
-  declareGStructures: function () {
+  declareGStructures: function() {
     // Structures
     this.GQuark = ctypes.uint32_t;
     this.gchar = ctypes.char;
@@ -61,21 +59,19 @@ var glib =
   },
 
 
-  declareMemAlloc: function () {
-
+  declareMemAlloc: function() {
     this.g_free = this.lib.declare("g_free",
       ctypes.default_abi,
       ctypes.void_t, // return
       glib.gpointer); // mem
-
   },
 
-  declareGMainContext: function () {
+  declareGMainContext: function() {
     this._GMainContext = new ctypes.StructType("_GMainContext");
     this.GMainContext = this._GMainContext;
   },
 
-  declareGError: function () {
+  declareGError: function() {
     this._GError = new ctypes.StructType("_GError", [{ domain: glib.GQuark },
     { code: glib.gint },
     { message: glib.gchar.ptr }]);
@@ -85,8 +81,7 @@ var glib =
       ctypes.void_t, this.GError.ptr);
   },
 
-  declareGList: function () {
-
+  declareGList: function() {
     this._GList = new ctypes.StructType("_Glist");
     this._GList.define([
       { data: glib.gpointer },
@@ -106,14 +101,12 @@ var glib =
     this.g_list_length = this.lib.declare("g_list_length",
       ctypes.default_abi, glib.guint, this.GList.ptr);
 
-    this.g_list_next = function (list) {
+    this.g_list_next = function(list) {
       return list.isNull() ? this.GList.ptr : list.contents.next;
     };
-
   },
 
-  declareGSList: function () {
-
+  declareGSList: function() {
     this._GSList = new ctypes.StructType("_GSlist");
     this._GSList.define([
       { data: glib.gpointer },
@@ -132,13 +125,12 @@ var glib =
     this.g_slist_length = this.lib.declare("g_slist_length",
       ctypes.default_abi, glib.guint, this.GSList.ptr);
 
-    this.g_slist_next = function (list) {
+    this.g_slist_next = function(list) {
       return list.isNull() ? NULL : list.next;
     };
-
   },
 
-  shutdown: function () {
+  shutdown: function() {
     this.lib.close();
   }
 };

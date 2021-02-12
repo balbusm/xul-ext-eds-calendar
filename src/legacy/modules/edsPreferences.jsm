@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2014-2019 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -20,7 +20,7 @@
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
-var EXPORTED_SYMBOLS = [ "EdsPreferences" ];
+var EXPORTED_SYMBOLS = ["EdsPreferences"];
 
 
 const PREF_ROOT = "extensions.edscalendar.";
@@ -41,6 +41,4 @@ class EdsPreferences {
     isDebugEnabled() {
         return this.branch.getBoolPref("debug");
     }
-
-
 }

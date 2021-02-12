@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
  * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -32,25 +32,24 @@ var libedataserver =
 
     lib: null,
 
-    init: function () {
+    init: function() {
         edsUtils.addLogger(this, "libedataserver");
         // Workaround to make sure that invalid version of libedataserver-2.0.so
         // is not loaded (libecal makes libedataserver load)
         this.lib = edslib.loadEdsLib();
-        
+
         this.declareVersionChecking();
         this.declareESource();
         this.declareESourceRegistry();
         this.declareESourceBackend();
         this.declareESourceSelectable();
-        this.declareESourceRegistry();
         this.declareESourceCalendar();
         this.declareESourceTaskList();
         this.declareEClient();
         this.declareEUid();
     },
 
-    declareVersionChecking: function () {
+    declareVersionChecking: function() {
         this.eds_check_version =
             this.lib.declare(
                 "eds_check_version",
@@ -61,8 +60,7 @@ var libedataserver =
                 glib.gint);
     },
 
-    declareESource: function () {
-
+    declareESource: function() {
         // Structures
         this._ESource = new ctypes.StructType("_ESource");
 
@@ -139,11 +137,9 @@ var libedataserver =
                 this.ESource.ptr, // source
                 gio.GCancellable.ptr, // cancellable
                 glib.GError.ptr.ptr); // error
-
     },
 
-    declareESourceRegistry: function () {
-
+    declareESourceRegistry: function() {
         // Structures
         this._ESourceRegistry = new ctypes.StructType("_ESourceRegistry");
         this.ESourceRegistry = this._ESourceRegistry;
@@ -190,10 +186,9 @@ var libedataserver =
                 libedataserver.ESource.ptr,
                 this.ESourceRegistry.ptr,
                 glib.gchar.ptr);
-
     },
 
-    declareESourceBackend: function () {
+    declareESourceBackend: function() {
         // Structures
         this._ESourceBackend = new ctypes.StructType("_ESourceBackend");
         this.ESourceBackend = this._ESourceBackend;
@@ -213,10 +208,9 @@ var libedataserver =
                 ctypes.default_abi,
                 glib.gchar.ptr,
                 this.ESourceBackend.ptr);
-
     },
 
-    declareESourceSelectable: function () {
+    declareESourceSelectable: function() {
         // Structures
         this._ESourceSelectable = new ctypes.StructType("_ESourceSelectable");
         this.ESourceSelectable = this._ESourceSelectable;
@@ -236,75 +230,21 @@ var libedataserver =
                 ctypes.default_abi,
                 glib.gchar.ptr,
                 this.ESourceSelectable.ptr);
-
     },
 
-    declareESourceRegistry: function () {
-
-        // Structures
-        this._ESourceRegistry = new ctypes.StructType("_ESourceRegistry");
-        this.ESourceRegistry = this._ESourceRegistry;
-
-        // Methods
-        this.e_source_registry_new_sync =
-            this.lib.declare(
-                "e_source_registry_new_sync",
-                ctypes.default_abi,
-                this.ESourceRegistry.ptr,
-                gio.GCancellable.ptr,
-                glib.GError.ptr.ptr);
-
-        this.e_source_registry_list_sources =
-            this.lib.declare(
-                "e_source_registry_list_sources",
-                ctypes.default_abi,
-                glib.GList.ptr,
-                this.ESourceRegistry.ptr,
-                glib.gchar.ptr);
-
-        this.e_source_registry_check_enabled =
-            this.lib.declare(
-                "e_source_registry_check_enabled",
-                ctypes.default_abi,
-                glib.gboolean,
-                this.ESourceRegistry.ptr,
-                libedataserver.ESource.ptr);
-
-        this.e_source_registry_commit_source_sync =
-            this.lib.declare(
-                "e_source_registry_commit_source_sync",
-                ctypes.default_abi,
-                glib.gboolean,
-                this.ESourceRegistry.ptr,
-                libedataserver.ESource.ptr,
-                gio.GCancellable.ptr,
-                glib.GError.ptr.ptr);
-
-        this.e_source_registry_ref_source =
-            this.lib.declare(
-                "e_source_registry_ref_source",
-                ctypes.default_abi,
-                libedataserver.ESource.ptr,
-                this.ESourceRegistry.ptr,
-                glib.gchar.ptr);
-
-    },
-
-    declareESourceCalendar: function () {
+    declareESourceCalendar: function() {
         this.ESourceCalendar = {
             E_SOURCE_EXTENSION_CALENDAR: "Calendar"
         };
-
     },
 
-    declareESourceTaskList: function () {
+    declareESourceTaskList: function() {
         this.ESourceTaskList = {
             E_SOURCE_EXTENSION_TASK_LIST: "Task List"
         };
-
     },
 
-    declareEClient: function () {
+    declareEClient: function() {
         // Structures
         this._EClient = new ctypes.StructType("_EClient");
         this.EClient = this._EClient;
@@ -316,21 +256,19 @@ var libedataserver =
                 ctypes.default_abi,
                 libedataserver.ESource.ptr,
                 this.EClient.ptr);
-
     },
 
 
-    declareEUid: function () {
+    declareEUid: function() {
         this.e_uid_new =
             this.lib.declare(
                 "e_uid_new",
                 ctypes.default_abi,
                 glib.gchar.ptr);
-
     },
 
 
-    shutdown: function () {
+    shutdown: function() {
         this.lib.close();
     }
 };

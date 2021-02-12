@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Philipp Kewisch <mozilla@kewis.ch>
  * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -35,18 +35,16 @@ var libecal =
 
   lib: null,
 
-  init: function () {
-
+  init: function() {
     edsUtils.addLogger(this, "libecal");
     this.lib = edslib.loadEdsLib();
 
     this.declareECalClientSourceType();
     this.declareECalObjModType();
     this.declareECalClient();
-
   },
 
-  declareECalObjModType: function () {
+  declareECalObjModType: function() {
     // Enum
     this.ECalObjModType = {
       E_CAL_OBJ_MOD_THIS: 1 << 0,
@@ -56,10 +54,9 @@ var libecal =
       E_CAL_OBJ_MOD_ONLY_THIS: 1 << 3
     };
     this.ECalObjModType.type = ctypes.int;
-
   },
 
-  declareECalClientSourceType: function () {
+  declareECalClientSourceType: function() {
     // Enum
     this.ECalClientSourceType = {
       E_CAL_CLIENT_SOURCE_TYPE_EVENTS: 0,
@@ -69,8 +66,7 @@ var libecal =
     this.ECalClientSourceType.type = ctypes.int;
   },
 
-  declareECalClient: function () {
-
+  declareECalClient: function() {
     // Structures
     this._ECalClient = new ctypes.StructType("_ECalClient");
     this.ECalClient = this._ECalClient;
@@ -130,10 +126,9 @@ var libecal =
         libecal.ECalObjModType.type, // mod
         gio.GCancellable.ptr, // cancellable
         glib.GError.ptr.ptr); // error
-
   },
 
-  declareECalClientConnectSync: function () {
+  declareECalClientConnectSync: function() {
     this.LOG("Loading new declaration of e_cal_client_connect_sync...");
     this.e_cal_client_connect_sync = this.lib.declare(
       "e_cal_client_connect_sync",
@@ -146,10 +141,9 @@ var libecal =
       glib.GError.ptr.ptr);
 
     this.LOG("Successfully loaded e_cal_client_connect_sync");
-
   },
 
-  shutdown: function () {
+  shutdown: function() {
     this.lib.close();
   }
 };

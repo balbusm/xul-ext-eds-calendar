@@ -1,4 +1,4 @@
-const { classes: Cc, interfaces: Ci, results: Cr} = Components;
+const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
 const NS_PREFBRANCH_PREFCHANGE_TOPIC_ID = "nsPref:changed";
 
@@ -17,8 +17,9 @@ var gCallbacks = {};
 
 function formatLogMessage(aType, aDomain, aStr, aException) {
   let message = `${new Date().toISOString()} ${aType.toUpperCase()}  ${aDomain} : ${aStr}`;
-  if (aException)
+  if (aException) {
     return message + ": " + aException;
+  }
   return message;
 }
 
@@ -45,8 +46,7 @@ function getStackDetails(aException) {
       sourceName: stackFrame.filename,
       lineNumber: stackFrame.lineNumber
     };
-  }
-  catch (e) {
+  } catch (e) {
     return {
       sourceName: null,
       lineNumber: 0
@@ -64,7 +64,7 @@ Logger.prototype = {
   branch: null,
   domain: null,
 
-  setupPrefObserver: function Logger_setupPrefObserver() {
+  setupPrefObserver: function() {
     if (!gLogPrefRoot || this.branch) {
       return;
     }
@@ -75,7 +75,7 @@ Logger.prototype = {
     this.observe(this.branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, null);
   },
 
-  observe: function Logger_observe(aSubject, aTopic, aData) {
+  observe: function(aSubject, aTopic, aData) {
     try {
       if (aSubject != this.branch) {
         throw Cr.NS_ERROR_FAILURE;
@@ -87,7 +87,7 @@ Logger.prototype = {
                                  (domains.indexOf(this.domain) != -1 ||
                                   domains.indexOf("all") != -1));
       }
-    } catch(e) { this._debugLogEnabled = false; }
+    } catch (e) { this._debugLogEnabled = false; }
   },
 
   _debugLogEnabled: false,
@@ -102,7 +102,7 @@ Logger.prototype = {
     return this._debugLogEnabled;
   },
 
-  log: function Logger_log(aStr, aException) {
+  log: function(aStr, aException) {
     if (this.debugLogEnabled) {
       let message = formatLogMessage("log", this.domain, aStr, aException);
       Services.console.logStringMessage(message);
@@ -110,13 +110,13 @@ Logger.prototype = {
     }
   },
 
-  warn: function Logger_warn(aStr, aException) {
+  warn: function(aStr, aException) {
     let message = formatLogMessage("warn", this.domain, aStr, aException);
 
     let stack = getStackDetails(aException);
 
-    let consoleMessage = Cc["@mozilla.org/scripterror;1"].
-                         createInstance(Ci.nsIScriptError);
+    let consoleMessage = Cc["@mozilla.org/scripterror;1"]
+                         .createInstance(Ci.nsIScriptError);
     consoleMessage.init(message, stack.sourceName, null, stack.lineNumber, 0,
                         Ci.nsIScriptError.warningFlag, "component javascript");
     Services.console.logMessage(consoleMessage);
@@ -126,13 +126,13 @@ Logger.prototype = {
     }
   },
 
-  error: function Logger_error(aStr, aException) {
+  error: function(aStr, aException) {
     let message = formatLogMessage("error", this.domain, aStr, aException);
 
     let stack = getStackDetails(aException);
 
-    let consoleMessage = Cc["@mozilla.org/scripterror;1"].
-                         createInstance(Ci.nsIScriptError);
+    let consoleMessage = Cc["@mozilla.org/scripterror;1"]
+                         .createInstance(Ci.nsIScriptError);
     consoleMessage.init(message, stack.sourceName, null, stack.lineNumber, 0,
                         Ci.nsIScriptError.errorFlag, "component javascript");
     Services.console.logMessage(consoleMessage);
@@ -144,13 +144,13 @@ Logger.prototype = {
 };
 
 function addLogger(aTarget, aDomain) {
-  if (typeof(aTarget) != "object") {
+  if (typeof (aTarget) != "object") {
     throw Error("Must pass an object on which to add logging functions");
   }
 
   let domain;
   if (aDomain) {
-    if (typeof(aDomain) != "string") {
+    if (typeof (aDomain) != "string") {
       throw Error("Invalid type for domain");
     }
 
@@ -167,11 +167,11 @@ function addLogger(aTarget, aDomain) {
 
   let logger = new Logger(domain);
 
-  ["log", "warn", "error"].forEach(function(name) {
+  ["log", "warn", "error"].forEach((name) => {
     let upper = name.toUpperCase();
     delete aTarget[upper];
     aTarget[upper] = function() {
-      logger[name].apply(logger, arguments);
+      logger[name].apply(logger, ...arguments);
     };
   });
 }
@@ -197,7 +197,7 @@ addLogger(this, "utils");
 function loadLib(libName, startFromABI, tryNextABIs = 30) {
   var lib = null;
   var maxABI = startFromABI + tryNextABIs;
-  for (let abi = startFromABI; abi <= maxABI; abi++ ) {
+  for (let abi = startFromABI; abi <= maxABI; abi++) {
     lib = tryLoadLib(libName + "." + abi);
     if (lib !== null) {
       return lib;
@@ -220,4 +220,3 @@ function tryLoadLib(libName) {
     return null;
   }
 }
-

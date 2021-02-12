@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -19,7 +19,7 @@
 
 var EXPORTED_SYMBOLS = ["CalendarServiceException", "LoadingLibException"];
 
-var IntermediateInheritor = function () { }
+var IntermediateInheritor = function() { };
 IntermediateInheritor.prototype = Error.prototype;
 
 function CalendarServiceException() {
@@ -29,9 +29,9 @@ function CalendarServiceException() {
   this.stack = tmp.stack;
   this.message = tmp.message;
 
-  return this
+  return this;
 }
-CalendarServiceException.prototype = new IntermediateInheritor()
+CalendarServiceException.prototype = new IntermediateInheritor();
 
 function LoadingLibException() {
   var tmp = Error.apply(this, arguments);
@@ -40,6 +40,6 @@ function LoadingLibException() {
   this.stack = tmp.stack;
   this.message = tmp.message;
 
-  return this
+  return this;
 }
-LoadingLibException.prototype = new IntermediateInheritor()
+LoadingLibException.prototype = new IntermediateInheritor();

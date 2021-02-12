@@ -2,7 +2,7 @@
  * EDS Calendar Integration
  * Copyright: 2011 Mark Tully <markjtully@gmail.com>
  * Copyright: 2014-2021 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -20,7 +20,7 @@
 
 "use strict";
 
-var EXPORTED_SYMBOLS = [ "edsCalendarClient" ];
+var EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
 var { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 
@@ -32,8 +32,7 @@ var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
 var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/edsPreferences.jsm");
 
 
-this.edsCalendarClient = class EdsCalendarClient { 
-
+this.edsCalendarClient = class EdsCalendarClient {
   calendar = null;
 
   startEdsCalendarSync() {
@@ -50,34 +49,34 @@ this.edsCalendarClient = class EdsCalendarClient {
     function processCalendars(calendar) {
       calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
     }
-    edsCalendarClient.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}),processCalendars)
+    edsCalendarClient.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}), processCalendars)
       .then(edsCalendarClient.initCompositeCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
       .then(() => edsCalendarClient.LOG("Init finished"));
-      
-    };
+    }
 
     initCompositeCalendar() {
       if (edsCalendarClient.calendar === null) {
         edsCalendarClient.calendar = cal.view.getCompositeCalendar(window);
       }
-    };
+    }
 
     attachCalendarObservers() {
       if (edsCalendarClient.calendar) {
         edsCalendarClient.calendar.removeObserver(edsCalendarClient.calendarObserver);
         edsCalendarClient.calendar.addObserver(edsCalendarClient.calendarObserver);
       }
-  };
+  }
 
   attachDebuggerIfNeeded() {
     // Use below command to start debugging on start-up
     // thunderbird --start-debugger-server --jsdebugger --wait-for-jsdebugger
     if (edsCalendarClient.preferences.isDebugEnabled()) {
+      // eslint-disable-next-line no-debugger
       debugger;
     }
-  };
-    
+  }
+
   operationTypeToString(operationType) {
     let result;
     switch (operationType) {
@@ -98,19 +97,19 @@ this.edsCalendarClient = class EdsCalendarClient {
         break;
     }
     return result;
-  };
+  }
 
   thread = Components.classes["@mozilla.org/thread-manager;1"]
     .getService(Components.interfaces.nsIThreadManager)
     .currentThread;
 
-  delayedAsyncLoop (collection, callback) {
+  delayedAsyncLoop(collection, callback) {
     let delay = edsCalendarClient.preferences.getInitialProcressingDelay();
-    edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`)
+    edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`);
     return new Promise((resolve, reject) => {
-      window.setTimeout(() => { resolve() } , delay)
+      window.setTimeout(() => { resolve(); }, delay);
     }).then(() => edsCalendarClient.asyncLoop(collection, callback));
-  };
+  }
 
   asyncLoop(collection, callback) {
     var itemProcessingDelay = edsCalendarClient.preferences.getItemProcessingDelay();
@@ -128,12 +127,11 @@ this.edsCalendarClient = class EdsCalendarClient {
     edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay} ms`);
 
     return new Promise(asyncLoopInternal);
-
-  };
+  }
 
   calendarGetListener = {
 
-    onOperationComplete: function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) {
+    onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
       if (!Components.isSuccessCode(aStatus)) {
         edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
           " on element " + aId + " failed. " + aStatus + " - " + aDetail);
@@ -150,10 +148,9 @@ this.edsCalendarClient = class EdsCalendarClient {
       }
       edsCalendarClient.LOG("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
         " on element " + element + " completed");
-
-
     },
-    onGetResult: function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+
+    onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
       if (!Components.isSuccessCode(aStatus)) {
         edsCalendarClient.ERROR("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
           ". " + aStatus + " - " + aDetail);
@@ -164,14 +161,13 @@ this.edsCalendarClient = class EdsCalendarClient {
       function processItem(item) {
         edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
         edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
-
       }
       edsCalendarClient.asyncLoop(aItemscalendar, processItem);
     }
   };
 
   calendarChangeListener = {
-    onOperationComplete: function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetail) {
+    onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
       if (!Components.isSuccessCode(aStatus)) {
         edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
           " on element " + aId + " failed. " + aStatus + " - " + aDetail);
@@ -186,9 +182,9 @@ this.edsCalendarClient = class EdsCalendarClient {
       }
       edsCalendarClient.LOG("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
         " on element " + element + " completed.");
-
     },
-    onGetResult: function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+
+    onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
       throw "Unexpected operation";
     }
   };
@@ -200,25 +196,25 @@ this.edsCalendarClient = class EdsCalendarClient {
     ]),
 
     // calIObserver
-    onAddItem: function onAddItem(aItem) {
-      edsCalendarClient.LOG("onAddItem");        
+    onAddItem: function(aItem) {
+      edsCalendarClient.LOG("onAddItem");
       edsCalendarClient.edsCalendarService.addItem(aItem, this.calendarChangeListener);
     },
 
     // calIObserver
-    onDeleteItem: function onDeleteItem(aItem) {
+    onDeleteItem: function(aItem) {
       edsCalendarClient.LOG("onDeleteItem");
       edsCalendarClient.edsCalendarService.deleteItem(aItem, this.calendarChangeListener);
     },
 
     // calIObserver
-    onModifyItem: function onModifyItem(aNewItem, aOldItem) {
+    onModifyItem: function(aNewItem, aOldItem) {
       edsCalendarClient.LOG("onModifyItem");
       edsCalendarClient.edsCalendarService.modifyItem(aNewItem, aOldItem, this.calendarChangeListener);
     },
 
     // calICompositeObserver
-    onCalendarAdded: function onCalendarAdded(aCalendar) {
+    onCalendarAdded: function(aCalendar) {
       // This is called when a new calendar is added.
       // We can get all the items from the calendar and add them one by one to
       // Evolution Data Server
@@ -227,29 +223,27 @@ this.edsCalendarClient = class EdsCalendarClient {
     },
 
     // calICompositeObserver
-    onCalendarRemoved: function onCalendarRemoved(aCalendar) {
+    onCalendarRemoved: function(aCalendar) {
       edsCalendarClient.LOG("onCalendarRemoved");
       edsCalendarClient.edsCalendarService.removeCalendar(aCalendar);
     },
 
     // calIObserver
-    onStartBatch: function onStartBatch() {
+    onStartBatch: function() {
     },
 
     // calIObserver
-    onEndBatch: function onEndBatch() {
+    onEndBatch: function() {
     },
 
-    onError: function onError() { ; },
-    onPropertyChanged: function onPropertyChanged(aCalendar, aName, aValue, aOldValue) {
+    onError: function() { },
+    onPropertyChanged: function(aCalendar, aName, aValue, aOldValue) {
       edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, aValue);
     },
-    onPropertyDeleting: function onPropertyDeleting(aCalendar, aName) {
+    onPropertyDeleting: function(aCalendar, aName) {
       edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, null);
     },
-    onDefaultCalendarChanged: function onDefaultCalendarChanged() { ; },
-    onLoad: function onLoad() { ; }
-  };
-
+    onDefaultCalendarChanged: function() { },
+    onLoad: function() { }
+  }
 };
-
