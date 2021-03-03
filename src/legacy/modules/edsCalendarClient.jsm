@@ -30,20 +30,25 @@ var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.j
 
 var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/edsPreferences.jsm");
+var edsCalendarService = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
 
 
 class EdsCalendarClient {
   calendar = null;
 
-  startEdsCalendarSync() {
+  startEdsCalendarSync(window) {
     edsUtils.addLogger(this, "edsCalendarClient");
+
+    this.window = window;
 
     this.preferences = new EdsPreferences();
     this.attachDebuggerIfNeeded();
 
+    console.log("[edscalendar] Before get service1");
     edsCalendarClient.LOG("Init start");
+    console.log("[edscalendar] Before get service2 " + window);
 
-    this.edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
+    this.edsCalendarService = edsCalendarService;
     // TODO: Add cache?
     // get all the items from all calendars and add them to EDS
     function processCalendars(calendar) {
@@ -57,7 +62,7 @@ class EdsCalendarClient {
 
     initCompositeCalendar() {
       if (edsCalendarClient.calendar === null) {
-        edsCalendarClient.calendar = cal.view.getCompositeCalendar(window);
+        edsCalendarClient.calendar = cal.view.getCompositeCalendar(this.window);
       }
     }
 
@@ -107,7 +112,7 @@ class EdsCalendarClient {
     let delay = edsCalendarClient.preferences.getInitialProcressingDelay();
     edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`);
     return new Promise((resolve, reject) => {
-      window.setTimeout(() => { resolve(); }, delay);
+      this.window.setTimeout(() => { resolve(); }, delay);
     }).then(() => edsCalendarClient.asyncLoop(collection, callback));
   }
 
@@ -122,7 +127,7 @@ class EdsCalendarClient {
       }
       var item = collection[itemNumber];
       callback.call(edsCalendarClient, item);
-      window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
+      this.window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
     }
     edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay} ms`);
 

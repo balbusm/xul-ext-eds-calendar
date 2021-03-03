@@ -20,7 +20,7 @@
 
 "use strict";
 
-var EXPORTED_SYMBOLS = ["CalEdsProvider"];
+var EXPORTED_SYMBOLS = ["calEdsProvider"];
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -970,3 +970,5 @@ class CalEdsProvider extends cal.provider.BaseClass {
       glib.shutdown();
     }
 }
+
+this.calEdsProvider = new CalEdsProvider();

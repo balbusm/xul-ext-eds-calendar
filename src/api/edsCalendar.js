@@ -61,7 +61,8 @@ this.edscalendar = class extends ExtensionAPI {
     return {
       edscalendar: {
         async startEdsCalendarSync() {
-          self.edsCalendarClient.startEdsCalendarSync();
+          console.log("Has window" + context.window);
+          self.edsCalendarClient.startEdsCalendarSync(context.window);
         },
       },
     };
