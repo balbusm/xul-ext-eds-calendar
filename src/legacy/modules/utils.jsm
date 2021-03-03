@@ -170,11 +170,11 @@ function addLogger(aTarget, aDomain) {
 
   let logger = new Logger(domain);
 
-  ["log", "warn", "error"].forEach((name) => {
+  ["log", "warn", "error"].forEach(function(name) {
     let upper = name.toUpperCase();
     delete aTarget[upper];
     aTarget[upper] = function() {
-      logger[name].apply(logger, ...arguments);
+      logger[name].apply(logger, arguments);
     };
   });
 }

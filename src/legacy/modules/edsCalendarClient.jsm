@@ -129,6 +129,10 @@ class EdsCalendarClient {
     return new Promise(asyncLoopInternal);
   }
 
+  shutdown() {
+    this.edsCalendarService.shutdown();
+  }
+
   calendarGetListener = {
 
     onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
