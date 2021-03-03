@@ -29,7 +29,6 @@ this.edscalendar = class extends ExtensionAPI {
   edsCalendarClient;
 
   onStartup() {
-    console.log("[edscalendar] Hello startup");
     Services.io
       .getProtocolHandler("resource")
       .QueryInterface(Ci.nsIResProtocolHandler)
@@ -39,8 +38,6 @@ this.edscalendar = class extends ExtensionAPI {
       "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
     );
     this.edsCalendarClient = edsCalendarClient;
-    console.log("[edscalendar] edsCalendarClient " + this.edsCalendarClient);
-    console.log("[edscalendar] edsCalendarClient this " + this);
   }
 
   onShutdown(isAppShutdown) {
@@ -60,13 +57,11 @@ this.edscalendar = class extends ExtensionAPI {
   }
 
   getAPI(context) {
+    var self = this;
     return {
       edscalendar: {
         async startEdsCalendarSync() {
-          console.log("[edscalendar] edsCalendarClient2 " + this.edsCalendarClient);
-          console.log("[edscalendar] edsCalendarClient2 this " + this);
-
-          this.edsCalendarClient.startEdsCalendarSync();
+          self.edsCalendarClient.startEdsCalendarSync();
         },
       },
     };

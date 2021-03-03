@@ -18,27 +18,29 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 
 var EXPORTED_SYMBOLS = ["EdsPreferences"];
-
 
 const PREF_ROOT = "extensions.edscalendar.";
 
 class EdsPreferences {
     constructor() {
-        this.branch = Services.prefs.getBranch(PREF_ROOT);
+        this.messenger = getMessenger();
     }
 
     getInitialProcressingDelay() {
-        return this.branch.getIntPref("processing.start.delay");
+        let prefs = this.messenger.storage.local.get("extensions.edscalendar");
+        return prefs["processing.start.delay"];
     }
 
     getItemProcessingDelay() {
-        return this.branch.getIntPref("processing.item.delay");
+        let prefs = this.messenger.storage.local.get("extensions.edscalendar");
+        return prefs["processing.item.delay"];
     }
 
     isDebugEnabled() {
-        return this.branch.getBoolPref("debug");
+        let prefs = this.messenger.storage.local.get("extensions.edscalendar");
+        return prefs.debug;
     }
 }

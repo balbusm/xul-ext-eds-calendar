@@ -32,7 +32,7 @@ var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.j
 var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/edsPreferences.jsm");
 
 
-this.edsCalendarClient = class EdsCalendarClient {
+class EdsCalendarClient {
   calendar = null;
 
   startEdsCalendarSync() {
@@ -246,4 +246,6 @@ this.edsCalendarClient = class EdsCalendarClient {
     onDefaultCalendarChanged: function() { },
     onLoad: function() { }
   }
-};
+}
+
+this.edsCalendarClient = new EdsCalendarClient();

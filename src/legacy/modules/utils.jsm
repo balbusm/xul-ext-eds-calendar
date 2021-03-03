@@ -1,14 +1,17 @@
 const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
 const NS_PREFBRANCH_PREFCHANGE_TOPIC_ID = "nsPref:changed";
+const EXTENSION_ID = "{e6696d02-466a-11e3-a162-04e36188709b}";
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 
 var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
 
-var EXPORTED_SYMBOLS = ["addLogger", "loadLib"];
+var EXPORTED_SYMBOLS = ["addLogger", "loadLib", "getMessenger"];
 
 var gBase;
 var gLogPrefRoot;
@@ -219,4 +222,37 @@ function tryLoadLib(libName) {
   } catch (err) {
     return null;
   }
+}
+
+function getWXAPI(extension, name, sync = false) {
+  function implementation(api) {
+    let impl = api.getAPI({ extension })[name];
+
+    if (name == "storage") {
+      impl.local.get = (...args) => impl.local.callMethodInParentProcess("get", args);
+      impl.local.set = (...args) => impl.local.callMethodInParentProcess("set", args);
+      impl.local.remove = (...args) => impl.local.callMethodInParentProcess("remove", args);
+      impl.local.clear = (...args) => impl.local.callMethodInParentProcess("clear", args);
+    }
+    return impl;
+  }
+
+  if (sync) {
+    let api = extension.apiManager.getAPI(name, extension, "addon_parent");
+    return implementation(api);
+  } else {
+    return extension.apiManager.asyncGetAPI(name, extension, "addon_parent").then(api => {
+      return implementation(api);
+    });
+  }
+}
+
+function getMessenger() {
+  let extension = ExtensionParent.GlobalManager.getExtension(
+    EXTENSION_ID
+  );
+
+  let messenger = {};
+  XPCOMUtils.defineLazyGetter(messenger, "storage", () => getWXAPI(extension, "storage", true));
+  return messenger;
 }
