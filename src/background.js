@@ -18,7 +18,7 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-import prefs from "prefs";
+import prefs from "./prefs.js";
 
 async function startEdsCalendar() {
     let perfsEdsCal = await messenger.storage.local.get("extensions.edscalendar");
@@ -26,6 +26,7 @@ async function startEdsCalendar() {
         console.log("[edscalendar] Initializing preferences");
         await messenger.storage.local.set(prefs);
     }
+    console.log("[edscalendar] Starting calendar sync service");
     messenger.edscalendar.startEdsCalendarSync();
 }
 

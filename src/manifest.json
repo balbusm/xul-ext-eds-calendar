@@ -15,9 +15,7 @@
     "storage"
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "page": "background.html"
   },
   "experiment_apis": {
     "edscalendar": {
@@ -25,7 +23,7 @@
       "parent": {
         "events": ["startup"],
         "scopes": ["addon_parent"],
-        "script": "api/edsCalendarClient.js",
+        "script": "api/edsCalendar.js",
         "paths": [
           ["edscalendar"]
         ]

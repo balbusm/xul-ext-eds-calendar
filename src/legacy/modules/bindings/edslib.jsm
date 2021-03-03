@@ -20,8 +20,8 @@
 
 
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
-var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/exceptions.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
 
 var EXPORTED_SYMBOLS = ["edslib"];
 

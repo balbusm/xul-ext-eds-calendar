@@ -6,7 +6,7 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 
-var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/exceptions.jsm");
+var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
 
 var EXPORTED_SYMBOLS = ["addLogger", "loadLib"];
 

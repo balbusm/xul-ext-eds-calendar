@@ -20,13 +20,13 @@
 
 
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 
-var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
-var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical-glib.jsm");
-var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
-var { edslib } = ChromeUtils.import("resource://edscalendar/bindings/edslib.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+var { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
+var { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
+var { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
 
 var EXPORTED_SYMBOLS = ["libecal"];
 

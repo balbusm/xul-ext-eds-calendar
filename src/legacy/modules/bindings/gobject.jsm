@@ -19,9 +19,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 
-var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
 
 
 var EXPORTED_SYMBOLS = ["gobject"];

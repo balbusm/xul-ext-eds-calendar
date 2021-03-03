@@ -26,16 +26,16 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
+var { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
 
-var { gio } = ChromeUtils.import("resource://edscalendar/bindings/gio.jsm");
-var { glib } = ChromeUtils.import("resource://edscalendar/bindings/glib.jsm");
-var { gobject } = ChromeUtils.import("resource://edscalendar/bindings/gobject.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/bindings/libical-glib.jsm");
-var { libecal } = ChromeUtils.import("resource://edscalendar/bindings/libecal.jsm");
-var { libedataserver } = ChromeUtils.import("resource://edscalendar/bindings/libedataserver.jsm");
-var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/exceptions.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
+var { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
+var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+var { gobject } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gobject.jsm");
+var { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
+var { libecal } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libecal.jsm");
+var { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
+var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 
 
 const calEdsProviderInterfaces = [

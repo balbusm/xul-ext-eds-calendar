@@ -24,12 +24,12 @@ var EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
 var { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 
-var { cal } = ChromeUtils.import("resource://calendar/modules/calUtils.jsm");
+var { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-var edsUtils = ChromeUtils.import("resource://edscalendar/utils.jsm");
-var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/edsPreferences.jsm");
+var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/edsPreferences.jsm");
 
 
 this.edsCalendarClient = class EdsCalendarClient {
