@@ -30,30 +30,28 @@ var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.j
 
 var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
 var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/edsPreferences.jsm");
-var edsCalendarService = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
+var { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
 
 
 class EdsCalendarClient {
   calendar = null;
 
-  startEdsCalendarSync(window) {
+  startEdsCalendarSync() {
     edsUtils.addLogger(this, "edsCalendarClient");
-
-    this.window = window;
 
     this.preferences = new EdsPreferences();
     this.attachDebuggerIfNeeded();
 
     console.log("[edscalendar] Before get service1");
     edsCalendarClient.LOG("Init start");
-    console.log("[edscalendar] Before get service2 " + window);
 
-    this.edsCalendarService = edsCalendarService;
+    this.edsCalendarService = calEdsProvider;
     // TODO: Add cache?
     // get all the items from all calendars and add them to EDS
     function processCalendars(calendar) {
       calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
     }
+
     edsCalendarClient.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}), processCalendars)
       .then(edsCalendarClient.initCompositeCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
@@ -62,7 +60,7 @@ class EdsCalendarClient {
 
     initCompositeCalendar() {
       if (edsCalendarClient.calendar === null) {
-        edsCalendarClient.calendar = cal.view.getCompositeCalendar(this.window);
+        edsCalendarClient.calendar = Components.classes["@mozilla.org/calendar/calendar;1?type=composite"].getService(Components.interfaces.calICompositeCalendar);
       }
     }
 
@@ -70,6 +68,7 @@ class EdsCalendarClient {
       if (edsCalendarClient.calendar) {
         edsCalendarClient.calendar.removeObserver(edsCalendarClient.calendarObserver);
         edsCalendarClient.calendar.addObserver(edsCalendarClient.calendarObserver);
+        console.log("[edscalendar] Added observers");
       }
   }
 
@@ -112,7 +111,8 @@ class EdsCalendarClient {
     let delay = edsCalendarClient.preferences.getInitialProcressingDelay();
     edsCalendarClient.LOG(`Starting async loop with delay ${delay} ms`);
     return new Promise((resolve, reject) => {
-      this.window.setTimeout(() => { resolve(); }, delay);
+      // setTimeout(() => { resolve(); }, delay);
+      resolve();
     }).then(() => edsCalendarClient.asyncLoop(collection, callback));
   }
 
@@ -121,13 +121,15 @@ class EdsCalendarClient {
     var itemNumber = -1;
     function asyncLoopInternal(resolve, reject) {
       itemNumber++;
+      console.log("[edscalendar] Collection2.length %d itemNumber %d", collection.length, itemNumber);
       if (itemNumber >= collection.length) {
         resolve();
         return;
       }
       var item = collection[itemNumber];
       callback.call(edsCalendarClient, item);
-      this.window.setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
+      asyncLoopInternal(resolve, reject);
+      // setTimeout(() => asyncLoopInternal(resolve, reject), itemProcessingDelay);
     }
     edsCalendarClient.LOG(`Starting iterating items with delay on each item ${itemProcessingDelay} ms`);
 
@@ -171,7 +173,9 @@ class EdsCalendarClient {
         edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
         edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
       }
-      edsCalendarClient.asyncLoop(aItemscalendar, processItem);
+      if (aCount > 0) {
+        edsCalendarClient.asyncLoop(aItemscalendar, processItem);
+      }
     }
   };
 

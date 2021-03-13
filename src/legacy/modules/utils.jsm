@@ -80,16 +80,18 @@ Logger.prototype = {
 
   observe: function(aSubject, aTopic, aData) {
     try {
-      if (aSubject != this.branch) {
-        throw Cr.NS_ERROR_FAILURE;
-      }
+      this._debugLogEnabled = true;
+      // if (aSubject != this.branch) {
+      //   throw Cr.NS_ERROR_FAILURE;
+      // }
 
-      if (aTopic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
-        let domains = aSubject.getCharPref("domains").split(/\s*,\s*/);
-        this._debugLogEnabled = (aSubject.getBoolPref("enabled") &&
-                                 (domains.indexOf(this.domain) != -1 ||
-                                  domains.indexOf("all") != -1));
-      }
+      // if (aTopic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
+      //   let domains = aSubject.getCharPref("domains").split(/\s*,\s*/);
+      //   this._debugLogEnabled = (aSubject.getBoolPref("enabled") &&
+      //                            (domains.indexOf(this.domain) != -1 ||
+      //                             domains.indexOf("all") != -1));
+      //   this._debugLogEnabled = true;
+      // }
     } catch (e) { this._debugLogEnabled = false; }
   },
 

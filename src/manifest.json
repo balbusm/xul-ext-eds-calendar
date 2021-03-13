@@ -10,7 +10,7 @@
   },
   "name": "EDS Calendar Integration",
   "description": "Synchronizes calendars with Evolution Data Server",
-  "version": "0.9.0",
+  "version": "0.9.0-beta1",
   "permissions": [
     "storage"
   ],
@@ -21,13 +21,19 @@
     "edscalendar": {
       "schema": "api/schema.json",
       "parent": {
-        "events": ["startup"],
-        "scopes": ["addon_parent"],
+        "events": [
+          "startup"
+        ],
+        "scopes": [
+          "addon_parent"
+        ],
         "script": "api/edsCalendar.js",
         "paths": [
-          ["edscalendar"]
+          [
+            "edscalendar"
+          ]
         ]
       }
     }
-}
+  }
 }
