@@ -140,6 +140,7 @@ class EdsCalendarClient {
     this.edsCalendarService.shutdown();
   }
 
+  // calIOperationListener
   calendarGetListener = {
 
     onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
@@ -161,21 +162,19 @@ class EdsCalendarClient {
         " on element " + element + " completed");
     },
 
-    onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+    onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aItemscalendar) {
       if (!Components.isSuccessCode(aStatus)) {
         edsCalendarClient.ERROR("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
           ". " + aStatus + " - " + aDetail);
         return;
       }
-      edsCalendarClient.LOG("Adding events for calendar " + aCalendar.name + " - " + aCalendar.id);
+      edsCalendarClient.LOG("Adding events " + aItemscalendar.length + " for calendar " + aCalendar.name + " - " + aCalendar.id);
 
       function processItem(item) {
         edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
         edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
       }
-      if (aCount > 0) {
-        edsCalendarClient.asyncLoop(aItemscalendar, processItem);
-      }
+      edsCalendarClient.asyncLoop(aItemscalendar, processItem);
     }
   };
 
