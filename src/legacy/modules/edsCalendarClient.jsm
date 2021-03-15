@@ -60,12 +60,14 @@ class EdsCalendarClient {
 
     initCompositeCalendar() {
       if (edsCalendarClient.calendar === null) {
-        edsCalendarClient.calendar = Components.classes["@mozilla.org/calendar/calendar;1?type=composite"].getService(Components.interfaces.calICompositeCalendar);
+        edsCalendarClient.calendar = cal.view.getCompositeCalendar(edsCalendarClient);
+        console.log("[edscalendar] Got composite calendar");
       }
     }
 
     attachCalendarObservers() {
       if (edsCalendarClient.calendar) {
+        console.log("[edscalendar] Removing Observers");
         edsCalendarClient.calendar.removeObserver(edsCalendarClient.calendarObserver);
         edsCalendarClient.calendar.addObserver(edsCalendarClient.calendarObserver);
         console.log("[edscalendar] Added observers");
@@ -137,6 +139,7 @@ class EdsCalendarClient {
   }
 
   shutdown() {
+    this.calendar.removeObserver(edsCalendarClient.calendarObserver);
     this.edsCalendarService.shutdown();
   }
 
