@@ -22,25 +22,25 @@ const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modul
 
 var EXPORTED_SYMBOLS = ["EdsPreferences"];
 
-const PREF_ROOT = "extensions.edscalendar";
-
 class EdsPreferences {
     constructor() {
         this.messenger = getMessenger();
+        this.prefs = null;
+    }
+
+    async load() {
+        this.prefs = await this.messenger.storage.local.get();
     }
 
     getInitialProcressingDelay() {
-        let prefs = this.messenger.storage.local.get(PREF_ROOT);
-        return prefs["processing.start.delay"];
+        return this.prefs["processing.start.delay"];
     }
 
     getItemProcessingDelay() {
-        let prefs = this.messenger.storage.local.get(PREF_ROOT);
-        return prefs["processing.item.delay"];
+        return this.prefs["processing.item.delay"];
     }
 
     isDebugEnabled() {
-        let prefs = this.messenger.storage.local.get(PREF_ROOT);
-        return prefs.debug;
+        return this.prefs.debug;
     }
 }

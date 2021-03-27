@@ -36,13 +36,13 @@ var { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modul
 class EdsCalendarClient {
   calendar = null;
 
-  startEdsCalendarSync() {
+  async startEdsCalendarSync() {
     edsUtils.addLogger(this, "edsCalendarClient");
 
     this.preferences = new EdsPreferences();
+    await this.preferences.load();
     this.attachDebuggerIfNeeded();
 
-    console.log("[edscalendar] Before get service1");
     edsCalendarClient.LOG("Init start");
 
     this.edsCalendarService = calEdsProvider;

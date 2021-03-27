@@ -20,14 +20,24 @@
 
 import prefs from "./prefs.js";
 
+const PREF_ROOT = "extensions.edscalendar";
+
 async function startEdsCalendar() {
-    let perfsEdsCal = await messenger.storage.local.get("extensions.edscalendar");
-    if (!perfsEdsCal) {
-        console.log("[edscalendar] Initializing preferences");
-        await messenger.storage.local.set(prefs);
-    }
+    await populatePrefsIfNeeded();
     console.log("[edscalendar] Starting calendar sync service");
     messenger.edscalendar.startEdsCalendarSync();
+}
+
+async function populatePrefsIfNeeded() {
+    let perfsEdsCal = await messenger.storage.local.get();
+    if (isNullOrEmpty(perfsEdsCal)) {
+        console.log("[edscalendar] Initializing preferences");
+        await messenger.storage.local.set(prefs[PREF_ROOT]);
+    }
+}
+
+function isNullOrEmpty(obj) {
+    return !obj || Object.keys(obj).length === 0;
 }
 
 startEdsCalendar();
