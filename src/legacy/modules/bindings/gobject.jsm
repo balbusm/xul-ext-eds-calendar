@@ -18,22 +18,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
 
 
-var EXPORTED_SYMBOLS = ["gobject"];
+const EXPORTED_SYMBOLS = ["gobject"];
 
-var gobject =
+const gobject =
 {
 
   lib: null,
 
   init: function() {
-    edsUtils.addLogger(this, "gobject");
-    this.lib = edsUtils.loadLib("libgobject-2.0.so", 0);
+    addLogger(this, "gobject");
+    this.lib = loadLib("libgobject-2.0.so", 0);
 
     this.declareGObject();
   },

@@ -20,32 +20,32 @@
 
 "use strict";
 
-var EXPORTED_SYMBOLS = ["edsCalendarClient"];
+const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
+const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
+const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-var { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
+const { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
 
-var { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
-var { EdsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/edsPreferences.jsm");
-var { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
+const EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
 
 class EdsCalendarClient {
   calendar = null;
 
   async startEdsCalendarSync() {
-    edsUtils.addLogger(this, "edsCalendarClient");
+    addLogger(this, "edsCalendarClient");
+    this.preferences = edsPreferences;
+    this.edsCalendarService = calEdsProvider;
 
-    this.preferences = new EdsPreferences();
-    await this.preferences.load();
     this.attachDebuggerIfNeeded();
 
     edsCalendarClient.LOG("Init start");
 
-    this.edsCalendarService = calEdsProvider;
+
     // TODO: Add cache?
     // get all the items from all calendars and add them to EDS
     function processCalendars(calendar) {

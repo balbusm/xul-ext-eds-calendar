@@ -19,24 +19,25 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
-var { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
-var { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
-var { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
+const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+const { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
+const { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
+const { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
+const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
 
-var EXPORTED_SYMBOLS = ["libecal"];
+const EXPORTED_SYMBOLS = ["libecal"];
 
-var libecal =
+const libecal =
 {
 
   lib: null,
 
   init: function() {
-    edsUtils.addLogger(this, "libecal");
+    addLogger(this, "libecal");
     this.lib = edslib.loadEdsLib();
 
     this.declareECalClientSourceType();

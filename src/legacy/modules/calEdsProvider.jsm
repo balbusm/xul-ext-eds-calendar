@@ -20,22 +20,23 @@
 
 "use strict";
 
-var EXPORTED_SYMBOLS = ["calEdsProvider"];
+const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
+const { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
+const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+const { gobject } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gobject.jsm");
+const { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
+const { libecal } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libecal.jsm");
+const { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
+const { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/legacy/modules/utils/exceptions.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 
-var { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
-var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
-var { gobject } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gobject.jsm");
-var { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
-var { libecal } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libecal.jsm");
-var { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
-var { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+
+const EXPORTED_SYMBOLS = ["calEdsProvider"];
 
 
 const calEdsProviderInterfaces = [
@@ -55,7 +56,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
     constructor() {
       super();
       this.initProviderBase();
-      edsUtils.addLogger(this, "calEDSProvider");
+      addLogger(this, "calEDSProvider");
       glib.init();
       gio.init();
       gobject.init();

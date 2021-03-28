@@ -18,18 +18,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-var EXPORTED_SYMBOLS = ["libical"];
+const EXPORTED_SYMBOLS = ["libical"];
 
-var libical = {
+const libical = {
 
 	lib: null,
 
 	init: function() {
-		edsUtils.addLogger(this, "libical");
-		this.lib = edsUtils.loadLib("libical-glib.so", 3);
+		addLogger(this, "libical");
+		this.lib = loadLib("libical-glib.so", 3);
 
 		this.declareICalComponentType();
 		this.declareICalComponent();

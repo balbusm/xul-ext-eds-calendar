@@ -18,22 +18,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-var { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
-var { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
-var { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
 
-var EXPORTED_SYMBOLS = ["libedataserver"];
+const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+const { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
+const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
 
-var libedataserver =
+const EXPORTED_SYMBOLS = ["libedataserver"];
+
+const libedataserver =
 {
 
     lib: null,
 
     init: function() {
-        edsUtils.addLogger(this, "libedataserver");
+        addLogger(this, "libedataserver");
         // Workaround to make sure that invalid version of libedataserver-2.0.so
         // is not loaded (libecal makes libedataserver load)
         this.lib = edslib.loadEdsLib();

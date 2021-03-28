@@ -18,9 +18,10 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/apiAccess.jsm");
 
-var EXPORTED_SYMBOLS = ["EdsPreferences"];
+const EXPORTED_SYMBOLS = ["edsPreferences"];
+
 
 class EdsPreferences {
     constructor() {
@@ -43,4 +44,14 @@ class EdsPreferences {
     isDebugEnabled() {
         return this.prefs.debug;
     }
+
+    getLoggingDomains() {
+        return this.prefs["logging.domains"];
+    }
+
+    isLoggingEnabled() {
+        return this.prefs["logging.enabled"];
+    }
 }
+
+var edsPreferences = new EdsPreferences();

@@ -18,19 +18,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-var EXPORTED_SYMBOLS = ["glib"];
+const EXPORTED_SYMBOLS = ["glib"];
 
-var glib =
+const glib =
 {
 
   lib: null,
 
   init: function() {
-    edsUtils.addLogger(this, "glib");
-    this.lib = edsUtils.loadLib("libglib-2.0.so", 0);
+    addLogger(this, "glib");
+    this.lib = loadLib("libglib-2.0.so", 0);
 
     this.declareGStructures();
     this.declareMemAlloc();

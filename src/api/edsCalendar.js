@@ -28,15 +28,22 @@ const { ExtensionAPI } = ExtensionCommon;
 this.edscalendar = class extends ExtensionAPI {
   edsCalendarClient;
 
-  onStartup() {
+  async onStartup() {
     Services.io
       .getProtocolHandler("resource")
       .QueryInterface(Ci.nsIResProtocolHandler)
       .setSubstitution("edscalendar", this.extension.rootURI);
 
-    let { edsCalendarClient } = ChromeUtils.import(
+    const { edsPreferences } = ChromeUtils.import(
+      "resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
+    await edsPreferences.load();
+    console.log("[edscalendar] Loaded prefs");
+
+    const { edsCalendarClient } = ChromeUtils.import(
       "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
     );
+    console.log("[edscalendar] Loaded edsCalendarClient");
+
     this.edsCalendarClient = edsCalendarClient;
   }
 

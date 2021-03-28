@@ -19,18 +19,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-var { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-var edsUtils = ChromeUtils.import("resource://edscalendar/legacy/modules/utils.jsm");
-var { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/exceptions.jsm");
+const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
+const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
+const { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/exceptions.jsm");
 
-var EXPORTED_SYMBOLS = ["edslib"];
+const EXPORTED_SYMBOLS = ["edslib"];
 
-var edslib = {
+const edslib = {
 
   loadEdsLib: function() {
     try {
-      edsUtils.addLogger(this, "edslib");
-      return edsUtils.loadLib("libecal-2.0.so", 1);
+      addLogger(this, "edslib");
+      return loadLib("libecal-2.0.so", 1);
     } catch (ex) {
       if (!ex instanceof LoadingLibException) {
         throw ex;
@@ -49,14 +50,14 @@ var edslib = {
     if (lib12 === null) {
       return null;
     }
-    let reason = "Library libecal-2.0.so not available. Detected not suported libecal-1.2.so. Addon requires at least EDS 3.33.2";
+    let reason = "Library libecal-2.0.so not available. Detected not suported libecal-1.2.so. EdsCalendar > v0.8 requires at least EDS 3.33.2. Try EdsCalendar < v0.8";
     lib12.close();
     return reason;
   },
 
   loadOldEdsLib: function() {
     try {
-      return edsUtils.loadLib("libecal-1.2.so", 17);
+      return loadLib("libecal-1.2.so", 17);
     } catch (ex) {
       return null;
     }
