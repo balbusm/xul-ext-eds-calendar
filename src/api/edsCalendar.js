@@ -55,6 +55,10 @@ this.edscalendar = class extends ExtensionAPI {
     this.edsCalendarClient.shutdown();
     this.edsCalendarClient = null;
 
+    const { moduleRegistry } = ChromeUtils.import(
+      "resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+    moduleRegistry.shutdown();
+
     Services.io
       .getProtocolHandler("resource")
       .QueryInterface(Ci.nsIResProtocolHandler)

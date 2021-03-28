@@ -18,6 +18,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+moduleRegistry.registerModule(__URI__);
 
 const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
@@ -50,7 +52,7 @@ const edslib = {
     if (lib12 === null) {
       return null;
     }
-    let reason = "Library libecal-2.0.so not available. Detected not suported libecal-1.2.so. EdsCalendar > v0.8 requires at least EDS 3.33.2. Try EdsCalendar < v0.8";
+    let reason = "Library libecal-2.0.so not available. Detected not suported libecal-1.2.so. EdsCalendar >= v0.8 requires at least EDS 3.33.2. Try EdsCalendar < v0.8";
     lib12.close();
     return reason;
   },

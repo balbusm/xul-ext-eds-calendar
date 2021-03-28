@@ -20,6 +20,9 @@
 
 "use strict";
 
+const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+moduleRegistry.registerModule(__URI__);
+
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");

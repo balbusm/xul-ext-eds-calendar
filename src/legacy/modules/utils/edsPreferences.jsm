@@ -1,6 +1,6 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
- * Copyright: 2014-2019 Mateusz Balbus <balbusm@gmail.com>
+ * Copyright: 2014-2021 Mateusz Balbus <balbusm@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 "use strict";
+
+const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+moduleRegistry.registerModule(__URI__);
 
 const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/apiAccess.jsm");
 

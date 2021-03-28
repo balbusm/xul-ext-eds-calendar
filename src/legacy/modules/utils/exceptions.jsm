@@ -17,6 +17,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+moduleRegistry.registerModule(__URI__);
+
 const EXPORTED_SYMBOLS = ["CalendarServiceException", "LoadingLibException"];
 
 var IntermediateInheritor = function() { };

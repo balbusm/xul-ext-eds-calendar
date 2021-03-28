@@ -20,6 +20,9 @@
 
 "use strict";
 
+const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+moduleRegistry.registerModule(__URI__);
+
 const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -141,6 +144,7 @@ class EdsCalendarClient {
   shutdown() {
     this.calendar.removeObserver(edsCalendarClient.calendarObserver);
     this.edsCalendarService.shutdown();
+    this.LOG("Eds Calendar client is shutdown");
   }
 
   // calIOperationListener
