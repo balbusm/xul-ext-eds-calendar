@@ -966,12 +966,13 @@ class CalEdsProvider extends cal.provider.BaseClass {
     shutdown() {
       this.LOG("Closing EDS Calendar Service");
       this.deleteERegistry();
-      libecal.shutdown();
-      libedataserver.shutdown();
-      libical.shutdown();
-      gobject.shutdown();
-      gio.shutdown();
-      glib.shutdown();
+      // TODO Don't close c-libs as they won't work after resume
+      // libecal.shutdown();
+      // libedataserver.shutdown();
+      // libical.shutdown();
+      // gobject.shutdown();
+      // gio.shutdown();
+      // glib.shutdown();
     }
 }
 
