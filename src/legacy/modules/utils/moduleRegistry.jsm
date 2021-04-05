@@ -32,7 +32,6 @@ class ModuleRegistry {
 
     shutdown() {
         for (let module of this.registeredModules) {
-            console.log("Unloading module " + module);
             Cu.unload(module);
         }
         registeredModules = null;

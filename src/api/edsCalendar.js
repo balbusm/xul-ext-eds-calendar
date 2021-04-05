@@ -34,16 +34,21 @@ this.edscalendar = class extends ExtensionAPI {
       .QueryInterface(Ci.nsIResProtocolHandler)
       .setSubstitution("edscalendar", this.extension.rootURI);
 
+    // Load prefs at start
     const { edsPreferences } = ChromeUtils.import(
       "resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
     await edsPreferences.load();
-    console.log("[edscalendar] Loaded prefs");
+
+    const { addLogger } = ChromeUtils.import(
+      "resource://edscalendar/legacy/modules/utils/logger.jsm");
+    addLogger(this, "edscalendar");
+
+    this.LOG("Loaded prefs");
 
     const { edsCalendarClient } = ChromeUtils.import(
       "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
     );
-    console.log("[edscalendar] Loaded edsCalendarClient");
-
+    this.LOG("Loaded edsCalendarClient");
     this.edsCalendarClient = edsCalendarClient;
   }
 
@@ -52,6 +57,7 @@ this.edscalendar = class extends ExtensionAPI {
       return;
     }
 
+    this.LOG("Shutting down Eds Calendar");
     this.edsCalendarClient.shutdown();
     this.edsCalendarClient = null;
 

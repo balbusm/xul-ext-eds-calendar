@@ -180,9 +180,6 @@ function addLogger(aTarget, aDomain) {
 
 function init() {
   let uri = Services.io.newURI(__URI__, null, null);
-  console.log("Logging init");
-  console.log("URI" + __URI__);
-  console.dir(uri);
   if (uri.scheme != "resource") {
     throw Error("This only works properly from resource URI's at the moment");
   }
