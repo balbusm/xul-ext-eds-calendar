@@ -1,0 +1,14 @@
+[
+    {
+      "namespace": "edscalendar",
+      "functions": [
+        {
+          "name": "startEdsCalendarSync",
+          "type": "function",
+          "async": true,
+          "parameters": []
+        }
+      ]
+    }
+  ]
+  

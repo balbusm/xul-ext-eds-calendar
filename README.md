@@ -13,12 +13,70 @@ Based on [Evolution Data Server Provider](https://code.launchpad.net/~mconley/ed
 If you have any issues please collect logs and attach them to the issue.  
 
 To enable addon logging:
-- In Thunderbird go to Preferences > Preferences > Advanced > Config Editor
-- Set entry "extensions.edscalendar.logging.enabled" to true
-- Make sure "browser.dom.window.dump.enabled" is set to true
-- Close Thunderbird
-- Start Thunderbird from terminal
-- Logs should start displaying on the screen.
+1. In Thunderbird go to Menu > Tools > Developer Tools > Debug Addons
+1. Find "Eds Calendar Integration"
+1. Go to Inspect > Storage > Extension Storage
+1. Set `logging.enabled: true` (false is default)
+1. Close Thunderbird
+1. Start Thunderbird from terminal
+1. Logs should start displaying on the screen
+
+## Development setup
+### Setup Thunderbird
+1. Create a file
+```
+<YOUR_THUNDERBIRD_PROFILE>/extensions/{e6696d02-466a-11e3-a162-04e36188709b}
+```
+Example:
+```
+/home/<MY_HOME>/.thunderbird/ak1vcja3.default-release/extensions/{e6696d02-466a-11e3-a162-04e36188709b}
+```
+
+2. In file `{e6696d02-466a-11e3-a162-04e36188709b}` add path to your repository.<br />
+Example:
+```
+/home/<MY_HOME>/xul-ext-eds-calendar
+```
+
+### Setup build environment
+1. Install Node.js 14.x
+
+### Build commands
+1. First time build
+   ```
+   npm install
+   npm run build 
+   ```
+1. Clean build
+   ```
+   npm run rebuild
+   ```
+
+### Running add-on in Thunderbird
+To start addon-in Thunderbird run:
+```
+thunderbird -purgecaches --devtools
+```
+`purgecaches` - makes sure that Thunderbird doesn't cache add-on<br />
+`devtools` - starts developer toolbox on startup
+
+#### Useful shortcuts: 
+CTRL + SHIFT + I - opens developer toolbox<br/>
+CTRL + SHIFT + J - opens console log
+
+### Logging and Debugging
+
+In order to enable logging:
+1. Go to Menu > Tools > Developer Tools > Debug Addons
+2. Find "Eds Calendar Integration"
+3. Go to Inspect > Storage > Extension Storage
+4. Set `logging.enabled: true`
+
+To enable startup debugging set `debugging: true`.<br/>
+It will enable wait loop so there is time to attach debugger.
+
+Alternative approach is to edit `perf.js` file and set `forceReload: true`.<br/>
+Config will be reloaded on each startup.
 
 ## More questions?
 [See FAQ for more](https://github.com/balbusm/xul-ext-eds-calendar/wiki/FAQ)
