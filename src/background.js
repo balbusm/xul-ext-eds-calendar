@@ -29,11 +29,17 @@ async function startEdsCalendar() {
 }
 
 async function populatePrefsIfNeeded() {
-    let perfsEdsCal = await messenger.storage.local.get();
-    if (isNullOrEmpty(perfsEdsCal)) {
+    let prefsEdsCal = await messenger.storage.local.get();
+    if (needsUpdate(prefsEdsCal)) {
         console.log("[edscalendar] Initializing preferences");
         await messenger.storage.local.set(prefs[PREF_ROOT]);
     }
+}
+
+function needsUpdate(prefsEdsCal) {
+    return isNullOrEmpty(prefsEdsCal) ||
+        !prefsEdsCal.version || prefsEdsCal.version < prefs[PREF_ROOT].version ||
+        prefs.forceReload;
 }
 
 function isNullOrEmpty(obj) {
