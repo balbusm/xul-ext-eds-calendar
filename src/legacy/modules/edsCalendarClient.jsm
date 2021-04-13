@@ -58,7 +58,7 @@ class EdsCalendarClient {
 
   initCompositeCalendar() {
     if (edsCalendarClient.calendar === null) {
-      edsCalendarClient.calendar = cal.view.getCompositeCalendar(edsCalendarClient);
+      edsCalendarClient.calendar = cal.view.getCompositeCalendar(cal.window.getCalendarWindow());
       edsCalendarClient.LOG("Got composite calendar");
     }
   }
@@ -217,22 +217,27 @@ class EdsCalendarClient {
     },
 
     // calIObserver
-    onStartBatch: function() {
+    onStartBatch: function(aCalendar) {
     },
 
     // calIObserver
-    onEndBatch: function() {
+    onEndBatch: function(aCalendar) {
     },
 
-    onError: function() { },
+    // calIObserver
+    onError: function(aCalendar, aError, aMessage) { },
+    // calIObserver
     onPropertyChanged: function(aCalendar, aName, aValue, aOldValue) {
       edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, aValue);
     },
+    // calIObserver
     onPropertyDeleting: function(aCalendar, aName) {
       edsCalendarClient.edsCalendarService.setProperty(aCalendar.id + "::" + aName, null);
     },
-    onDefaultCalendarChanged: function() { },
-    onLoad: function() { }
+    // calIObserver
+    onDefaultCalendarChanged: function(aCalendar) { },
+    // calIObserver
+    onLoad: function(aCalendar) { }
   }
 }
 
