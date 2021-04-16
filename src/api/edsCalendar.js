@@ -26,7 +26,10 @@ const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
 const { ExtensionAPI } = ExtensionCommon;
 
 this.edscalendar = class extends ExtensionAPI {
-  edsCalendarClient;
+  constructor(...args) {
+    super(...args);
+    this.edsCalendarClient = null;
+  }
 
   async onStartup() {
     Services.io
