@@ -1,7 +1,7 @@
 {
   "name": "eds-calendar",
   "description": "EDS Calendar Integration",
-  "version": "0.9.0-rc1",
+  "version": "0.9.0",
   "private": true,
   "license": "GPL-2.0",
   "directories": {
