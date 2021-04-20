@@ -111,8 +111,15 @@ class EdsCalendarClient {
   }
 
   shutdown() {
-    this.calendar.removeObserver(edsCalendarClient.calendarObserver);
-    this.edsCalendarService.shutdown();
+    if (this.asyncHelper) {
+      this.asyncHelper.shutdown();
+    }
+    if (this.calendar) {
+      this.calendar.removeObserver(edsCalendarClient.calendarObserver);
+    }
+    if (this.edsCalendarService) {
+      this.edsCalendarService.shutdown();
+    }
     this.LOG("Eds Calendar client is shutdown");
   }
 

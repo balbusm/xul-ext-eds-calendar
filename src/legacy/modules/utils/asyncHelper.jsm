@@ -32,9 +32,11 @@ const EXPORTED_SYMBOLS = ["asyncHelper"];
 class AsyncHelper {
     constructor() {
         addLogger(this, "asyncHelper");
+        this.isShutdown = false;
         this.initialDelay = edsPreferences.getInitialProcressingDelay();
         this.itemProcessingDelay = edsPreferences.getItemProcessingDelay();
         this.window = Services.wm.getMostRecentWindow("mail:3pane");
+        this.jobs = new Set();
     }
 
     delayedAsyncLoop(collection, callback) {
@@ -45,6 +47,9 @@ class AsyncHelper {
     }
 
     asyncLoop(collection, callback) {
+        if (this.isShutdown) {
+            return Promise.reject(new Error("AsyncHelper is shutdown. AsyncLoop is not accepted"));
+        }
         var itemNumber = -1;
         const asyncLoopInternal = (resolve, reject) => {
             itemNumber++;
@@ -61,8 +66,19 @@ class AsyncHelper {
         return new Promise(asyncLoopInternal);
     }
 
-    setTimeout(...args) {
-        this.window.setTimeout(...args);
+    setTimeout(callback, timeout) {
+        var jobId = this.window.setTimeout(() => {
+            this.jobs.delete(jobId);
+            callback();
+        }, timeout);
+        this.jobs.add(jobId);
+    }
+
+    shutdown() {
+        for (let jobId of this.jobs) {
+            this.window.clearTimeout(jobId);
+        }
+        this.isShutdown = true;
     }
 }
 

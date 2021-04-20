@@ -64,6 +64,7 @@ this.edscalendar = class extends ExtensionAPI {
     this.edsCalendarClient.shutdown();
     this.edsCalendarClient = null;
 
+    this.LOG("Closing all registered modules");
     const { moduleRegistry } = ChromeUtils.import(
       "resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
     moduleRegistry.shutdown();

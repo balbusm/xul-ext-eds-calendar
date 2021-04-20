@@ -34,7 +34,7 @@ class ModuleRegistry {
         for (let module of this.registeredModules) {
             Cu.unload(module);
         }
-        registeredModules = null;
+        this.registeredModules = null;
     }
 }
 const moduleRegistry = new ModuleRegistry();
