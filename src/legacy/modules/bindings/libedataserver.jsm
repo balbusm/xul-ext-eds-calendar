@@ -18,7 +18,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+// Do not unload c libs as it causes crash
+// moduleRegistry.registerModule(__URI__);
 
 const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
@@ -37,6 +38,10 @@ const libedataserver =
     lib: null,
 
     init: function() {
+        if (this.lib) {
+            return;
+        }
+
         addLogger(this, "libedataserver");
         // Workaround to make sure that invalid version of libedataserver-2.0.so
         // is not loaded (libecal makes libedataserver load)
