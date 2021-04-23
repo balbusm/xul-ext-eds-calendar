@@ -1,14 +1,14 @@
 {
   "name": "eds-calendar",
   "description": "EDS Calendar Integration",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "license": "GPL-2.0",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "build": "mkdir -p dist && (cd src && zip -9r ../dist/ext-$npm_package_name-$npm_package_version.xpi *)",
+    "build": "mkdir -p dist && (cd src && zip -9r ../dist/ext-$npm_package_name-$npm_package_version-tb-linux.xpi *)",
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
     "bump": "bumper() { bump package.json \"$1\"; bump src/manifest.json \"$1\"; }; bumper",
