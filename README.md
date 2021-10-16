@@ -17,6 +17,8 @@ To enable addon logging:
 1. Find "Eds Calendar Integration"
 1. Go to Inspect > Storage > Extension Storage
 1. Set `logging.enabled: true` (false is default)
+1. In Thunderbird go to Menu (three dashes) > Preferences > Advanced > Config Editor
+1. Make sure "browser.dom.window.dump.enabled" is set to true
 1. Close Thunderbird
 1. Start Thunderbird from terminal
 1. Logs should start displaying on the screen
