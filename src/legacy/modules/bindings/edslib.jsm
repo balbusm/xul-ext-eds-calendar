@@ -30,38 +30,46 @@ const EXPORTED_SYMBOLS = ["edslib"];
 
 const edslib = {
 
+  _edslib: null,
+  _isOldEdsLib: null,
+
   loadEdsLib: function() {
+    addLogger(this, "edslib");
+    if (this._edslib !== null) {
+      return this._edslib;
+    }
+
     try {
-      addLogger(this, "edslib");
-      return loadLib("libecal-2.0.so", 1);
+      return this.loadNewEdsLib();
     } catch (ex) {
       if (!ex instanceof LoadingLibException) {
         throw ex;
       }
-      let reason = this.investigateLoadingLibException();
-      if (reason === null) {
-        throw ex;
-      }
-      this.ERROR(reason);
-      throw new LoadingLibException(reason);
+      return this.loadOldEdsLib();
     }
   },
 
-  investigateLoadingLibException: function() {
-    let lib12 = this.loadOldEdsLib();
-    if (lib12 === null) {
-      return null;
-    }
-    let reason = "Library libecal-2.0.so not available. Detected not suported libecal-1.2.so. EdsCalendar >= v0.8 requires at least EDS 3.33.2. Try EdsCalendar < v0.8";
-    lib12.close();
-    return reason;
+  isOldEdsLib: function() {
+    this.loadEdsLib();
+    return this._isOldEdsLib;
+  },
+
+  loadNewEdsLib: function() {
+    this._edslib = loadLib("libecal-2.0.so", 1);
+    this._isOldEdsLib = false;
+    return this._edslib;
   },
 
   loadOldEdsLib: function() {
     try {
-      return loadLib("libecal-1.2.so", 17);
+      this._edslib = loadLib("libecal-1.2.so", 17);
+      this._isOldEdsLib = true;
+      return this._edslib;
     } catch (ex) {
-      return null;
+      if (!ex instanceof LoadingLibException) {
+        throw ex;
+      }
+      throw new LoadingLibException("Library libecal-2.0.so or libecal-1.2 not available. EdsCalendar requires EDS >= 0.8");
     }
   },
 

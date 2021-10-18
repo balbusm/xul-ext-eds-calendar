@@ -22,17 +22,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://mozmill/modules/assertions.js");
 
-Components.utils.import("resource://edscalendar/bindings/libical-glib.jsm");
+Components.utils.import("resource://edscalendar/bindings/libical.jsm");
 
 Components.utils.import("resource://edscalendar/utils.jsm");
 
 function setupModule(module)
 {
   addLogger(module, "edsCalendarTest");
-  
+
   module.testData = require("modules/testData");
   module.testUtils = require("modules/testUtils");
-  
+
   module.uuidGenerator = Components.classes["@mozilla.org/uuid-generator;1"]
   .getService(Components.interfaces.nsIUUIDGenerator);
   

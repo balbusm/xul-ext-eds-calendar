@@ -1,7 +1,7 @@
 {
   "name": "eds-calendar",
   "description": "EDS Calendar Integration",
-  "version": "0.9.2",
+  "version": "1.0.0",
   "private": true,
   "license": "GPL-2.0",
   "directories": {
@@ -17,7 +17,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "action-thunderbird-tests": "github:kewisch/action-thunderbird-tests#master",
+    "action-thunderbird-tests": "github:kewisch/action-thunderbird-tests#main",
     "bump-file": "2.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "7.19.0"
