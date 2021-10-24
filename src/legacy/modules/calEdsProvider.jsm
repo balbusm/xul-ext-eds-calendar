@@ -48,16 +48,22 @@ const calEdsProviderInterfaces = [
   Components.interfaces.calICalendar,
   Components.interfaces.calICompositeCalendar
 ];
+
 class CalEdsProvider extends cal.provider.BaseClass {
-    QueryInterface = ChromeUtils.generateQI(calEdsProviderInterfaces);
-
-    mBatchCalendar = null;
-    mBatchClient = null;
-
-    registry = null;
-
     constructor() {
       super();
+
+      this.QueryInterface = ChromeUtils.generateQI(calEdsProviderInterfaces);
+      this.mBatchCalendar = null;
+      this.mBatchClient = null;
+
+      this.registry = null;
+
+      // calICompositeCalendar
+      this.defaultCalendar = null;
+      this.prefPrefix = null;
+      this.statusDisplayed = false;
+
       this.initProviderBase();
       addLogger(this, "calEDSProvider");
       glib.init();
@@ -951,17 +957,10 @@ class CalEdsProvider extends cal.provider.BaseClass {
     }
 
     // calICompositeCalendar
-    defaultCalendar = null;
-    // calICompositeCalendar
-    prefPrefix = null;
-
-    statusDisplayed = false;
-
-    // calICompositeCalendar
-    setStatusObserver = function(/* calIStatusObserver */ aStatusObserver, /* nsIDOMChromeWindow */ aWindow) {
+    setStatusObserver(/* calIStatusObserver */ aStatusObserver, /* nsIDOMChromeWindow */ aWindow) {
       // FIXME implement
       throw NS_ERROR_NOT_IMPLEMENTED;
-    };
+    }
 
     shutdown() {
       this.LOG("Closing EDS Calendar Service");
@@ -976,4 +975,4 @@ class CalEdsProvider extends cal.provider.BaseClass {
     }
 }
 
-this.calEdsProvider = new CalEdsProvider();
+const calEdsProvider = new CalEdsProvider();

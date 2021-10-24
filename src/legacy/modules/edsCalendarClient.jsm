@@ -37,8 +37,9 @@ const { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/mod
 const EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
 
-class EdsCalendarClient {
-  calendar = null;
+const edsCalendarClient = {
+
+  calendar: null,
 
   async startEdsCalendarSync() {
     addLogger(this, "edsCalendarClient");
@@ -54,14 +55,14 @@ class EdsCalendarClient {
       .then(edsCalendarClient.initCompositeCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
       .then(() => edsCalendarClient.LOG("Init finished"));
-  }
+  },
 
   initCompositeCalendar() {
     if (edsCalendarClient.calendar === null) {
       edsCalendarClient.calendar = cal.view.getCompositeCalendar(cal.window.getCalendarWindow());
       edsCalendarClient.LOG("Got composite calendar");
     }
-  }
+  },
 
   attachCalendarObservers() {
     if (edsCalendarClient.calendar) {
@@ -69,12 +70,12 @@ class EdsCalendarClient {
       edsCalendarClient.calendar.addObserver(edsCalendarClient.calendarObserver);
       edsCalendarClient.LOG("Added observers");
     }
-  }
+  },
 
     // get all the items from all calendars and add them to EDS
   processCalendars(calendar) {
       calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
-  }
+  },
 
 
   async attachDebuggerIfNeeded() {
@@ -86,7 +87,7 @@ class EdsCalendarClient {
           resolve();
         }, 30_000));
     }
-  }
+  },
 
   operationTypeToString(operationType) {
     let result;
@@ -108,7 +109,7 @@ class EdsCalendarClient {
         break;
     }
     return result;
-  }
+  },
 
   shutdown() {
     if (this.asyncHelper) {
@@ -121,10 +122,10 @@ class EdsCalendarClient {
       this.edsCalendarService.shutdown();
     }
     this.LOG("Eds Calendar client is shutdown");
-  }
+  },
 
   // calIOperationListener
-  calendarGetListener = {
+  calendarGetListener: {
 
     onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
       if (!Components.isSuccessCode(aStatus)) {
@@ -159,9 +160,9 @@ class EdsCalendarClient {
       }
       edsCalendarClient.asyncHelper.asyncLoop(aItemscalendar, processItem);
     }
-  };
+  },
 
-  calendarChangeListener = {
+  calendarChangeListener: {
     onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
       if (!Components.isSuccessCode(aStatus)) {
         edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
@@ -182,9 +183,9 @@ class EdsCalendarClient {
     onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
       throw "Unexpected operation";
     }
-  };
+  },
 
-  calendarObserver = {
+  calendarObserver: {
     QueryInterface: ChromeUtils.generateQI([
       Components.interfaces.calIObserver,
       Components.interfaces.calICompositeObserver
@@ -246,6 +247,4 @@ class EdsCalendarClient {
     // calIObserver
     onLoad: function(aCalendar) { }
   }
-}
-
-this.edsCalendarClient = new EdsCalendarClient();
+};

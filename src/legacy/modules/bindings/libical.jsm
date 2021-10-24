@@ -51,14 +51,8 @@ const libical = {
 	exposeFuntions: function() {
         Object
             .getOwnPropertyNames(this.lib)
-            .forEach(name => this.LOG(`Got variable ${name}`));
-
-        Object
-            .getOwnPropertyNames(this.lib)
             .filter(name => (name !== "constructor" && !this[name]))
-            // .filter(name => name !== "init")
             .forEach(name => {
-                this.LOG(`Exposing function ${name}`);
                 this[name] = this.lib[name];
             });
 	},
