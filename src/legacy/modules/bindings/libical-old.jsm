@@ -23,7 +23,7 @@ const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/mod
 
 const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
+const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
 const EXPORTED_SYMBOLS = ["libicalOld"];
 
