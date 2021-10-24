@@ -10,7 +10,7 @@
   },
   "name": "EDS Calendar Integration",
   "description": "Synchronizes calendars with Evolution Data Server",
-  "version": "1.0.0",
+  "version": "0.9.3",
   "permissions": [
     "storage"
   ],
