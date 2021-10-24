@@ -27,7 +27,7 @@ const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/ut
 
 const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
 const { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
-const { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
+const { libical } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical.jsm");
 const { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
 const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
 

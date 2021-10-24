@@ -25,9 +25,9 @@ const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
 
-const EXPORTED_SYMBOLS = ["libicalGlib"];
+const EXPORTED_SYMBOLS = ["libicalOld"];
 
-const libicalGlib = {
+const libicalOld = {
 
 	lib: null,
 
@@ -37,7 +37,7 @@ const libicalGlib = {
 		}
 
 		addLogger(this, "libical");
-		this.lib = loadLib("libical-glib.so", 3);
+		this.lib = loadLib("libical.so", 1);
 
 		this.declareICalComponentType();
 		this.declareICalComponent();
@@ -84,16 +84,16 @@ const libicalGlib = {
 		this.icaltimezone = this._icaltimezone;
 
 		this.icaltimezone_set_component = this.lib.declare(
-			"i_cal_timezone_set_component", ctypes.default_abi, ctypes.int,
+			"icaltimezone_set_component", ctypes.default_abi, ctypes.int,
 			this.icaltimezone.ptr, this.icalcomponent.ptr);
 
-		this.icaltimezone_get_component = this.lib.declare("i_cal_timezone_get_component",
+		this.icaltimezone_get_component = this.lib.declare("icaltimezone_get_component",
 			ctypes.default_abi, this.icalcomponent.ptr, this.icaltimezone.ptr);
 
-		this.icaltimezone_new = this.lib.declare("i_cal_timezone_new",
+		this.icaltimezone_new = this.lib.declare("icaltimezone_new",
 			ctypes.default_abi, this.icaltimezone.ptr);
 
-		this.icaltimezone_free = this.lib.declare("i_cal_timezone_free",
+		this.icaltimezone_free = this.lib.declare("icaltimezone_free",
 			ctypes.default_abi, ctypes.void_t, this.icaltimezone.ptr, ctypes.int);
 	},
 
@@ -104,41 +104,41 @@ const libicalGlib = {
 
 		// Methods
 		this.icalcomponent_as_ical_string = this.lib.declare(
-			"i_cal_component_as_ical_string", ctypes.default_abi,
+			"icalcomponent_as_ical_string", ctypes.default_abi,
 			ctypes.char.ptr, this.icalcomponent.ptr);
 
 		this.icalcomponent_as_ical_string_r = this.lib.declare(
-			"i_cal_component_as_ical_string", ctypes.default_abi,
+			"icalcomponent_as_ical_string", ctypes.default_abi,
 			ctypes.char.ptr, this.icalcomponent.ptr);
 
 		this.icalcomponent_new_from_string = this.lib.declare(
-			"i_cal_component_new_from_string", ctypes.default_abi,
+			"icalcomponent_new_from_string", ctypes.default_abi,
 			this.icalcomponent.ptr, ctypes.char.ptr);
 
 		this.icalcomponent_get_first_component = this.lib.declare(
-			"i_cal_component_get_first_component", ctypes.default_abi,
+			"icalcomponent_get_first_component", ctypes.default_abi,
 			this.icalcomponent.ptr, this.icalcomponent.ptr,
 			this.icalcomponent_kind.type);
 
 		this.icalcomponent_get_next_component = this.lib.declare(
-			"i_cal_component_get_next_component", ctypes.default_abi,
+			"icalcomponent_get_next_component", ctypes.default_abi,
 			this.icalcomponent.ptr, this.icalcomponent.ptr,
 			this.icalcomponent_kind.type);
 
 		this.icalcomponent_get_description = this.lib.declare(
-			"i_cal_component_get_description", ctypes.default_abi,
+			"icalcomponent_get_description", ctypes.default_abi,
 			ctypes.char.ptr, this.icalcomponent.ptr);
 
 		this.icalcomponent_set_description = this.lib.declare(
-			"i_cal_component_set_description", ctypes.default_abi,
+			"icalcomponent_set_description", ctypes.default_abi,
 			ctypes.void_t, this.icalcomponent.ptr, ctypes.char.ptr);
 
 		this.icalcomponent_isa = this.lib
-			.declare("i_cal_component_isa", ctypes.default_abi,
+			.declare("icalcomponent_isa", ctypes.default_abi,
 				this.icalcomponent_kind.type, this.icalcomponent.ptr);
 
 		this.icalcomponent_free = this.lib
-			.declare("i_cal_component_free", ctypes.default_abi,
+			.declare("icalcomponent_free", ctypes.default_abi,
 				ctypes.void_t, this.icalcomponent.ptr);
 	},
 
