@@ -74,10 +74,21 @@ const edsCalendarClient = {
 
     // get all the items from all calendars and add them to EDS
   processCalendars(calendar) {
-    edsCalendarClient.LOG("Processing calendar " + calendar.name + "::" + calendar);
+    edsCalendarClient.LOG("processCalendars " + calendar);
+    edsCalendarClient.LOG("processCalendars::has functions");
+    edsCalendarClient.printFuntions(calendar);
+    edsCalendarClient.LOG("processCalendars::name " + calendar.name);
     calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
   },
 
+  printFuntions(obj) {
+    Object
+        .getOwnPropertyNames(obj)
+        .filter(name => (name !== "constructor" && !this[name]))
+        .forEach(name => {
+            edsCalendarClient.LOG("function: " + name);
+        });
+  },
 
   async attachDebuggerIfNeeded() {
     if (edsCalendarClient.preferences.isDebugEnabled()) {
