@@ -74,7 +74,8 @@ const edsCalendarClient = {
 
     // get all the items from all calendars and add them to EDS
   processCalendars(calendar) {
-      calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
+    edsCalendarClient.LOG("Processing calendar " + calendar.name + "::" + calendar);
+    calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
   },
 
 
