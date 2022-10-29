@@ -41,7 +41,7 @@ Example:
 ```
 
 ### Setup build environment
-1. Install Node.js 14.x
+1. Install Node.js 18.x
 
 ### Build commands
 1. First time build

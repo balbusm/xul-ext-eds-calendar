@@ -51,7 +51,7 @@ const edsCalendarClient = {
 
     edsCalendarClient.LOG("Init start");
 
-    this.asyncHelper.delayedAsyncLoop(cal.getCalendarManager().getCalendars({}), this.processCalendars)
+    this.asyncHelper.delayedAsyncLoop(cal.manager.getCalendars(), this.processCalendars)
       .then(edsCalendarClient.initCompositeCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
       .then(() => edsCalendarClient.LOG("Init finished"));
