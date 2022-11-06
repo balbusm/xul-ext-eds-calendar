@@ -77,20 +77,19 @@ const edsCalendarClient = {
     let iterator = cal.iterate.streamValues(
       calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null)
     );
-  
+
     for await (let calItems of iterator) {
       edsCalendarClient.processCalendarItems(calItems);
-    }  
+    }
   },
 
   processCalendarItems(calItems) {
-
     if (calItems.length === 0) {
       edsCalendarClient.LOG("Got empty calendar item list. Ignoring.");
     }
 
-    let calendar = calItems[0].calendar
-    edsCalendarClient.LOG("Adding events " + calItems.length + " for calendar " + calendar.name + " - " + calendar.id);  
+    let calendar = calItems[0].calendar;
+    edsCalendarClient.LOG("Adding events " + calItems.length + " for calendar " + calendar.name + " - " + calendar.id);
 
     function processItem(item) {
       edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
