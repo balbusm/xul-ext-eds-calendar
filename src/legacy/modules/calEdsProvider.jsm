@@ -302,9 +302,9 @@ class CalEdsProvider extends cal.provider.BaseClass {
 
     getItemSourceType(item) {
       var sourceType;
-      if (item instanceof Components.interfaces.calITodo) {
+      if (item.isTodo()) {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_TASKS;
-      } else if (item instanceof Components.interfaces.calIEvent) {
+      } else if (item.isEvent()) {
         sourceType = libecal.ECalClientSourceType.E_CAL_CLIENT_SOURCE_TYPE_EVENTS;
       } else {
         sourceType = null;
