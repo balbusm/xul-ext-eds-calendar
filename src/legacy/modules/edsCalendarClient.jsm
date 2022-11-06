@@ -51,7 +51,7 @@ const edsCalendarClient = {
 
     edsCalendarClient.LOG("Init start");
 
-    this.asyncHelper.delayedAsyncLoop(cal.manager.getCalendars(), this.processCalendars)
+    this.asyncHelper.delayedAsyncLoop(cal.manager.getCalendars(), this.processCalendar)
       .then(edsCalendarClient.initCompositeCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
       .then(() => edsCalendarClient.LOG("Init finished"));
@@ -73,17 +73,17 @@ const edsCalendarClient = {
   },
 
     // get all the items from all calendars and add them to EDS
-  async processCalendars(calendar) {
+  async processCalendar(calendar) {
     let iterator = cal.iterate.streamValues(
       calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null)
     );
   
     for await (let calItems of iterator) {
-      edsCalendarClient.processCalendar(calItems);
+      edsCalendarClient.processCalendarItems(calItems);
     }  
   },
 
-  processCalendar: function(calItems) {
+  processCalendarItems(calItems) {
 
     if (calItems.length === 0) {
       edsCalendarClient.LOG("Got empty calendar item list. Ignoring.");
@@ -200,7 +200,7 @@ const edsCalendarClient = {
       // We can get all the items from the calendar and add them one by one to
       // Evolution Data Server
       edsCalendarClient.LOG("onCalendarAdded");
-      edsCalendarClient.processCalendars(aCalendar);
+      edsCalendarClient.processCalendar(aCalendar);
     },
 
     // calICompositeObserver
