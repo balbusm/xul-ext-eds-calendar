@@ -73,8 +73,30 @@ const edsCalendarClient = {
   },
 
     // get all the items from all calendars and add them to EDS
-  processCalendars(calendar) {
-      calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
+  async processCalendars(calendar) {
+    let iterator = cal.iterate.streamValues(
+      calendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null)
+    );
+  
+    for await (let calItems of iterator) {
+      edsCalendarClient.processCalendar(calItems);
+    }  
+  },
+
+  processCalendar: function(calItems) {
+
+    if (calItems.length === 0) {
+      edsCalendarClient.LOG("Got empty calendar item list. Ignoring.");
+    }
+
+    let calendar = calItems[0].calendar
+    edsCalendarClient.LOG("Adding events " + calItems.length + " for calendar " + calendar.name + " - " + calendar.id);  
+
+    function processItem(item) {
+      edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
+      edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
+    }
+    edsCalendarClient.asyncHelper.asyncLoop(calItems, processItem);
   },
 
 
@@ -125,43 +147,6 @@ const edsCalendarClient = {
   },
 
   // calIOperationListener
-  calendarGetListener: {
-
-    onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
-      if (!Components.isSuccessCode(aStatus)) {
-        edsCalendarClient.ERROR("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
-          " on element " + aId + " failed. " + aStatus + " - " + aDetail);
-        return;
-      }
-      // make sure that calendar has been created
-      // when there are no items on a list
-      let element;
-      if (aOperationType == Components.interfaces.calIOperationListener.GET) {
-        edsCalendarClient.edsCalendarService.addCalendar(aCalendar);
-        element = aCalendar.id;
-      } else {
-        element = aId;
-      }
-      edsCalendarClient.LOG("Operation " + edsCalendarClient.operationTypeToString(aOperationType) +
-        " on element " + element + " completed");
-    },
-
-    onGetResult: function(aCalendar, aStatus, aItemType, aDetail, aItemscalendar) {
-      if (!Components.isSuccessCode(aStatus)) {
-        edsCalendarClient.ERROR("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
-          ". " + aStatus + " - " + aDetail);
-        return;
-      }
-      edsCalendarClient.LOG("Adding events " + aItemscalendar.length + " for calendar " + aCalendar.name + " - " + aCalendar.id);
-
-      function processItem(item) {
-        edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
-        edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
-      }
-      edsCalendarClient.asyncHelper.asyncLoop(aItemscalendar, processItem);
-    }
-  },
-
   calendarChangeListener: {
     onOperationComplete: function(aCalendar, aStatus, aOperationType, aId, aDetail) {
       if (!Components.isSuccessCode(aStatus)) {
@@ -215,7 +200,7 @@ const edsCalendarClient = {
       // We can get all the items from the calendar and add them one by one to
       // Evolution Data Server
       edsCalendarClient.LOG("onCalendarAdded");
-      aCalendar.getItems(Components.interfaces.calICalendar.ITEM_FILTER_ALL_ITEMS, 0, null, null, edsCalendarClient.calendarGetListener);
+      edsCalendarClient.processCalendars(aCalendar);
     },
 
     // calICompositeObserver
