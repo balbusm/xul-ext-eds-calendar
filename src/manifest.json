@@ -6,7 +6,7 @@
     "gecko": {
       "id": "{e6696d02-466a-11e3-a162-04e36188709b}",
       "strict_min_version": "102.0",
-      "strict_max_version": "105.*"
+      "strict_max_version": "102.*"
     }
   },
   "name": "EDS Calendar Integration",
