@@ -35,7 +35,7 @@ var gBase = null;
 function formatLogMessage(aType, aDomain, aStr, aException) {
   let message = `${new Date().toISOString()} ${aType.toUpperCase()}  ${aDomain} : ${aStr}`;
   if (aException) {
-    message += "\n\  " + aException + "\n";
+    message += "\n  " + aException + "\n";
     if (aException.stack) {
       message += "  Stack:\n";
       let frame = aException.stack;
