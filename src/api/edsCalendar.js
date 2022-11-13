@@ -48,11 +48,7 @@ this.edscalendar = class extends ExtensionAPI {
 
     this.LOG("Loaded prefs");
 
-    const { edsCalendarClient } = ChromeUtils.import(
-      "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
-    );
-    this.LOG("Loaded edsCalendarClient");
-    this.edsCalendarClient = edsCalendarClient;
+    this.edsCalendarClient = this.createEdsCalendarClient();
   }
 
   onShutdown(isAppShutdown) {
@@ -86,5 +82,20 @@ this.edscalendar = class extends ExtensionAPI {
         },
       },
     };
+  }
+
+  createEdsCalendarClient() {
+    try {
+      const { edsCalendarClient } = ChromeUtils.import(
+        "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
+      );
+      this.LOG("Loaded edsCalendarClient");
+      return edsCalendarClient;
+    } catch(e) {
+      this.ERROR("Cannot load edsCalendarClient", e);
+      let err = new Error("Cannot load edsCalendarClient");
+      err.cause = e;
+      throw err;
+    }
   }
 };

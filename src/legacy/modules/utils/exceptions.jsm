@@ -22,27 +22,14 @@ moduleRegistry.registerModule(__URI__);
 
 const EXPORTED_SYMBOLS = ["CalendarServiceException", "LoadingLibException"];
 
-var IntermediateInheritor = function() { };
-IntermediateInheritor.prototype = Error.prototype;
-
-function CalendarServiceException() {
-  var tmp = Error.apply(this, arguments);
-  tmp.name = this.name = "CalendarServiceException";
-
-  this.stack = tmp.stack;
-  this.message = tmp.message;
-
-  return this;
+class CalendarServiceException extends DOMException {
+  constructor(message) {
+    super(message, "CalendarServiceException");
+  }
 }
-CalendarServiceException.prototype = new IntermediateInheritor();
 
-function LoadingLibException() {
-  var tmp = Error.apply(this, arguments);
-  tmp.name = this.name = "LoadingLibException";
-
-  this.stack = tmp.stack;
-  this.message = tmp.message;
-
-  return this;
+class LoadingLibException extends DOMException {
+  constructor(message) {
+    super(message, "LoadingLibException");
+  }
 }
-LoadingLibException.prototype = new IntermediateInheritor();
