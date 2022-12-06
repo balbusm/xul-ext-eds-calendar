@@ -58,7 +58,11 @@ class AsyncHelper {
                 return;
             }
             var item = collection[itemNumber];
-            callback(item);
+            let shouldContinue = callback(item);
+            if (!shouldContinue) {
+                resolve();
+                return;
+            }
             this.setTimeout(() => asyncLoopInternal(resolve, reject), this.itemProcessingDelay);
         };
         this.LOG(`Starting iterating items with delay on each item ${this.itemProcessingDelay} ms`);
