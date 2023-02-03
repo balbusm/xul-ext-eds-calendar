@@ -29,6 +29,7 @@ const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { maskVariable } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
 const { asyncHelper } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/asyncHelper.jsm");
 const { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
@@ -51,8 +52,10 @@ const edsCalendarClient = {
 
     edsCalendarClient.LOG("Init start");
 
-    this.asyncHelper.delayedAsyncLoop(cal.manager.getCalendars(), this.processCalendar)
-      .then(edsCalendarClient.initCompositeCalendar)
+    edsCalendarClient.initCompositeCalendar();
+    let compositeCalendar = [edsCalendarClient.calendar];
+
+    this.asyncHelper.delayedAsyncLoop(compositeCalendar, this.processCalendar)
       .then(edsCalendarClient.attachCalendarObservers)
       .then(() => edsCalendarClient.LOG("Init finished"));
   },
@@ -81,19 +84,29 @@ const edsCalendarClient = {
     for await (let calItems of iterator) {
       edsCalendarClient.processCalendarItems(calItems);
     }
+    return true;
   },
 
   processCalendarItems(calItems) {
     if (calItems.length === 0) {
       edsCalendarClient.LOG("Got empty calendar item list. Ignoring.");
+      return;
     }
 
     let calendar = calItems[0].calendar;
-    edsCalendarClient.LOG("Adding events " + calItems.length + " for calendar " + calendar.name + " - " + calendar.id);
+
+    edsCalendarClient.LOG(`Adding events ${calItems.length} for calendar ${maskVariable(calendar.name)} - ${calendar.id}`);
 
     function processItem(item) {
-      edsCalendarClient.LOG("Processing item " + item.title + " - " + item.id);
+      edsCalendarClient.LOG(`Processing item ${maskVariable(item.title)} - ${item.id}`);
+
+      if (item.calendar.getProperty("edsRemoved")) {
+        edsCalendarClient.LOG("Got disabled calendar. Ignoring.");
+        return false;
+      }
+
       edsCalendarClient.edsCalendarService.addItem(item, edsCalendarClient.calendarChangeListener);
+      return true;
     }
     edsCalendarClient.asyncHelper.asyncLoop(calItems, processItem);
   },
@@ -199,12 +212,14 @@ const edsCalendarClient = {
       // We can get all the items from the calendar and add them one by one to
       // Evolution Data Server
       edsCalendarClient.LOG("onCalendarAdded");
+      aCalendar.setProperty("edsRemoved", false);
       edsCalendarClient.processCalendar(aCalendar);
     },
 
     // calICompositeObserver
     onCalendarRemoved: function(aCalendar) {
       edsCalendarClient.LOG("onCalendarRemoved");
+      aCalendar.setProperty("edsRemoved", true);
       edsCalendarClient.edsCalendarService.removeCalendar(aCalendar);
     },
 

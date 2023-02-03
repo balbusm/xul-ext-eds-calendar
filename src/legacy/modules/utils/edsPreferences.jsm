@@ -55,6 +55,10 @@ class EdsPreferences {
     isLoggingEnabled() {
         return this.prefs["logging.enabled"];
     }
+
+    isLoggingMasked() {
+        return this.prefs["logging.masked"];
+    }
 }
 
 var edsPreferences = new EdsPreferences();

@@ -37,6 +37,7 @@ const { libecal } = ChromeUtils.import("resource://edscalendar/legacy/modules/bi
 const { libedataserver } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libedataserver.jsm");
 const { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/legacy/modules/utils/exceptions.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { maskVariable } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 
 
 const EXPORTED_SYMBOLS = ["calEdsProvider"];
@@ -263,7 +264,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
       // do not create new one if calendar exists
       if (source.isNull()) {
         source = this.createESource(calendar, registry);
-        this.LOG("Created new source for calendar " + calendar.name + " - " + calendar.id);
+        this.LOG(`Created new source for calendar ${maskVariable(calendar.name)} - ${calendar.id}`);
       }
       return source;
     }
@@ -320,8 +321,8 @@ class CalEdsProvider extends cal.provider.BaseClass {
           this.LOG("Batch used");
           return this.mBatchClient;
         } else {
-          let errorMessage = "Batch is started but provided calendar " + calendar.name + " - " + calendar.id +
-              " doesn't match calendar " + this.mBatchCalendar.name + " - " +
+          let errorMessage = `Batch is started but provided calendar ${maskVariable(calendar.name)} - ${calendar.id}` +
+              `doesn't match calendar ${maskVariable(this.mBatchCalendar.name)} - ${this.mBatchCalendar.id}`;
           this.endBatch();
           throw new CalendarServiceException(errorMessage);
         }
@@ -508,7 +509,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         comp = libical.icalcomponent_new_from_string(item.icalString);
         subcomp = this.vcalendarAddTimezonesGetItem(client, comp, item);
 
-        this.LOG("Modifying single item " + item.title + " " + item.id);
+        this.LOG(`Modifying single item ${maskVariable(item.title)} ${item.id}`);
         modified = libecal.e_cal_client_modify_object_sync(client, subcomp, objModType, null, error.address());
         this.checkGError("Error modifying single item:", error);
         return modified;
@@ -580,7 +581,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         icalcomponent = this.findItem(client, aItem);
         // item exists in calendar, do not add it
         if (!icalcomponent.isNull()) {
-          this.LOG("Skipping item: " + aItem.title + " - " + aItem.id);
+          this.LOG(`Skipping item: ${maskVariable(aItem.title)} - ${aItem.id}`);
           libical.icalcomponent_free(icalcomponent);
           return;
         }
@@ -594,7 +595,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         this.checkGError("Error adding item:", error);
 
         // notify obeservers that given item has been synchronized
-        this.LOG("Created new EDS item " + aItem.title + " - " + aItem.id);
+        this.LOG(`Created new EDS item ${maskVariable(aItem.title)} - ${aItem.id}`);
         this.mObservers.notify("onAddItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
@@ -654,13 +655,14 @@ class CalEdsProvider extends cal.provider.BaseClass {
           if (this.itemExists(modifiedRecurrence)) {
             modified = this.modifySingleItem(modifiedRecurrence);
           } else {
-            this.LOG("No old item to modify. Adding single item " + modifiedRecurrence.title + " " + modifiedRecurrence.id);
+            this.LOG(`No old item to modify. Adding single item ${maskVariable(modifiedRecurrence.title)}` +
+              ` ${modifiedRecurrence.id}`);
             this.addItem(modifiedRecurrence, aListener);
             modified = true;
           }
         }
 
-        this.LOG("Modified item " + aNewItem.title + " " + aNewItem.id);
+        this.LOG(`Modified item ${maskVariable(aNewItem.title)} ${aNewItem.id}`);
         this.mObservers.notify("onModifyItem", [aNewItem, aOldItem]);
         nserror = Components.results.NS_OK;
         detail = aNewItem;
@@ -703,7 +705,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
         removed = libecal.e_cal_client_remove_object_sync(client, aItem.id, rid, objModType, null, error.address());
         this.checkGError("Error removing item:", error);
 
-        this.LOG("Removed item " + aItem.title + " " + aItem.id);
+        this.LOG(`Removed item ${maskVariable(aItem.title)} ${aItem.id}`);
         this.mObservers.notify("onDeleteItem", [aItem]);
         nserror = Components.results.NS_OK;
         detail = aItem;
@@ -846,7 +848,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
       glib.g_free(sourceId);
       glib.g_free(sourceName);
 
-      this.LOG("Created calendar " + calendar.name + " - " + calendar.id);
+      this.LOG(`Created calendar ${maskVariable(calendar.name)} - ${calendar.id}`);
       return calendar;
     }
 
@@ -902,14 +904,14 @@ class CalEdsProvider extends cal.provider.BaseClass {
         source = this.findESource(registry, aCalendar);
         this.LOG("Found source");
         if (source.isNull()) {
-          this.WARN("Calendar " + aCalendar.name + " " + aCalendar.id + " doesn't exist. Unable to remove calendar.");
+          this.WARN(`Calendar ${maskVariable(aCalendar.name)} ${aCalendar.id} doesn't exist. Unable to remove calendar`);
           return;
         }
 
         // TODO: Shoud items be removed first?
         let removed = libedataserver.e_source_remove_sync(source, null, error.address());
         this.checkGError("Couldn't remove calendar:", error);
-        this.LOG("Removed calendar " + aCalendar.name + " " + aCalendar.id);
+        this.LOG(`Removed calendar ${maskVariable(aCalendar.name)} - ${aCalendar.id}`);
         // FIXME: add notification
         // ---Place for notification---
       } catch (e) {

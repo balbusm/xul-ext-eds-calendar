@@ -28,7 +28,7 @@ const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager
 
 const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
 
-const EXPORTED_SYMBOLS = ["addLogger"];
+const EXPORTED_SYMBOLS = ["addLogger", "maskVariable"];
 
 var gBase = null;
 
@@ -193,6 +193,14 @@ function init() {
   }
 
   gBase = uri.host;
+}
+
+function maskVariable(variable) {
+  let resultVariable = variable;
+  if (edsPreferences.isLoggingMasked()) {
+    resultVariable = "***";
+  }
+  return resultVariable;
 }
 
 init();
