@@ -22,7 +22,9 @@ moduleRegistry.registerModule(__URI__);
 
 const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const Services = globalThis.Services || ChromeUtils.import(
+  "resource://gre/modules/Services.jsm"
+).Services;
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 

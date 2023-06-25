@@ -25,7 +25,9 @@ moduleRegistry.registerModule(__URI__);
 
 const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const Services = globalThis.Services || ChromeUtils.import(
+  "resource://gre/modules/Services.jsm"
+).Services;
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
