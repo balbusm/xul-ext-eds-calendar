@@ -23,7 +23,6 @@
 const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
 moduleRegistry.registerModule(__URI__);
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
@@ -39,6 +38,7 @@ const { CalendarServiceException }= ChromeUtils.import("resource://edscalendar/l
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 const { maskVariable } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
 
+const Services = globalThis.Services;
 
 const EXPORTED_SYMBOLS = ["calEdsProvider"];
 

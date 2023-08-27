@@ -22,10 +22,10 @@
 const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
 moduleRegistry.registerModule(__URI__);
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+
+const Services = globalThis.Services;
 
 const EXPORTED_SYMBOLS = ["asyncHelper"];
 

@@ -22,11 +22,12 @@ moduleRegistry.registerModule(__URI__);
 
 const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
+
+const Services = globalThis.Services;
 
 const EXPORTED_SYMBOLS = ["addLogger", "maskVariable"];
 

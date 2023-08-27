@@ -25,7 +25,6 @@ moduleRegistry.registerModule(__URI__);
 
 const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
@@ -34,6 +33,7 @@ const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/mod
 const { asyncHelper } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/asyncHelper.jsm");
 const { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
 
+const Services = globalThis.Services;
 
 const EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
