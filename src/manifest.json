@@ -1,17 +1,17 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "author": "Mateusz Balbus",
   "homepage_url": "https://github.com/balbusm/xul-ext-eds-calendar",
   "applications": {
     "gecko": {
       "id": "{e6696d02-466a-11e3-a162-04e36188709b}",
-      "strict_min_version": "115.0",
-      "strict_max_version": "115.*"
+      "strict_min_version": "128.0",
+      "strict_max_version": "128.*"
     }
   },
   "name": "EDS Calendar Integration",
   "description": "Synchronizes calendars with Evolution Data Server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "permissions": [
     "storage"
   ],

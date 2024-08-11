@@ -69,7 +69,7 @@ CTRL + SHIFT + J - opens console log
 ### Logging and Debugging
 
 In order to enable logging:
-1. Go to Menu > Tools > Developer Tools > Debug Addons
+1. Go to Menu > Addons and themes > Click on Cog icon > Debug Addons
 2. Find "Eds Calendar Integration"
 3. Go to Inspect > Storage > Extension Storage
 4. Set `logging.enabled: true`
