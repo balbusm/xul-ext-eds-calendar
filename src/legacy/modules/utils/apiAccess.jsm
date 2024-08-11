@@ -23,7 +23,6 @@ const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/mod
 moduleRegistry.registerModule(__URI__);
 
 const { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 // EDS Calenadr ID
 const EXTENSION_ID = "{e6696d02-466a-11e3-a162-04e36188709b}";
 
@@ -59,6 +58,6 @@ function getWXAPI(extension, name, sync = false) {
     );
 
     let messenger = {};
-    XPCOMUtils.defineLazyGetter(messenger, "storage", () => getWXAPI(extension, "storage", true));
+    ChromeUtils.defineLazyGetter(messenger, "storage", () => getWXAPI(extension, "storage", true));
     return messenger;
   }
