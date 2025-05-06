@@ -18,17 +18,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
-const { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/exceptions.jsm");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
+const { LoadingLibException } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/exceptions.sys.mjs");
 
-const EXPORTED_SYMBOLS = ["edslib"];
 
-const edslib = {
+export const edslib = {
 
   _edslib: null,
   _isOldEdsLib: null,

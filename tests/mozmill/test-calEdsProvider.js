@@ -17,13 +17,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://modules/calendar/calUtils.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://mozmill/modules/assertions.js");
+Components.utils.importESModule("resource://modules/calendar/calUtils.sys.mjs");
+Components.utils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+Components.utils.importESModule("resource://mozmill/modules/assertions.js");
 
-Components.utils.import("resource://edscalendar/bindings/libical.jsm");
+Components.utils.importESModule("resource://edscalendar/bindings/libical.sys.mjs");
 
-Components.utils.import("resource://edscalendar/utils.jsm");
+Components.utils.importESModule("resource://edscalendar/utils.sys.mjs");
 
 const Services = globalThis.Services;
 

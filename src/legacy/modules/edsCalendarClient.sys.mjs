@@ -20,25 +20,23 @@
 
 "use strict";
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
-const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { ExtensionCommon } = ChromeUtils.importESModule("resource://gre/modules/ExtensionCommon.sys.mjs");
+const { cal } = ChromeUtils.importESModule("resource:///modules/calendar/calUtils.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { maskVariable } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
-const { asyncHelper } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/asyncHelper.jsm");
-const { calEdsProvider } = ChromeUtils.import("resource://edscalendar/legacy/modules/calEdsProvider.jsm");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { maskVariable } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { edsPreferences } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/edsPreferences.sys.mjs");
+const { asyncHelper } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/asyncHelper.sys.mjs");
+const { calEdsProvider } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/calEdsProvider.sys.mjs");
 
 const Services = globalThis.Services;
 
-const EXPORTED_SYMBOLS = ["edsCalendarClient"];
 
-
-const edsCalendarClient = {
+export const edsCalendarClient = {
 
   calendar: null,
 

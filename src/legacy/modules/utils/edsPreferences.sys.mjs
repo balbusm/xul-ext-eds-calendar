@@ -18,12 +18,10 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { getMessenger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/apiAccess.jsm");
-
-const EXPORTED_SYMBOLS = ["edsPreferences"];
+const { getMessenger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/apiAccess.sys.mjs");
 
 
 class EdsPreferences {
@@ -61,4 +59,4 @@ class EdsPreferences {
     }
 }
 
-var edsPreferences = new EdsPreferences();
+export var edsPreferences = new EdsPreferences();

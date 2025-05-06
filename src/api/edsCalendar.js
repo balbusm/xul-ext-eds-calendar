@@ -19,8 +19,8 @@
 
 "use strict";
 
-const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
-const { cal } = ChromeUtils.import("resource:///modules/calendar/calUtils.jsm");
+const { ExtensionCommon } = ChromeUtils.importESModule("resource://gre/modules/ExtensionCommon.sys.mjs");
+const { cal } = ChromeUtils.importESModule("resource:///modules/calendar/calUtils.sys.mjs");
 
 const { ExtensionAPI } = ExtensionCommon;
 
@@ -37,12 +37,12 @@ this.edscalendar = class extends ExtensionAPI {
       .setSubstitution("edscalendar", this.extension.rootURI);
 
     // Load prefs at start
-    const { edsPreferences } = ChromeUtils.import(
-      "resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
+    const { edsPreferences } = ChromeUtils.importESModule(
+      "resource://edscalendar/legacy/modules/utils/edsPreferences.sys.mjs");
     await edsPreferences.load();
 
-    const { addLogger } = ChromeUtils.import(
-      "resource://edscalendar/legacy/modules/utils/logger.jsm");
+    const { addLogger } = ChromeUtils.importESModule(
+      "resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
     addLogger(this, "edscalendar");
 
     this.LOG("Loaded prefs");
@@ -60,8 +60,8 @@ this.edscalendar = class extends ExtensionAPI {
     this.edsCalendarClient = null;
 
     this.LOG("Closing all registered modules");
-    const { moduleRegistry } = ChromeUtils.import(
-      "resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+    const { moduleRegistry } = ChromeUtils.importESModule(
+      "resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
     moduleRegistry.shutdown();
 
     Services.io
@@ -85,8 +85,8 @@ this.edscalendar = class extends ExtensionAPI {
 
   createEdsCalendarClient() {
     try {
-      const { edsCalendarClient } = ChromeUtils.import(
-        "resource://edscalendar/legacy/modules/edsCalendarClient.jsm"
+      const { edsCalendarClient } = ChromeUtils.importESModule(
+        "resource://edscalendar/legacy/modules/edsCalendarClient.sys.mjs"
       );
       this.LOG("Loaded edsCalendarClient");
       return edsCalendarClient;

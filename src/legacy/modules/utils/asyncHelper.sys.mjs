@@ -19,15 +19,14 @@
 
 "use strict";
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { edsPreferences } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/edsPreferences.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
 
 const Services = globalThis.Services;
 
-const EXPORTED_SYMBOLS = ["asyncHelper"];
 
 class AsyncHelper {
     constructor() {
@@ -86,4 +85,4 @@ class AsyncHelper {
     }
 }
 
-var asyncHelper = new AsyncHelper();
+export var asyncHelper = new AsyncHelper();

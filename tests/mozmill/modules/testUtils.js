@@ -17,9 +17,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://modules/calendar/calUtils.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://mozmill/modules/assertions.js");
+Components.utils.importESModule("resource://modules/calendar/calUtils.sys.mjs");
+Components.utils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+Components.utils.importESModule("resource://mozmill/modules/assertions.js");
 
 exports._uuidGenerator = Components.classes["@mozilla.org/uuid-generator;1"]
             .getService(Components.interfaces.nsIUUIDGenerator);

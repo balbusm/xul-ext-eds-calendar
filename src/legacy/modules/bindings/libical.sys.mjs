@@ -17,20 +17,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
-const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
-const { libicalGlib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-glib.jsm");
-const { libicalOld } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/libical-old.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
+const { edslib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/edslib.sys.mjs");
+const { libicalGlib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/libical-glib.sys.mjs");
+const { libicalOld } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/libical-old.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
 
 
-const EXPORTED_SYMBOLS = ["libical"];
-
-const libical = {
+export const libical = {
 
 	lib: null,
 

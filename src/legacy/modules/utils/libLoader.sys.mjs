@@ -17,23 +17,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { ExtensionParent } = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs");
 
-const { LoadingLibException } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/exceptions.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
+const { LoadingLibException } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/exceptions.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
 
 const Services = globalThis.Services;
 
-const EXPORTED_SYMBOLS = ["loadLib"];
 
-
-function loadLib(libName, startFromABI, tryNextABIs = 30) {
+export function loadLib(libName, startFromABI, tryNextABIs = 30) {
   var lib = null;
   var maxABI = startFromABI + tryNextABIs;
   for (let abi = startFromABI; abi <= maxABI; abi++) {
