@@ -5,8 +5,8 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "{e6696d02-466a-11e3-a162-04e36188709b}",
-      "strict_min_version": "128.0",
-      "strict_max_version": "128.*"
+      "strict_min_version": "136.0",
+      "strict_max_version": "138.*"
     }
   },
   "name": "EDS Calendar Integration",
