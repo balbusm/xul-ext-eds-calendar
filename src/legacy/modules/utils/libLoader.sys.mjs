@@ -28,7 +28,8 @@ const { ExtensionParent } = ChromeUtils.importESModule("resource://gre/modules/E
 const { LoadingLibException } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/exceptions.sys.mjs");
 const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
 
-const Services = globalThis.Services;
+const libLoaderContext = {};
+addLogger(libLoaderContext, "libLoader");
 
 
 export function loadLib(libName, startFromABI, tryNextABIs = 30) {
@@ -51,11 +52,9 @@ export function loadLib(libName, startFromABI, tryNextABIs = 30) {
 function tryLoadLib(libName) {
   try {
     let lib = ctypes.open(libName);
-    LOG("Opened " + libName);
+    libLoaderContext.LOG("Opened " + libName);
     return lib;
   } catch (err) {
     return null;
   }
 }
-
-addLogger(this, "libLoader");
