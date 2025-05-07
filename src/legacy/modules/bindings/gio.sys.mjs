@@ -17,20 +17,16 @@
  * version 2 is available at: <http://www.gnu.org/licenses/>
  *
  * ***** END LICENSE BLOCK ***** */
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
 // Do not unload c libs as it causes crash
-// moduleRegistry.registerModule(__URI__);
+// moduleRegistry.registerModule(import.meta.url);
 
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
-
-const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
 
 
-const EXPORTED_SYMBOLS = ["gobject"];
-
-const gobject =
+export const gio =
 {
 
   lib: null,
@@ -39,22 +35,20 @@ const gobject =
     if (this.lib) {
       return;
     }
+    addLogger(this, "gio");
+    this.lib = loadLib("libgio-2.0.so", 0);
 
-    addLogger(this, "gobject");
-    this.lib = loadLib("libgobject-2.0.so", 0);
-
-    this.declareGObject();
+    this.declareGCancellable();
   },
 
+  declareGCancellable: function() {
+    this._GCancellable = new ctypes.StructType("_GCancellable");
+    this.GCancellable = this._GCancellable;
 
-  declareGObject: function() {
-    this._GObject = new ctypes.StructType("_GObject");
-    this.GObject = this._GObject;
-
-    this.g_object_unref = this.lib.declare("g_object_unref",
-      ctypes.default_abi,
-      ctypes.void_t, // return
-      glib.gpointer); // mem
+    this.g_cancellable_new = this.lib.declare("g_cancellable_new", ctypes.default_abi, this.GCancellable.ptr);
+    this.createGCancellable = function() {
+      return this.g_cancellable_new();
+    };
   },
 
   shutdown: function() {

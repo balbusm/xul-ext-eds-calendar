@@ -17,22 +17,21 @@
  * version 2 is available at: <http://www.gnu.org/licenses/>
  *
  * ***** END LICENSE BLOCK ***** */
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
 // Do not unload c libs as it causes crash
-// moduleRegistry.registerModule(__URI__);
+// moduleRegistry.registerModule(import.meta.url);
 
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
 
 
-const { glib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/glib.jsm");
-const { gio } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/gio.jsm");
-const { edslib } = ChromeUtils.import("resource://edscalendar/legacy/modules/bindings/edslib.jsm");
+const { glib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/glib.sys.mjs");
+const { gio } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/gio.sys.mjs");
+const { edslib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/edslib.sys.mjs");
 
-const EXPORTED_SYMBOLS = ["libedataserver"];
 
-const libedataserver =
+export const libedataserver =
 {
 
     lib: null,

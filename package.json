@@ -1,7 +1,7 @@
 {
   "name": "eds-calendar",
   "description": "EDS Calendar Integration",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "license": "GPL-2.0",
   "directories": {
@@ -13,7 +13,7 @@
     "rebuild": "npm run clean && npm run build",
     "bump": "bumper() { bump package.json \"$1\"; bump src/manifest.json \"$1\"; }; bumper",
     "tag": "git tag v$(jq -r '.version' src/manifest.json)",
-    "lint": "eslint --ext '.jsm' . || true"
+    "lint": "eslint --ext '.sys.mjs' . || true"
   },
   "dependencies": {},
   "devDependencies": {

@@ -17,36 +17,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 "use strict";
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
-moduleRegistry.registerModule(__URI__);
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
 const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
-const { edsPreferences } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/edsPreferences.jsm");
+const { edsPreferences } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/edsPreferences.sys.mjs");
 
 const Services = globalThis.Services;
 
-const EXPORTED_SYMBOLS = ["addLogger", "maskVariable"];
-
 var gBase = null;
 
-function formatLogMessage(aType, aDomain, aStr, aException) {
-  let message = `${new Date().toISOString()} ${aType.toUpperCase()}  ${aDomain} : ${aStr}`;
-  if (aException) {
-    message += "\n  " + aException + "\n";
-    if (aException.stack) {
-      message += "  Stack:\n";
-      let frame = aException.stack;
-      while (frame) {
-        message += "    " + frame + "\n";
-        frame = frame.caller;
-      }
-    }
-  }
-  return message;
+
+function formatLogMessage(aType, aDomain, aStr) {
+  return `${new Date().toISOString()} ${aType.toUpperCase()}  ${aDomain} : ${aStr}`;
+}
+
+function formatStackMessage(stack) {
+  return `\nSource: ${stack.sourceName}:${stack.lineNumber}`
 }
 
 function getStackDetails(aException) {
@@ -109,52 +100,48 @@ class Logger {
 
   log(aStr, aException) {
     if (this.debugLogEnabled) {
-      let message = formatLogMessage("log", this.domain, aStr, aException);
-      let stack = getStackDetails(aException);
+      const message = formatLogMessage("log", this.domain, aStr);
+      const stack = getStackDetails(aException);
+      const stackMessage = formatStackMessage(stack);
 
-      let consoleMessage = Cc["@mozilla.org/scripterror;1"]
-                           .createInstance(Ci.nsIScriptError);
-      consoleMessage.init(message, stack.sourceName, null, stack.lineNumber, 0,
-                          Ci.nsIScriptError.infoFlag, "component javascript");
-      Services.console.logMessage(consoleMessage);
-      dump("*** " + message + "\n");
+      if (aException) {
+        console.log(message, aException, stackMessage);
+      } else {
+        console.log(message, stackMessage);
+      }
     }
   }
 
   warn(aStr, aException) {
-    let message = formatLogMessage("warn", this.domain, aStr, aException);
+    const message = formatLogMessage("warn", this.domain, aStr);
 
-    let stack = getStackDetails(aException);
+    const stack = getStackDetails(aException);
+    const stackMessage = formatStackMessage(stack);
 
-    let consoleMessage = Cc["@mozilla.org/scripterror;1"]
-                         .createInstance(Ci.nsIScriptError);
-    consoleMessage.init(message, stack.sourceName, null, stack.lineNumber, 0,
-                        Ci.nsIScriptError.warningFlag, "component javascript");
-    Services.console.logMessage(consoleMessage);
-
-    if (this.debugLogEnabled) {
-      dump("*** " + message + "\n");
+    if (aException) {
+      console.warn(message, aException, stackMessage);
+    } else {
+      console.warn(message, stackMessage);
     }
+
   }
 
   error(aStr, aException) {
-    let message = formatLogMessage("error", this.domain, aStr, aException);
+    const message = formatLogMessage("error", this.domain, aStr);
 
-    let stack = getStackDetails(aException);
+    const stack = getStackDetails(aException);
+    const stackMessage = formatStackMessage(stack);
 
-    let consoleMessage = Cc["@mozilla.org/scripterror;1"]
-                         .createInstance(Ci.nsIScriptError);
-    consoleMessage.init(message, stack.sourceName, null, stack.lineNumber, 0,
-                        Ci.nsIScriptError.errorFlag, "component javascript");
-    Services.console.logMessage(consoleMessage);
-
-    if (this.debugLogEnabled) {
-      dump("*** " + message + "\n");
+    if (aException) {
+      console.error(message, aException, stackMessage);
+    } else {
+      console.error(message, stackMessage);
     }
+
   }
 }
 
-function addLogger(aTarget, aDomain) {
+export function addLogger(aTarget, aDomain) {
   if (typeof (aTarget) != "object") {
     throw Error("Must pass an object on which to add logging functions");
   }
@@ -178,6 +165,7 @@ function addLogger(aTarget, aDomain) {
 
   let logger = new Logger(domain);
 
+  /* eslint-disable */
   ["log", "warn", "error"].forEach(function(name) {
     let upper = name.toUpperCase();
     delete aTarget[upper];
@@ -185,10 +173,11 @@ function addLogger(aTarget, aDomain) {
       logger[name].apply(logger, arguments);
     };
   });
+  /* eslint-enable */
 }
 
 function init() {
-  let uri = Services.io.newURI(__URI__, null, null);
+  let uri = Services.io.newURI(import.meta.url, null, null);
   if (uri.scheme != "resource") {
     throw Error("This only works properly from resource URI's at the moment");
   }
@@ -196,7 +185,7 @@ function init() {
   gBase = uri.host;
 }
 
-function maskVariable(variable) {
+export function maskVariable(variable) {
   let resultVariable = variable;
   if (edsPreferences.isLoggingMasked()) {
     resultVariable = "***";

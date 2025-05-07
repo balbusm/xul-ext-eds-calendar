@@ -17,17 +17,16 @@
  * version 2 is available at: <http://www.gnu.org/licenses/>
  *
  * ***** END LICENSE BLOCK ***** */
-const { moduleRegistry } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/moduleRegistry.jsm");
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
 // Do not unload c libs as it causes crash
-// moduleRegistry.registerModule(__URI__);
+// moduleRegistry.registerModule(import.meta.url);
 
-const { ctypes } = ChromeUtils.import("resource://gre/modules/ctypes.jsm");
-const { addLogger } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/logger.jsm");
-const { loadLib } = ChromeUtils.import("resource://edscalendar/legacy/modules/utils/libLoader.jsm");
+const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
+const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
 
-const EXPORTED_SYMBOLS = ["glib"];
 
-const glib =
+export const glib =
 {
 
   lib: null,

@@ -1,6 +1,6 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
- * Copyright: 2021 Mateusz Balbus <balbusm@gmail.com>
+ * Copyright: 2014-2015 Mateusz Balbus <balbusm@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,19 @@
  * version 2 is available at: <http://www.gnu.org/licenses/>
  *
  * ***** END LICENSE BLOCK ***** */
-"use strict";
 
-const EXPORTED_SYMBOLS = ["moduleRegistry"];
+const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
+moduleRegistry.registerModule(import.meta.url);
 
-class ModuleRegistry {
-    constructor() {
-        this.registeredModules = new Set();
-        this.registerModule(__URI__);
-    }
 
-    registerModule(module) {
-        this.registeredModules.add(module);
-    }
-
-    shutdown() {
-        for (let module of this.registeredModules) {
-            Cu.unload(module);
-        }
-        this.registeredModules = null;
-    }
+export class CalendarServiceException extends DOMException {
+  constructor(message) {
+    super(message, "CalendarServiceException");
+  }
 }
-const moduleRegistry = new ModuleRegistry();
+
+export class LoadingLibException extends DOMException {
+  constructor(message) {
+    super(message, "LoadingLibException");
+  }
+}
