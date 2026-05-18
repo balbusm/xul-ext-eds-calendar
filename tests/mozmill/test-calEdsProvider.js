@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -27,8 +27,7 @@ Components.utils.importESModule("resource://edscalendar/utils.sys.mjs");
 
 const Services = globalThis.Services;
 
-function setupModule(module)
-{
+function setupModule(module) {
   addLogger(module, "edsCalendarTest");
 
   module.testData = require("modules/testData");
@@ -36,7 +35,7 @@ function setupModule(module)
 
   module.uuidGenerator = Components.classes["@mozilla.org/uuid-generator;1"]
   .getService(Components.interfaces.nsIUUIDGenerator);
-  
+
   module.assert = new Assert();
 }
 
@@ -44,16 +43,14 @@ function teardownModule(module) {
   module.LOG("All tests are finished");
 }
 
-function setupTest(test)
-{
+function setupTest(test) {
   let edsCalendarService = Components.classes["@mozilla.org/calendar/calendar;1?type=eds"].getService(Components.interfaces.calICompositeCalendar);
   test.edsCalendarService = edsCalendarService;
   test.calendars = [];
   test.calendarsItems = [];
 }
 
-function teardownTest(test)
-{
+function teardownTest(test) {
   test.LOG("Tear down test");
   for (let calendarItem of test.calendarsItems) {
     test.LOG("On the end of the test removed calendar item " + calendarItem.name + " - " + calendarItem.id);
@@ -65,7 +62,6 @@ function teardownTest(test)
     test.LOG("On the end of the test removed calendar " + calendar.name + " - " + calendar.id);
     test.edsCalendarService.removeCalendar(calendar);
   }
-  
 }
 
 function testRetreivingEdsCalendarService() {
@@ -128,7 +124,6 @@ function testRemoveCalendar() {
   this.assert.equal(resultCalendar, null, "Unexpectedly retrieved calendar");
 
   testUtils.removeItemFromArray(calendar, this.calendars);
-
 }
 
 function testAddItem() {
@@ -138,7 +133,7 @@ function testAddItem() {
 
   var item = testUtils.prepareEvent(currentTestData.item, calendar);
   this.calendarsItems.push(item);
-  
+
   let assertContainer = new testUtils.AssertContainer();
   let resultListener = new testUtils.ResultListener([item], assertContainer);
   this.edsCalendarService.addItem(item, resultListener);
@@ -149,7 +144,7 @@ function testGetItem() {
   let currentTestData = testData.testGetItem;
   var calendar = testUtils.prepareCalendar(currentTestData.calendar);
   this.calendars.push(calendar);
-  
+
   var item = testUtils.prepareEvent(currentTestData.item, calendar);
   this.calendarsItems.push(item);
 
@@ -167,10 +162,10 @@ function testDeleteItem() {
 
   var item = testUtils.prepareEvent(currentTestData.item, calendar);
   this.calendarsItems.push(item);
-  
+
   let assertContainer = new testUtils.AssertContainer();
   let resultListener = new testUtils.ResultListener([], assertContainer);
-  resultListener._assertExpectedItemsMatch = function (aItemscalendar) {
+  resultListener._assertExpectedItemsMatch = function(aItemscalendar) {
     if (aItemscalendar.length > 0) {
       this.assert.fail("Unexpected items has been returned");
     }
@@ -180,7 +175,7 @@ function testDeleteItem() {
   assertContainer.assertErrors();
   this.edsCalendarService.getItem(item.id, resultListener);
   assertContainer.assertErrors();
-  
+
   testUtils.removeItemFromArray(item, this.calendarsItems);
 }
 
@@ -223,7 +218,7 @@ function testAddAlertItem() {
 
   var item = testUtils.prepareEvent(currentTestData.item, calendar);
   this.calendarsItems.push(item);
-  
+
   let assertContainer = new testUtils.AssertContainer();
   let resultListener = new testUtils.ResultListener([item], assertContainer);
   this.edsCalendarService.addItem(item, resultListener);
@@ -240,7 +235,7 @@ function disabledtestAddTodoItem() {
 
   var item = testUtils.prepareTodo(currentTestData.item, calendar);
   this.calendarsItems.push(item);
-  
+
   let assertContainer = new testUtils.AssertContainer();
   let resultListener = new testUtils.ResultListener([item], assertContainer);
   this.edsCalendarService.addItem(item, resultListener);
@@ -255,7 +250,7 @@ function disabledtestAddEvolutionTodoItem() {
   var calendar = testUtils.prepareCalendar(currentTestData.calendar);
   this.calendars.push(calendar);
 
-  var item =  testUtils.prepareTodo(currentTestData.item, calendar);
+  var item = testUtils.prepareTodo(currentTestData.item, calendar);
   this.calendarsItems.push(item);
 
   let assertContainer = new testUtils.AssertContainer();
@@ -275,12 +270,12 @@ function testEditRecurrenceItem() {
   this.edsCalendarService.addItem(oldItem, resultListener);
   this.calendars.push(calendar);
   this.calendarsItems.push(oldItem);
-  
+
   var newItem = testUtils.prepareEventWithId(oldItem.id, currentTestData.newParentItem, calendar);
-  
+
   let newExceptionItem = testUtils.prepareExceptionEvent(newItem, currentTestData.newExceptionItem);
   testUtils.attachExceptionEvent(newItem, newExceptionItem);
-  
+
   this.edsCalendarService.modifyItem(newItem, oldItem, resultListener);
   // TODO create getter to check if 20140402 has different name
   assertContainer.assertErrors();
@@ -297,15 +292,15 @@ function testRemovalLastRecurrenceItem() {
   this.edsCalendarService.addItem(oldItem, resultListener);
   this.calendars.push(calendar);
   this.calendarsItems.push(oldItem);
-  
+
   var newItem = testUtils.prepareEventWithId(oldItem.id, currentTestData.newParentItem, calendar);
-  
+
   this.edsCalendarService.modifyItem(newItem, oldItem, resultListener);
   // TODO create getter to verify if 20140406 has been removed
   assertContainer.assertErrors();
 }
 
-//modification of single element in repetable event and removal this element
+// modification of single element in repetable event and removal this element
 function testEditRemovalRecurrenceItem() {
   let currentTestData = testData.testEditRemovalRecurrenceItem;
   let calendar = testUtils.prepareCalendar(currentTestData.calendar);
@@ -316,27 +311,27 @@ function testEditRemovalRecurrenceItem() {
   this.edsCalendarService.addItem(oldItem, resultListener);
   this.calendars.push(calendar);
   this.calendarsItems.push(oldItem);
-  
+
   var newItem = testUtils.prepareEventWithId(oldItem.id, currentTestData.newParentItem, calendar);
-  
+
   let newExceptionItem = testUtils.prepareExceptionEvent(newItem, currentTestData.newExceptionItem);
   testUtils.attachExceptionEvent(newItem, newExceptionItem);
-  
+
   this.edsCalendarService.modifyItem(newItem, oldItem, resultListener);
   // all above is same as testEditRecurrenceItem, 20140402 is modified
-  
+
   var removalItem = testUtils.prepareEventWithId(oldItem.id, currentTestData.removalParentItem, calendar);
-  
+
   this.edsCalendarService.modifyItem(removalItem, newItem, resultListener);
   // TODO check if 20140402 has been removed
   assertContainer.assertErrors();
 }
 
-//modification of single element in repetable event and removal all elements
+// modification of single element in repetable event and removal all elements
 function testEditRemovalAllRecurrenceItem() {
   let currentTestData = testData.testEditRemovalAllRecurrenceItem;
   let calendar = testUtils.prepareCalendar(currentTestData.calendar);
-  
+
   var oldItem = testUtils.prepareEvent(currentTestData.oldParentItem, calendar);
 
   let assertContainer = new testUtils.AssertContainer();
@@ -344,15 +339,15 @@ function testEditRemovalAllRecurrenceItem() {
   this.edsCalendarService.addItem(oldItem, resultListener);
   this.calendars.push(calendar);
   this.calendarsItems.push(oldItem);
-  
+
   var newItem = testUtils.prepareEventWithId(oldItem.id, currentTestData.newParentItem, calendar);
-  
+
   let newExceptionItem = testUtils.prepareExceptionEvent(newItem, currentTestData.newExceptionItem);
   testUtils.attachExceptionEvent(newItem, newExceptionItem);
-  
+
   this.edsCalendarService.modifyItem(newItem, oldItem, resultListener);
   // all above is same as testEditRecurrenceItem, 20140402 is modified
-  
+
   this.edsCalendarService.deleteItem(newItem, resultListener);
   // TODO check if all items has been removed, especially 20140402
   assertContainer.assertErrors();
@@ -365,12 +360,11 @@ function testSetCalendarColor() {
   var calendar = testUtils.prepareCalendar(currentTestData.calendar);
   this.edsCalendarService.addCalendar(calendar);
   this.calendars.push(calendar);
-  let color = this.edsCalendarService.getProperty(calendar.id + "::" + "color");
+  let color = this.edsCalendarService.getProperty(calendar.id + "::color");
   this.assert.equal(color, testData.testSetCalendarColor.calendar.properties.color, "Color not set for new calendar");
-  
-  this.edsCalendarService.setProperty(calendar.id + "::" + "color", "#0000FF");
-  
-  color = this.edsCalendarService.getProperty(calendar.id + "::" + "color");
+
+  this.edsCalendarService.setProperty(calendar.id + "::color", "#0000FF");
+
+  color = this.edsCalendarService.getProperty(calendar.id + "::color");
   this.assert.equal(color, "#0000FF", "Color not changed by setProperty");
 }
-

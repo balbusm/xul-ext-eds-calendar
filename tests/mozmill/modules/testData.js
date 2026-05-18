@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -18,11 +18,11 @@
  * ***** END LICENSE BLOCK ***** */
 
 exports.testLongAddRemoveCalendars = {
-  calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae-XYY", name: "testLongAddRemoveCalendars"}
+  calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae-XYY", name: "testLongAddRemoveCalendars" }
 };
 
 exports.testLongAddRemoveItems = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae00", name: "testLongAddRemoveItems", type: "dummy" },
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae00", name: "testLongAddRemoveItems", type: "dummy" },
     item: "BEGIN:VCALENDAR\n" +
     "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
     "VERSION:2.0\n" +
@@ -59,15 +59,15 @@ exports.testLongAddRemoveItems = {
 };
 
 exports.testAddNewCalendar = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae01", name: "testAddNewCalendar", type: "dummy"}
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae01", name: "testAddNewCalendar", type: "dummy" }
 };
 
 exports.testRemoveCalendar = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae02", name: "testRemoveCalendar", type: "dummy"}
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae02", name: "testRemoveCalendar", type: "dummy" }
 };
 
 exports.testAddItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae03", name: "testAddItemCal", type: "dummy" },
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae03", name: "testAddItemCal", type: "dummy" },
     item: "BEGIN:VCALENDAR\n" +
           "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
           "VERSION:2.0\n" +
@@ -105,8 +105,8 @@ exports.testAddItem = {
 };
 
 exports.testGetItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae04", name: "testGetItemCal", type: "dummy" },
-    item : 
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae04", name: "testGetItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -144,8 +144,8 @@ exports.testGetItem = {
 };
 
 exports.testDeleteItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae05", name: "testDeleteItemCal", type: "dummy" },
-    item : 
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae05", name: "testDeleteItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -182,8 +182,8 @@ exports.testDeleteItem = {
 };
 
 exports.testModifyItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae06", name: "testModifyItemCal", type: "dummy" },
-    oldItem :
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae06", name: "testModifyItemCal", type: "dummy" },
+    oldItem:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -217,8 +217,8 @@ exports.testModifyItem = {
       "LOCATION:loc\n" +
       "END:VEVENT\n" +
       "END:VCALENDAR",
-      
-      newItem :
+
+      newItem:
         "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
@@ -255,8 +255,8 @@ exports.testModifyItem = {
 };
 
 exports.testAddRecurringItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae07", name: "testAddRecurringItemCal", type: "dummy" },
-    item :
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae07", name: "testAddRecurringItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -295,8 +295,8 @@ exports.testAddRecurringItem = {
 };
 
 exports.testAddAlertItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae08", name: "testAddAlertItemCal", type: "dummy" },
-    item : 
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae08", name: "testAddAlertItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -338,8 +338,8 @@ exports.testAddAlertItem = {
 };
 
 exports.testAddTodoItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae09", name: "testAddTodoItemCal", type: "dummy" },
-    item : 
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae09", name: "testAddTodoItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
@@ -386,8 +386,8 @@ exports.testAddTodoItem = {
 };
 
 exports.testAddEvolutionTodoItem = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae10", name: "testAddEvolutionTodoItemCal", type: "dummy" },
-    item :
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae10", name: "testAddEvolutionTodoItemCal", type: "dummy" },
+    item:
       "BEGIN:VCALENDAR\n" +
       "PRODID:-//Ximian//NONSGML Evolution Calendar//EN\n" +
       "VERSION:2.0\n" +
@@ -407,8 +407,8 @@ exports.testAddEvolutionTodoItem = {
 };
 
 exports.testEditRecurrenceItem = {
-        calendar :  { id: "f8192dac-61dc-11e3-a20e-010b628cae11", name: "testEditItemCal", type: "dummy" },
-        oldParentItem : "BEGIN:VCALENDAR\n" +
+        calendar:  { id: "f8192dac-61dc-11e3-a20e-010b628cae11", name: "testEditItemCal", type: "dummy" },
+        oldParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -440,8 +440,8 @@ exports.testEditRecurrenceItem = {
         "DTEND;TZID=Europe/Warsaw:20140401T130000\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR",
-    
-        newParentItem : "BEGIN:VCALENDAR\n" +
+
+        newParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -511,8 +511,8 @@ exports.testEditRecurrenceItem = {
 };
 
 exports.testRemovalLastRecurrenceItem = {
-    calendar : { id: "f8192dac-61dc-11e3-a20e-010b628cae12", name: "testRemovalItemCal", type: "dummy" },
-    oldParentItem : "BEGIN:VCALENDAR\n" +
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae12", name: "testRemovalItemCal", type: "dummy" },
+    oldParentItem: "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
       "BEGIN:VTIMEZONE\n" +
@@ -545,7 +545,7 @@ exports.testRemovalLastRecurrenceItem = {
       "END:VEVENT\n" +
       "END:VCALENDAR",
 
-    newParentItem : "BEGIN:VCALENDAR\n" +
+    newParentItem: "BEGIN:VCALENDAR\n" +
       "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
       "VERSION:2.0\n" +
       "BEGIN:VTIMEZONE\n" +
@@ -584,8 +584,8 @@ exports.testRemovalLastRecurrenceItem = {
 
 
 exports.testEditRemovalRecurrenceItem = {
-        calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae13", name: "testEditRemovalItemCal", type: "dummy" },
-        oldParentItem : "BEGIN:VCALENDAR\n" +
+        calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae13", name: "testEditRemovalItemCal", type: "dummy" },
+        oldParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -617,8 +617,8 @@ exports.testEditRemovalRecurrenceItem = {
         "DTEND;TZID=Europe/Warsaw:20140401T130000\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR",
-    
-        newParentItem : "BEGIN:VCALENDAR\n" +
+
+        newParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -685,8 +685,8 @@ exports.testEditRemovalRecurrenceItem = {
         "X-MOZ-GENERATION:1\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR",
-        
-        removalParentItem : "BEGIN:VCALENDAR\n" +
+
+        removalParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -719,15 +719,15 @@ exports.testEditRemovalRecurrenceItem = {
         "DTSTART;TZID=Europe/Warsaw:20140401T120000\n" +
         "DTEND;TZID=Europe/Warsaw:20140401T130000\n" +
         "X-MOZ-GENERATION:2\n" +
-        "SEQUENCE:1\n" + 
+        "SEQUENCE:1\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR"
 };
 
 
 exports.testEditRemovalAllRecurrenceItem = {
-        calendar : { id: "f8192dac-61dc-11e3-a20e-010b628cae14", name: "testEditRemovalAllItemCal", type: "dummy" },
-        oldParentItem : "BEGIN:VCALENDAR\n" +
+        calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae14", name: "testEditRemovalAllItemCal", type: "dummy" },
+        oldParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -759,8 +759,8 @@ exports.testEditRemovalAllRecurrenceItem = {
         "DTEND;TZID=Europe/Warsaw:20140401T130000\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR",
-    
-        newParentItem : "BEGIN:VCALENDAR\n" +
+
+        newParentItem: "BEGIN:VCALENDAR\n" +
         "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
         "VERSION:2.0\n" +
         "BEGIN:VTIMEZONE\n" +
@@ -830,7 +830,9 @@ exports.testEditRemovalAllRecurrenceItem = {
 };
 
 exports.testSetCalendarColor = {
-    calendar : {id: "f8192dac-61dc-11e3-a20e-010b628cae15", name: "testSetCalendarColor", type: "dummy",
-      properties : { color : "#FF0000"}
+    calendar: { id: "f8192dac-61dc-11e3-a20e-010b628cae15",
+name: "testSetCalendarColor",
+type: "dummy",
+      properties: { color: "#FF0000" }
     }
 };

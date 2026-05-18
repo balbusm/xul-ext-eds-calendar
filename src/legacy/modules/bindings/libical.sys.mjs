@@ -17,9 +17,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
-
 const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
 const { edslib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/bindings/edslib.sys.mjs");

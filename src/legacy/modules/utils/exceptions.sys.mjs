@@ -17,9 +17,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
-
 
 export class CalendarServiceException extends DOMException {
   constructor(message) {

@@ -18,9 +18,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
-
 const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 const { addLogger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/logger.sys.mjs");
 const { loadLib } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/libLoader.sys.mjs");
@@ -41,7 +38,7 @@ export const edslib = {
     try {
       return this.loadNewEdsLib();
     } catch (ex) {
-      if (!ex instanceof LoadingLibException) {
+      if (!(ex instanceof LoadingLibException)) {
         throw ex;
       }
       return this.loadOldEdsLib();
@@ -65,7 +62,7 @@ export const edslib = {
       this._isOldEdsLib = true;
       return this._edslib;
     } catch (ex) {
-      if (!ex instanceof LoadingLibException) {
+      if (!(ex instanceof LoadingLibException)) {
         throw ex;
       }
       throw new LoadingLibException("Library libecal-2.0.so or libecal-1.2 not available. EdsCalendar requires EDS >= 0.8");
