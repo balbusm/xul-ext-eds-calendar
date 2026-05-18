@@ -19,9 +19,6 @@
 
 "use strict";
 
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
-
 const { ExtensionParent } = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs");
 // EDS Calenadr ID
 const EXTENSION_ID = "{e6696d02-466a-11e3-a162-04e36188709b}";

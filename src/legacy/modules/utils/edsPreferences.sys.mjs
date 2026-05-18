@@ -18,9 +18,6 @@
  * ***** END LICENSE BLOCK ***** */
 "use strict";
 
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
-
 const { getMessenger } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/apiAccess.sys.mjs");
 
 

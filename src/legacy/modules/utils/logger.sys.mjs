@@ -17,8 +17,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 "use strict";
-const { moduleRegistry } = ChromeUtils.importESModule("resource://edscalendar/legacy/modules/utils/moduleRegistry.sys.mjs");
-moduleRegistry.registerModule(import.meta.url);
 
 const { classes: Cc, interfaces: Ci, results: Cr } = Components;
 
