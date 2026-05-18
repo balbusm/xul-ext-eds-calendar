@@ -11,7 +11,7 @@
     "build": "mkdir -p dist && (cd src && zip -9r ../dist/ext-$npm_package_name-$npm_package_version-tb-linux.xpi *)",
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
-    "bump": "sh -c 'bump package.json \"$1\" && bump src/manifest.json \"$1\"' --",
+    "bump": "sh -c 'bump package.json \"$1\" && bump src/manifest.json \"$1\" && npm install --package-lock-only --silent' --",
     "tag": "git tag v$(jq -r '.version' src/manifest.json)",
     "lint": "eslint . || true"
   },
