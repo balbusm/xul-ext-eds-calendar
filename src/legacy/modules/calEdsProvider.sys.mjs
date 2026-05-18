@@ -209,7 +209,7 @@ class CalEdsProvider extends cal.provider.BaseClass {
     }
 
     rethrowNotCalendarServiceException(exception) {
-      if (!exception instanceof CalendarServiceException) {
+      if (!(exception instanceof CalendarServiceException)) {
         throw exception;
       }
     }

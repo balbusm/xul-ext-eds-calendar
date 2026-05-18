@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * EDS Calendar Integration
  * Copyright: 2014 Mateusz Balbus <balbusm@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -24,23 +24,22 @@ Components.utils.importESModule("resource://mozmill/modules/assertions.js");
 exports._uuidGenerator = Components.classes["@mozilla.org/uuid-generator;1"]
             .getService(Components.interfaces.nsIUUIDGenerator);
 
-exports.generateUuid = function generateUuid() {
+exports.generateUuid = function() {
   return exports._uuidGenerator.generateUUID().toString();
 };
 
-exports.clone = function clone(object) {
+exports.clone = function(object) {
   var cloned = Object.create(object.prototype || null);
-  Object.keys(object).map(function (i) {
+  Object.keys(object).forEach((i) => {
       cloned[i] = object[i];
   });
   return cloned;
 };
 
-exports.prepareCalendar = function prepareCalendar(calData) {
+exports.prepareCalendar = function(calData) {
   let calendar = exports.clone(calData);
-  calendar.getProperty = function (name) {
-    if (calData.properties)
-      return calData.properties[name];
+  calendar.getProperty = function(name) {
+    if (calData.properties) { return calData.properties[name]; }
     return undefined;
   };
   calendar.QueryInterface = ChromeUtils.generateQI([Components.interfaces.calICalendar]);
@@ -48,7 +47,7 @@ exports.prepareCalendar = function prepareCalendar(calData) {
 };
 
 
-exports.prepareIcalString = function prepareIcalString(icalString) {
+exports.prepareIcalString = function(icalString) {
   // FIXME: There is a bug in EDS that doesn't remove esource nor item
   // as a workaround generate different item each time (unique uid)
   let uuid = exports.generateUuid();
@@ -56,46 +55,46 @@ exports.prepareIcalString = function prepareIcalString(icalString) {
   return exports.prepareIcalStringWithId(uuid, icalString);
 };
 
-exports.prepareIcalStringWithId = function prepareIcalStringWithId(id, icalString) {
+exports.prepareIcalStringWithId = function(id, icalString) {
   var icalStringPrepared = icalString.replace("${uid}", id);
   return icalStringPrepared;
 };
 
-exports.prepareEvent = function prepareEvent(eventData, calendar) {
+exports.prepareEvent = function(eventData, calendar) {
   var event = cal.createEvent();
-  event.calendar = calendar; 
+  event.calendar = calendar;
   event.icalString = exports.prepareIcalString(eventData);
   return event;
 };
 
-exports.prepareEventWithId = function prepareEventWithId(eventId, eventData, calendar) {
+exports.prepareEventWithId = function(eventId, eventData, calendar) {
   var event = cal.createEvent();
-  event.calendar = calendar; 
+  event.calendar = calendar;
   event.icalString = exports.prepareIcalStringWithId(eventId, eventData);
   return event;
 };
 
-exports.prepareExceptionEvent = function prepareExceptionEvent(parentEvent, eventData) {
+exports.prepareExceptionEvent = function(parentEvent, eventData) {
   var newExceptionEvent = exports.prepareEventWithId(parentEvent.id, eventData, parentEvent.calendar);
   newExceptionEvent.parentItem = parentEvent;
   return newExceptionEvent;
 };
 
-exports.attachExceptionEvent = function attachExceptionEvent(parentEvent, exceptionEvent) {
+exports.attachExceptionEvent = function(parentEvent, exceptionEvent) {
   let recurrenceInfo = cal.createRecurrenceInfo();
   recurrenceInfo.item = parentEvent;
   recurrenceInfo.modifyException(exceptionEvent, true);
   parentEvent.recurrenceInfo = recurrenceInfo;
-}
+};
 
-exports.prepareTodo = function prepareTodo(todoData, calendar) {
+exports.prepareTodo = function(todoData, calendar) {
   var todo = cal.createTodo();
   todo.calendar = calendar;
   todo.icalString = exports.prepareIcalString(todoData);
   return todo;
-}
+};
 
-exports.removeItemFromArray = function (item, array) {
+exports.removeItemFromArray = function(item, array) {
   let indexOfItem = array.indexOf(item);
   if (indexOfItem > -1) {
     array.splice(indexOfItem, 1);
@@ -110,38 +109,37 @@ exports.AssertContainer.prototype = new Assert();
 exports.AssertContainer.prototype.constructor = exports.AssertContainer;
 exports.AssertContainer.prototype.assertErrors = function() {
   let error = this.errors.shift();
-  if (error)
-    Assert.prototype._logFail.call(this, error);
+  if (error) { Assert.prototype._logFail.call(this, error); }
 };
 
-exports.AssertContainer.prototype._logFail = function logFail(result) {
+exports.AssertContainer.prototype._logFail = function(result) {
   this.errors.push(result);
 };
 
-exports.ResultListener = function (expectedItems, assert){
+exports.ResultListener = function(expectedItems, assert) {
   this.expectedItems = expectedItems;
   this.assert = assert;
 };
-exports.ResultListener.prototype.onOperationComplete = function listener_onOperationComplete(aCalendar, aStatus, aOperationType, aId, aDetai) { 
+exports.ResultListener.prototype.onOperationComplete = function(aCalendar, aStatus, aOperationType, aId, aDetai) {
   if (!Components.isSuccessCode(aStatus)) {
     this.assert.fail("Result operation failed " + aStatus);
   }
 };
-exports.ResultListener.prototype.onGetResult = function listener_onGetResult(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
+exports.ResultListener.prototype.onGetResult = function(aCalendar, aStatus, aItemType, aDetail, aCount, aItemscalendar) {
   if (!Components.isSuccessCode(aStatus)) {
     this.assert.fail("Unable to get results for calendar " + aCalendar.name + " - " + aCalendar.id +
-        ". " + aStatus + " - " + aDetail );
+        ". " + aStatus + " - " + aDetail);
   }
   this._assertExpectedItemsMatch(aItemscalendar);
 };
-exports.ResultListener.prototype._assertExpectedItemsMatch = function listener_assertExpectedItemsMatch(aItemscalendar) {
+exports.ResultListener.prototype._assertExpectedItemsMatch = function(aItemscalendar) {
   let found = false;
   for (let expectedItem of this.expectedItems) {
     for (let item of aItemscalendar) {
       if (item.id == expectedItem.id) {
         found = true;
         break;
-      } 
+      }
     }
     if (!found) {
       this.assert.fail("Couldn't find item " + expectedItem.id);
@@ -149,6 +147,4 @@ exports.ResultListener.prototype._assertExpectedItemsMatch = function listener_a
     }
     found = false;
   }
-
 };
-

@@ -85,7 +85,7 @@ this.edscalendar = class extends ExtensionAPI {
       );
       this.LOG("Loaded edsCalendarClient");
       return edsCalendarClient;
-    } catch(e) {
+    } catch (e) {
       this.ERROR("Cannot load edsCalendarClient", e);
       let err = new Error("Cannot load edsCalendarClient");
       err.cause = e;

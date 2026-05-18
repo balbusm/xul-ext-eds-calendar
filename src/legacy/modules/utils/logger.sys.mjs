@@ -37,7 +37,7 @@ function formatLogMessage(aType, aDomain, aStr) {
 }
 
 function formatStackMessage(stack) {
-  return `\nSource: ${stack.sourceName}:${stack.lineNumber}`
+  return `\nSource: ${stack.sourceName}:${stack.lineNumber}`;
 }
 
 function getStackDetails(aException) {
@@ -123,7 +123,6 @@ class Logger {
     } else {
       console.warn(message, stackMessage);
     }
-
   }
 
   error(aStr, aException) {
@@ -137,7 +136,6 @@ class Logger {
     } else {
       console.error(message, stackMessage);
     }
-
   }
 }
 
